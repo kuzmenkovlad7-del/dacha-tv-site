@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 interface CTAButtonProps {
   href?: string
   onClick?: () => void
-  variant?: 'primary' | 'secondary' | 'outline'
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   children: React.ReactNode
   className?: string
@@ -15,14 +15,15 @@ interface CTAButtonProps {
 
 const variants = {
   primary: 'bg-honey-700 text-white hover:bg-honey-800 focus:ring-honey-600',
-  secondary: 'bg-forest-700 text-white hover:bg-forest-800 focus:ring-forest-600',
+  secondary: 'bg-bark text-white hover:bg-bark-light focus:ring-bark',
   outline: 'border-2 border-honey-700 text-honey-700 hover:bg-honey-50 focus:ring-honey-600',
+  ghost: 'text-bark/70 hover:text-bark hover:bg-honey-50 focus:ring-honey-600',
 }
 
 const sizes = {
-  sm: 'px-4 py-2 text-sm min-h-[40px]',
-  md: 'px-6 py-3 text-base min-h-[48px]',
-  lg: 'px-8 py-4 text-lg min-h-[56px]',
+  sm: 'px-5 py-2.5 text-sm min-h-[40px]',
+  md: 'px-7 py-3.5 text-base min-h-[48px]',
+  lg: 'px-9 py-4 text-lg min-h-[56px]',
 }
 
 export function CTAButton({
@@ -37,8 +38,8 @@ export function CTAButton({
   fullWidth,
 }: CTAButtonProps) {
   const classes = cn(
-    'inline-flex items-center justify-center gap-2 rounded-lg font-semibold',
-    'transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
+    'inline-flex items-center justify-center gap-2 rounded-full font-semibold',
+    'transition-all focus:outline-none focus:ring-2 focus:ring-offset-2',
     'disabled:opacity-60 disabled:cursor-not-allowed',
     variants[variant],
     sizes[size],

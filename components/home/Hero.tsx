@@ -12,70 +12,86 @@ interface HeroProps {
 export function Hero({ tagline, subtext, siteConfig }: HeroProps) {
   const displayTagline = tagline || 'Справжній мед. Від нашої пасіки — до вашого столу.'
   const displaySubtext =
-    subtext || 'Сімейна пасіка на Харківщині. Мед, пилок, прополіс та бджолині пакети.'
+    subtext || 'Сімейна пасіка на Харківщині. Мед, пилок, прополіс та бджолині пакети — напряму від виробника.'
 
   return (
-    <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-bark">
-      {/* Background gradient — placeholder until real photo */}
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden" aria-label="Головний банер">
+      {/* Background */}
       <div
-        className="absolute inset-0 bg-gradient-to-br from-honey-900 via-bark to-forest-950"
+        className="absolute inset-0 bg-gradient-to-br from-bark via-honey-950 to-bark"
         aria-hidden="true"
       />
+      {/* Subtle warm glow */}
       <div
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 opacity-30"
         style={{
           backgroundImage:
-            'radial-gradient(ellipse at 30% 50%, #f59e0b 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, #166534 0%, transparent 50%)',
+            'radial-gradient(ellipse at 20% 60%, #d97706 0%, transparent 55%), radial-gradient(ellipse at 75% 30%, #92400e 0%, transparent 45%)',
         }}
         aria-hidden="true"
       />
+      {/* Texture overlay */}
+      <div
+        className="absolute inset-0 opacity-5"
+        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}
+        aria-hidden="true"
+      />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
-        <div className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 bg-honey-500/20 border border-honey-400/30 rounded-full px-4 py-2 mb-6">
-            <span className="w-2 h-2 rounded-full bg-honey-400 animate-pulse" aria-hidden="true" />
-            <span className="text-honey-300 text-sm font-medium">
-              Пряма поставка від пасічника
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-36 w-full">
+        <div className="max-w-3xl">
+          {/* Trust badge */}
+          <div className="inline-flex items-center gap-2.5 bg-white/10 border border-white/15 rounded-full px-4 py-2 mb-8 backdrop-blur-sm">
+            <span className="w-2 h-2 rounded-full bg-honey-400 animate-pulse flex-shrink-0" aria-hidden="true" />
+            <span className="text-honey-200 text-sm font-medium tracking-wide">
+              Пряма поставка від пасічника · без посередників
             </span>
           </div>
 
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight mb-6">
+          {/* Headline */}
+          <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl font-bold text-white leading-[1.1] mb-7 tracking-tight">
             {displayTagline}
           </h1>
 
-          <p className="text-xl text-cream/80 mb-8 leading-relaxed">
+          {/* Subtext */}
+          <p className="text-xl md:text-2xl text-white/65 mb-10 leading-relaxed max-w-2xl">
             {displaySubtext}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          {/* CTA row */}
+          <div className="flex flex-col sm:flex-row gap-4 items-start">
             <CTAButton href="/honey" size="lg" variant="primary">
               Обрати мед
             </CTAButton>
             <Link
               href="/about"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg text-cream/80 hover:text-cream transition-colors min-h-[56px]"
+              className="inline-flex items-center justify-center gap-2 px-9 py-4 text-lg text-white/70 hover:text-white border border-white/20 hover:border-white/40 rounded-full transition-all min-h-[56px]"
             >
-              Дізнатись про нас
+              Про нас
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </Link>
           </div>
 
+          {/* Phone — shown when available */}
           {siteConfig?.phone && (
-            <div className="mt-8 pt-8 border-t border-cream/10">
-              <p className="text-cream/60 text-sm mb-2">
-                Або зателефонуйте нам напряму:
-              </p>
+            <div className="mt-10 pt-10 border-t border-white/10 flex items-center gap-3">
+              <span className="text-white/40 text-sm">або зателефонуйте:</span>
               <PhoneLink
                 phone={siteConfig.phone}
                 showIcon
-                className="text-xl font-bold text-honey-300 hover:text-honey-200"
+                className="text-xl font-bold text-honey-300 hover:text-honey-200 transition-colors"
               />
             </div>
           )}
         </div>
       </div>
+
+      {/* Bottom fade */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-cream/20 to-transparent pointer-events-none"
+        aria-hidden="true"
+      />
     </section>
   )
 }
