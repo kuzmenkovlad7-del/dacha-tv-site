@@ -8,12 +8,6 @@ interface InquiryCardProps {
   inquiry: Inquiry
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  honey_order: '🍯 Мед',
-  beekeeper_inquiry: '🐝 Пасічник',
-  general: '💬 Загальна',
-}
-
 export function InquiryCard({ inquiry }: InquiryCardProps) {
   return (
     <article className="bg-white rounded-2xl border border-honey-100 shadow-sm p-5 space-y-4">
@@ -21,9 +15,6 @@ export function InquiryCard({ inquiry }: InquiryCardProps) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-bark/50 font-medium">
-              {TYPE_LABELS[inquiry.type] || inquiry.type}
-            </span>
             <StatusBadge status={inquiry.status} />
           </div>
           <h3 className="font-semibold text-bark text-lg mt-1">{inquiry.name}</h3>
@@ -57,28 +48,10 @@ export function InquiryCard({ inquiry }: InquiryCardProps) {
             {inquiry.product}
           </div>
         )}
-        {inquiry.packaging && (
+        {inquiry.source && (
           <div>
-            <span className="font-medium text-bark/50">Упаковка:</span>{' '}
-            {inquiry.packaging}
-          </div>
-        )}
-        {inquiry.breed && (
-          <div>
-            <span className="font-medium text-bark/50">Порода:</span>{' '}
-            {inquiry.breed}
-          </div>
-        )}
-        {inquiry.quantity && (
-          <div>
-            <span className="font-medium text-bark/50">Кількість:</span>{' '}
-            {inquiry.quantity}
-          </div>
-        )}
-        {inquiry.timing && (
-          <div>
-            <span className="font-medium text-bark/50">Час:</span>{' '}
-            {inquiry.timing}
+            <span className="font-medium text-bark/50">Джерело:</span>{' '}
+            {inquiry.source}
           </div>
         )}
         {inquiry.message && (
@@ -90,7 +63,7 @@ export function InquiryCard({ inquiry }: InquiryCardProps) {
       </div>
 
       {/* Status toggle */}
-      <StatusToggle inquiryId={inquiry.id} currentStatus={inquiry.status} />
+      <StatusToggle inquiryId={inquiry.id} currentStatus={inquiry.status as 'new' | 'contacted' | 'completed' | 'cancelled'} />
     </article>
   )
 }

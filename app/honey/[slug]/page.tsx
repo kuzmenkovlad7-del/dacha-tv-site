@@ -5,12 +5,11 @@ import Link from 'next/link'
 import { HoneyOrderForm } from '@/components/forms/HoneyOrderForm'
 import { HoneyCard } from '@/components/honey/HoneyCard'
 import { StructuredData } from '@/components/shared/StructuredData'
-import { urlFor } from '@/lib/sanity/image'
 import {
   getHoneyProductBySlug,
   getAllHoneySlugs,
   getAllHoneyProducts,
-} from '@/lib/sanity/queries'
+} from '@/lib/supabase/queries'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -18,7 +17,7 @@ interface Props {
 
 export async function generateStaticParams() {
   const slugs = await getAllHoneySlugs().catch(() => [])
-  return slugs.map((item) => ({ slug: item.slug.current }))
+  return slugs.map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -29,17 +28,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: 'Продукт не знайдено' }
   }
 
-  const imageUrl = product.image
-    ? urlFor(product.image).width(1200).height(630).url()
-    : undefined
-
   return {
     title: product.name,
     description: `Натуральний ${product.name.toLowerCase()} від сімейної пасіки на Харківщині. ${product.packaging?.join(', ') || ''}. Замовляйте напряму від пасічника.`,
     openGraph: {
       title: `${product.name} | Дача TV`,
       description: `Натуральний ${product.name.toLowerCase()} від пасіки Дача TV на Харківщині`,
-      images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630 }] : [],
+      images: product.image_url ? [{ url: product.image_url, width: 1200, height: 630 }] : [],
     },
   }
 }
@@ -111,12 +106,9 @@ export default async function HoneyProductPage({ params }: Props) {
   if (!product) notFound()
 
   const details = VARIETY_DETAILS[product.variety]
-  const imageUrl = product.image
-    ? urlFor(product.image).width(800).height(800).url()
-    : null
 
   const related = allProducts
-    .filter((p) => p._id !== product._id && p.inStock)
+    .filter((p) => p.id !== product.id && p.in_stock)
     .slice(0, 3)
 
   const productSchema = {
@@ -127,12 +119,12 @@ export default async function HoneyProductPage({ params }: Props) {
     brand: { '@type': 'Brand', name: 'Дача TV' },
     offers: {
       '@type': 'Offer',
-      availability: product.inStock
+      availability: product.in_stock
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'Дача TV' },
     },
-    image: imageUrl || undefined,
+    image: product.image_url || undefined,
   }
 
   return (
@@ -155,10 +147,10 @@ export default async function HoneyProductPage({ params }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           {/* Image */}
           <div className="relative aspect-square rounded-2xl overflow-hidden bg-honey-50">
-            {imageUrl ? (
+            {product.image_url ? (
               <Image
-                src={imageUrl}
-                alt={product.image?.alt || `${product.name} від пасіки Дача TV`}
+                src={product.image_url}
+                alt={product.image_alt || `${product.name} від пасіки Дача TV`}
                 fill
                 priority
                 className="object-cover"
@@ -173,7 +165,7 @@ export default async function HoneyProductPage({ params }: Props) {
                 </span>
               </div>
             )}
-            {product.isFeatured && (
+            {product.is_featured && (
               <div className="absolute top-4 left-4">
                 <span className="bg-honey-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
                   Найпопулярніший
@@ -188,7 +180,7 @@ export default async function HoneyProductPage({ params }: Props) {
               {product.name}
             </h1>
 
-            {!product.inStock && (
+            {!product.in_stock && (
               <div className="bg-gray-100 text-gray-700 rounded-lg px-4 py-3 mb-4 text-sm font-medium">
                 Наразі немає в наявності. Залиште заявку — ми повідомимо, коли з&apos;явиться.
               </div>
@@ -235,9 +227,9 @@ export default async function HoneyProductPage({ params }: Props) {
             )}
 
             {/* YouTube link */}
-            {product.youtubeVideoLink && (
+            {product.youtube_video_link && (
               <a
-                href={product.youtubeVideoLink}
+                href={product.youtube_video_link}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700 mb-6"
@@ -273,7 +265,7 @@ export default async function HoneyProductPage({ params }: Props) {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {related.map((p) => (
-                <HoneyCard key={p._id} product={p} />
+                <HoneyCard key={p.id} product={p} />
               ))}
             </div>
           </div>

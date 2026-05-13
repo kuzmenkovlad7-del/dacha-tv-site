@@ -3,7 +3,7 @@ import { Inter, Lora } from 'next/font/google'
 import './globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
-import { getSiteConfig } from '@/lib/sanity/queries'
+import { getSiteSettings } from '@/lib/supabase/queries'
 
 const inter = Inter({
   variable: '--font-inter',
@@ -35,8 +35,7 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Graceful fallback when Sanity is not yet configured
-  const siteConfig = await getSiteConfig().catch(() => null)
+  const siteSettings = await getSiteSettings().catch(() => null)
 
   return (
     <html lang="uk" className={`${inter.variable} ${lora.variable} h-full antialiased`}>
@@ -56,9 +55,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
       </head>
       <body className="min-h-full flex flex-col bg-cream text-bark">
-        <Header siteConfig={siteConfig} />
+        <Header siteSettings={siteSettings} />
         <main className="flex-1">{children}</main>
-        <Footer siteConfig={siteConfig} />
+        <Footer siteSettings={siteSettings} />
       </body>
     </html>
   )

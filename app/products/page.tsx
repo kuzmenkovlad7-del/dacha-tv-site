@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { ProductGrid } from '@/components/products/ProductGrid'
 import { CTAButton } from '@/components/shared/CTAButton'
-import { getAllApinaryProducts } from '@/lib/sanity/queries'
+import { getAllApiaryProducts } from '@/lib/supabase/queries'
+import type { ApiaryProduct } from '@/types'
 
 export const metadata: Metadata = {
   title: 'Продукти пасіки',
@@ -13,40 +14,46 @@ export const metadata: Metadata = {
   },
 }
 
-// Fallback static products shown when Sanity is not yet populated
-const STATIC_PRODUCTS = [
+// Fallback static products shown when Supabase is not yet populated
+const STATIC_PRODUCTS: ApiaryProduct[] = [
   {
-    _id: 'static-pollen',
-    _type: 'apinaryProduct' as const,
+    id: 'static-pollen',
     name: 'Квітковий пилок',
-    slug: { current: 'pollen' },
-    description: [],
+    slug: 'pollen',
+    description: null,
     packaging: ['Уточнюйте при замовленні'],
-    inStock: true,
+    in_stock: true,
+    display_order: 1,
+    image_url: null,
+    image_alt: null,
   },
   {
-    _id: 'static-propolis',
-    _type: 'apinaryProduct' as const,
+    id: 'static-propolis',
     name: 'Прополіс',
-    slug: { current: 'propolis' },
-    description: [],
+    slug: 'propolis',
+    description: null,
     packaging: ['Уточнюйте при замовленні'],
-    inStock: true,
+    in_stock: true,
+    display_order: 2,
+    image_url: null,
+    image_alt: null,
   },
   {
-    _id: 'static-nuts',
-    _type: 'apinaryProduct' as const,
+    id: 'static-nuts',
     name: 'Горіхи в меду',
-    slug: { current: 'nuts-in-honey' },
-    description: [],
+    slug: 'nuts-in-honey',
+    description: null,
     packaging: ['200ml'],
-    inStock: true,
+    in_stock: true,
+    display_order: 3,
+    image_url: null,
+    image_alt: null,
   },
 ]
 
 export default async function ProductsPage() {
-  const sanityProducts = await getAllApinaryProducts().catch(() => [])
-  const products = sanityProducts.length > 0 ? sanityProducts : STATIC_PRODUCTS
+  const supabaseProducts = await getAllApiaryProducts().catch(() => [])
+  const products = supabaseProducts.length > 0 ? supabaseProducts : STATIC_PRODUCTS
 
   return (
     <div className="bg-cream min-h-screen">

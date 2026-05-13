@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { BeekeeperSection } from '@/components/beekeeper/BeekeeperSection'
 import { BeekeeperInquiryForm } from '@/components/forms/BeekeeperInquiryForm'
-import { getAllBeekeeperProducts } from '@/lib/sanity/queries'
+import { getAllBeekeeperProducts } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
   title: 'Для пасічників',
@@ -16,10 +16,10 @@ export const metadata: Metadata = {
 export default async function BeekeeperPage() {
   const products = await getAllBeekeeperProducts().catch(() => [])
 
-  const packageProducts = products.filter((p) => p.productType === 'bee_packages')
-  const colonyProducts = products.filter((p) => p.productType === 'bee_colonies')
+  const packageProducts = products.filter((p) => p.product_type === 'bee_packages')
+  const colonyProducts = products.filter((p) => p.product_type === 'bee_colonies')
   const hiveProducts = products.filter(
-    (p) => p.productType === 'empty_hives' || p.productType === 'hives_with_bees'
+    (p) => p.product_type === 'empty_hives' || p.product_type === 'hives_with_bees'
   )
 
   return (

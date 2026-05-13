@@ -1,7 +1,7 @@
-import type { SiteConfig } from '@/types'
+import type { SiteSettings } from '@/types'
 
 interface SocialIconsProps {
-  siteConfig: SiteConfig | null
+  siteSettings: SiteSettings | null
   className?: string
   iconClassName?: string
 }
@@ -38,14 +38,14 @@ function TikTokIcon() {
   )
 }
 
-export function SocialIcons({ siteConfig, className, iconClassName }: SocialIconsProps) {
-  if (!siteConfig) return null
+export function SocialIcons({ siteSettings, className, iconClassName }: SocialIconsProps) {
+  if (!siteSettings) return null
 
   const socials = [
-    { url: siteConfig.youtubeUrl, Icon: YouTubeIcon, label: 'YouTube' },
-    { url: siteConfig.facebookUrl, Icon: FacebookIcon, label: 'Facebook' },
-    { url: siteConfig.instagramUrl, Icon: InstagramIcon, label: 'Instagram' },
-    { url: siteConfig.tiktokUrl, Icon: TikTokIcon, label: 'TikTok' },
+    { url: siteSettings.youtube_url, Icon: YouTubeIcon, label: 'YouTube' },
+    { url: siteSettings.facebook_url, Icon: FacebookIcon, label: 'Facebook' },
+    { url: siteSettings.instagram_url, Icon: InstagramIcon, label: 'Instagram' },
+    { url: siteSettings.tiktok_url, Icon: TikTokIcon, label: 'TikTok' },
   ].filter((s) => Boolean(s.url))
 
   if (socials.length === 0) return null

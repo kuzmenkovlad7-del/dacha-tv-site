@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { HoneyGrid } from '@/components/honey/HoneyGrid'
 import { CTAButton } from '@/components/shared/CTAButton'
-import { getAllHoneyProducts } from '@/lib/sanity/queries'
+import { getAllHoneyProducts } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
   title: 'Наш мед',

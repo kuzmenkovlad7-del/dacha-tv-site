@@ -52,7 +52,7 @@ export function Reviews({ reviews }: ReviewsProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {reviews.slice(0, 6).map((review) => (
             <blockquote
-              key={review._id}
+              key={review.id}
               className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300 flex flex-col"
             >
               <StarRating rating={review.rating} />
@@ -62,9 +62,9 @@ export function Reviews({ reviews }: ReviewsProps) {
               </p>
 
               <footer className="flex items-center gap-3">
-                <ReviewerInitial name={review.reviewerName} />
+                <ReviewerInitial name={review.reviewer_name} />
                 <cite className="not-italic">
-                  <span className="font-semibold text-bark text-sm block">{review.reviewerName}</span>
+                  <span className="font-semibold text-bark text-sm block">{review.reviewer_name}</span>
                   {review.city && (
                     <span className="text-gray-400 text-xs">{review.city}</span>
                   )}

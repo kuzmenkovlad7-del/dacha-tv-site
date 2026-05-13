@@ -29,7 +29,7 @@ export function ProductPreview({ products }: ProductPreviewProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-12">
           {products.map((product) => (
-            <HoneyCard key={product._id} product={product} />
+            <HoneyCard key={product.id} product={product} />
           ))}
         </div>
 

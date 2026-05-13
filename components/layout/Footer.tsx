@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import { PhoneLink } from '@/components/shared/PhoneLink'
-import type { SiteConfig } from '@/types'
+import type { SiteSettings } from '@/types'
 
 interface FooterProps {
-  siteConfig: SiteConfig | null
+  siteSettings: SiteSettings | null
 }
 
 const FALLBACK_PHONE = '+380XXXXXXXXX'
@@ -59,17 +59,17 @@ function TelegramIcon() {
   )
 }
 
-export function Footer({ siteConfig }: FooterProps) {
-  const phone = siteConfig?.phone || FALLBACK_PHONE
-  const address = siteConfig?.addressFull || FALLBACK_ADDRESS
+export function Footer({ siteSettings }: FooterProps) {
+  const phone = siteSettings?.phone || FALLBACK_PHONE
+  const address = siteSettings?.address_full || FALLBACK_ADDRESS
   const currentYear = new Date().getFullYear()
 
   const socials = [
-    { url: siteConfig?.youtubeUrl, Icon: YouTubeIcon, label: 'YouTube' },
-    { url: siteConfig?.facebookUrl, Icon: FacebookIcon, label: 'Facebook' },
-    { url: siteConfig?.instagramUrl, Icon: InstagramIcon, label: 'Instagram' },
-    { url: siteConfig?.tiktokUrl, Icon: TikTokIcon, label: 'TikTok' },
-    { url: siteConfig?.telegramUrl, Icon: TelegramIcon, label: 'Telegram' },
+    { url: siteSettings?.youtube_url, Icon: YouTubeIcon, label: 'YouTube' },
+    { url: siteSettings?.facebook_url, Icon: FacebookIcon, label: 'Facebook' },
+    { url: siteSettings?.instagram_url, Icon: InstagramIcon, label: 'Instagram' },
+    { url: siteSettings?.tiktok_url, Icon: TikTokIcon, label: 'TikTok' },
+    { url: siteSettings?.telegram_url, Icon: TelegramIcon, label: 'Telegram' },
   ].filter((s) => Boolean(s.url))
 
   return (
@@ -159,9 +159,9 @@ export function Footer({ siteConfig }: FooterProps) {
               <address className="text-sm text-gray-500 not-italic leading-relaxed">
                 {address}
               </address>
-              {siteConfig?.telegramUrl && (
+              {siteSettings?.telegram_url && (
                 <a
-                  href={siteConfig.telegramUrl}
+                  href={siteSettings.telegram_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-bark transition-colors"

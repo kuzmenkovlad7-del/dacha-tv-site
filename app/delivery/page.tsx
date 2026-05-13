@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { getDeliveryPage } from '@/lib/sanity/queries'
 
 export const metadata: Metadata = {
   title: 'Доставка',
@@ -34,14 +33,7 @@ const STATIC_SECTIONS = [
   },
 ]
 
-export default async function DeliveryPage() {
-  const deliveryData = await getDeliveryPage().catch(() => null)
-
-  const sections =
-    deliveryData?.sections && deliveryData.sections.length > 0
-      ? deliveryData.sections
-      : STATIC_SECTIONS
-
+export default function DeliveryPage() {
   return (
     <div className="bg-cream min-h-screen">
       <div className="bg-white border-b border-gray-100 py-12 md:py-16">
@@ -57,23 +49,13 @@ export default async function DeliveryPage() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-        {sections.map((section, idx) => (
+        {STATIC_SECTIONS.map((section, idx) => (
           <article key={idx} className="bg-white rounded-2xl p-6 border border-honey-100 shadow-sm">
             <h2 className="font-serif text-2xl font-bold text-bark mb-4">
               {section.heading}
             </h2>
             <div className="text-bark/80 leading-relaxed">
-              {typeof section.body === 'string' ? (
-                <p>{section.body}</p>
-              ) : (
-                Array.isArray(section.body) && section.body.length > 0 ? (
-                  <p>{section.body.map((b) =>
-                    typeof b === 'object' && b !== null && 'children' in b
-                      ? (b.children as Array<{ text: string }>)?.map((c) => c.text).join('')
-                      : ''
-                  ).join('\n')}</p>
-                ) : null
-              )}
+              <p>{section.body}</p>
             </div>
           </article>
         ))}

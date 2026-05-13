@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { getAllHoneySlugs } from '@/lib/sanity/queries'
+import { getAllHoneySlugs } from '@/lib/supabase/queries'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://dacha-tv.com'
 
@@ -17,8 +17,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   const honeySlugs = await getAllHoneySlugs().catch(() => [])
-  const honeyRoutes: MetadataRoute.Sitemap = honeySlugs.map((item) => ({
-    url: `${BASE_URL}/honey/${item.slug.current}`,
+  const honeyRoutes: MetadataRoute.Sitemap = honeySlugs.map((slug) => ({
+    url: `${BASE_URL}/honey/${slug}`,
     lastModified: new Date(),
     priority: 0.85,
   }))
