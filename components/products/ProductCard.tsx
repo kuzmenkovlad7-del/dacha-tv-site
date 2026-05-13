@@ -12,9 +12,10 @@ const BLUR_DATA_URL =
 
 export function ProductCard({ product, onOrder }: ProductCardProps) {
   const hasValidImage = product.image?.asset?._ref && product.image.asset._ref.length > 0
-  const imageUrl = hasValidImage
-    ? urlFor(product.image).width(400).height(400).url()
-    : null
+  const imageUrl =
+    hasValidImage && product.image
+      ? urlFor(product.image).width(400).height(400).url()
+      : null
 
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-honey-100 flex flex-col">
