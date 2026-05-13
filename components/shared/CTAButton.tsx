@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 interface CTAButtonProps {
   href?: string
   onClick?: () => void
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'outline' | 'white' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   children: React.ReactNode
   className?: string
@@ -17,6 +17,7 @@ const variants = {
   primary: 'bg-honey-700 text-white hover:bg-honey-800 focus:ring-honey-600',
   secondary: 'bg-bark text-white hover:bg-bark-light focus:ring-bark',
   outline: 'border-2 border-honey-700 text-honey-700 hover:bg-honey-50 focus:ring-honey-600',
+  white: 'bg-white text-bark hover:bg-honey-50 focus:ring-white border-2 border-white/30',
   ghost: 'text-bark/70 hover:text-bark hover:bg-honey-50 focus:ring-honey-600',
 }
 

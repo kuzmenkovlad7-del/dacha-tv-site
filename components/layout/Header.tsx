@@ -25,7 +25,7 @@ export function Header({ siteConfig }: HeaderProps) {
           </Link>
 
           {/* Desktop navigation (center) */}
-          <Navigation />
+          <Navigation phone={phone} />
 
           {/* Phone — desktop only */}
           <div className="hidden md:flex items-center">
