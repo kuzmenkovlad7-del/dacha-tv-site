@@ -7,19 +7,19 @@ export const homepageConfig = defineType({
   fields: [
     defineField({
       name: 'heroTagline',
-      title: 'Головний слоган',
+      title: 'Головний слоган (герой)',
       type: 'string',
-      description: 'Наприклад: Справжній мед. Від нашої пасіки — до вашого столу.',
+      description: 'Великий заголовок у верхній секції. Наприклад: Справжній мед. Від нашої пасіки — до вашого столу.',
     }),
     defineField({
       name: 'heroSubtext',
-      title: 'Підзаголовок героя',
+      title: 'Підзаголовок (герой)',
       type: 'string',
-      description: 'Наприклад: Сімейна пасіка на Харківщині.',
+      description: 'Рядок під головним слоганом. Наприклад: Сімейна пасіка на Харківщині — без посередників, без домішок.',
     }),
     defineField({
       name: 'featuredProductIds',
-      title: 'Рекомендовані продукти',
+      title: 'Рекомендовані сорти меду',
       type: 'array',
       of: [
         {
@@ -27,7 +27,7 @@ export const homepageConfig = defineType({
           to: [{ type: 'honeyProduct' }],
         },
       ],
-      description: 'Виберіть до 4 продуктів для відображення на головній',
+      description: 'Оберіть 3–4 сорти, які показуватимуться на головній. Якщо порожньо — відображаються перші за порядком',
       validation: (Rule) => Rule.max(4),
     }),
   ],
