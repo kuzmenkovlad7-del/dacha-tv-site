@@ -22,38 +22,51 @@ function StarRating({ rating }: { rating: number }) {
   )
 }
 
+function ReviewerInitial({ name }: { name: string }) {
+  const initial = name.trim().charAt(0).toUpperCase()
+  return (
+    <div className="w-10 h-10 rounded-full bg-honey-100 border-2 border-honey-200 flex items-center justify-center flex-shrink-0">
+      <span className="font-serif font-bold text-honey-700 text-sm">{initial}</span>
+    </div>
+  )
+}
+
 export function Reviews({ reviews }: ReviewsProps) {
   if (reviews.length === 0) return null
 
   return (
-    <section className="py-16 md:py-24 bg-honey-50" aria-labelledby="reviews-heading">
+    <section className="py-20 md:py-28 bg-cream" aria-labelledby="reviews-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
+          <span className="text-xs font-semibold text-honey-700 uppercase tracking-widest mb-4 block">
+            Відгуки
+          </span>
           <h2 id="reviews-heading" className="font-serif text-3xl md:text-4xl font-bold text-bark mb-4">
-            Відгуки покупців
+            Що кажуть наші покупці
           </h2>
-          <p className="text-bark/60 text-lg">
-            Реальні відгуки від наших покупців
+          <p className="text-gray-500 text-base">
+            Реальні відгуки від людей, які вже замовляли у нас
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {reviews.slice(0, 6).map((review) => (
             <blockquote
               key={review._id}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-honey-100 flex flex-col"
+              className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300 flex flex-col"
             >
               <StarRating rating={review.rating} />
 
-              <p className="text-bark/80 mt-4 mb-6 leading-relaxed flex-1 italic">
+              <p className="text-gray-700 mt-5 mb-6 leading-relaxed flex-1 text-sm">
                 &ldquo;{review.quote}&rdquo;
               </p>
 
-              <footer>
+              <footer className="flex items-center gap-3">
+                <ReviewerInitial name={review.reviewerName} />
                 <cite className="not-italic">
-                  <span className="font-semibold text-bark">{review.reviewerName}</span>
+                  <span className="font-semibold text-bark text-sm block">{review.reviewerName}</span>
                   {review.city && (
-                    <span className="text-bark/50 text-sm ml-1">· {review.city}</span>
+                    <span className="text-gray-400 text-xs">{review.city}</span>
                   )}
                 </cite>
               </footer>

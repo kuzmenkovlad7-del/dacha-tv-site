@@ -1,21 +1,53 @@
 import { CTAButton } from '@/components/shared/CTAButton'
 
+const BEEKEEPER_FEATURES = [
+  'Бджолопакети Buckfast',
+  'Українська степова',
+  'Карніка',
+  'Бджолосім\'ї',
+  'Вулики',
+]
+
 export function BeekeeperTeaser() {
   return (
-    <section className="py-16 md:py-20 bg-forest-900" aria-labelledby="beekeeper-teaser-heading">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 id="beekeeper-teaser-heading" className="font-serif text-3xl md:text-4xl font-bold text-cream mb-4">
-          Для пасічників
-        </h2>
-        <p className="text-cream/80 text-lg mb-4 max-w-2xl mx-auto">
-          Ми пасічники, і розуміємо, що вам потрібно.
-        </p>
-        <p className="text-cream/70 mb-8 max-w-2xl mx-auto">
-          Пропонуємо бджолопакети (Buckfast, Українська степова, Карніка), бджолосім&apos;ї та вулики — з індивідуальним підходом і без зайвих слів.
-        </p>
-        <CTAButton href="/beekeeper" variant="outline" className="border-cream/40 text-cream hover:bg-cream/10 hover:border-cream/60">
-          Дізнатись більше
-        </CTAButton>
+    <section className="py-20 md:py-28 bg-cream" aria-labelledby="beekeeper-teaser-heading">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="rounded-3xl bg-gradient-to-br from-bark via-forest-950 to-bark overflow-hidden">
+          <div className="px-8 py-14 md:px-16 md:py-20 lg:px-20">
+            <div className="max-w-2xl">
+              <span className="text-xs font-semibold text-forest-400 uppercase tracking-widest mb-5 block">
+                Для пасічників
+              </span>
+              <h2 id="beekeeper-teaser-heading" className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
+                Ми пасічники. Розуміємо, що вам потрібно.
+              </h2>
+              <p className="text-white/60 text-lg mb-8 leading-relaxed">
+                Пропонуємо бджолопакети, бджолосім&apos;ї та вулики — з індивідуальним підходом і без зайвих слів.
+              </p>
+
+              {/* Feature tags */}
+              <div className="flex flex-wrap gap-2 mb-10">
+                {BEEKEEPER_FEATURES.map((feature) => (
+                  <span
+                    key={feature}
+                    className="text-sm text-white/70 bg-white/8 border border-white/15 px-4 py-1.5 rounded-full"
+                  >
+                    {feature}
+                  </span>
+                ))}
+              </div>
+
+              <CTAButton
+                href="/beekeeper"
+                variant="primary"
+                size="lg"
+                className="bg-white text-bark hover:bg-honey-50"
+              >
+                Дізнатись більше
+              </CTAButton>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )
