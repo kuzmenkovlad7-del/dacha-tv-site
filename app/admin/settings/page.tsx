@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { getSiteSettings } from '@/lib/supabase/queries'
 import { saveSiteSettings } from './actions'

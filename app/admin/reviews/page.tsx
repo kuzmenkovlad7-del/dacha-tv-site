@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { createReview, deleteReview, toggleReviewVisibility } from './actions'

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { getAllFaqItems } from '@/lib/supabase/queries'
 import { createFaqItem, deleteFaqItem } from './actions'
