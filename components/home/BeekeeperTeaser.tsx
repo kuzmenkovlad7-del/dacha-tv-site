@@ -37,12 +37,7 @@ export function BeekeeperTeaser() {
                 ))}
               </div>
 
-              <CTAButton
-                href="/beekeeper"
-                variant="primary"
-                size="lg"
-                className="bg-white text-bark hover:bg-honey-50"
-              >
+              <CTAButton href="/beekeeper" variant="white" size="lg">
                 Дізнатись більше
               </CTAButton>
             </div>

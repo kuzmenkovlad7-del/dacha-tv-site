@@ -26,6 +26,14 @@ export const metadata: Metadata = {
   },
 }
 
+// Static fallback so the home page always shows honey products before Sanity is populated
+const STATIC_HONEY_FALLBACK = [
+  { _id: 'f-acacia', _type: 'honeyProduct' as const, name: 'Мед Акація', slug: { current: 'acacia' }, variety: 'Акація', description: [], packaging: ['1L пластик', '1L скло'], isFeatured: true, inStock: true, image: { _type: 'image' as const, asset: { _ref: '', _type: 'reference' as const } } },
+  { _id: 'f-linden', _type: 'honeyProduct' as const, name: 'Мед Липа', slug: { current: 'linden' }, variety: 'Липа', description: [], packaging: ['1L пластик', '1L скло'], isFeatured: true, inStock: true, image: { _type: 'image' as const, asset: { _ref: '', _type: 'reference' as const } } },
+  { _id: 'f-sunflower', _type: 'honeyProduct' as const, name: 'Мед Сонях', slug: { current: 'sunflower' }, variety: 'Сонях', description: [], packaging: ['1L пластик', '1L скло'], isFeatured: true, inStock: true, image: { _type: 'image' as const, asset: { _ref: '', _type: 'reference' as const } } },
+  { _id: 'f-wildflower', _type: 'honeyProduct' as const, name: "Мед Різнотрав'я", slug: { current: 'wildflower' }, variety: "Різнотрав'я", description: [], packaging: ['1L пластик', '1L скло'], isFeatured: false, inStock: true, image: { _type: 'image' as const, asset: { _ref: '', _type: 'reference' as const } } },
+]
+
 export default async function HomePage() {
   const [featuredProducts, reviews, siteConfig, homepageConfig] = await Promise.all([
     getFeaturedProducts().catch(() => []),
@@ -34,11 +42,13 @@ export default async function HomePage() {
     getHomepageConfig().catch(() => null),
   ])
 
-  // Use homepage config products if available, otherwise use featured flag
+  // Use homepage config products if available, otherwise use featured flag, otherwise static fallback
   const displayProducts =
     homepageConfig?.featuredProductIds && homepageConfig.featuredProductIds.length > 0
       ? homepageConfig.featuredProductIds
-      : featuredProducts
+      : featuredProducts.length > 0
+        ? featuredProducts
+        : STATIC_HONEY_FALLBACK
 
   const localBusinessSchema = {
     '@context': 'https://schema.org',

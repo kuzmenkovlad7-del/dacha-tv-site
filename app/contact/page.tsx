@@ -38,12 +38,13 @@ export default async function ContactPage() {
     <div className="bg-cream min-h-screen">
       <StructuredData data={localBusinessSchema} />
 
-      <div className="bg-honey-50 border-b border-honey-200 py-12 md:py-16">
+      <div className="bg-white border-b border-gray-100 py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <span className="text-xs font-semibold text-honey-700 uppercase tracking-widest mb-3 block">Контакти</span>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-bark mb-4">
             Зв&apos;язатись з нами
           </h1>
-          <p className="text-bark/70 text-lg max-w-xl">
+          <p className="text-gray-500 text-lg max-w-xl">
             Відповідаємо протягом кількох годин. Найшвидший спосіб — зателефонувати.
           </p>
         </div>

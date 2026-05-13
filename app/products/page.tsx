@@ -51,12 +51,13 @@ export default async function ProductsPage() {
   return (
     <div className="bg-cream min-h-screen">
       {/* Page header */}
-      <div className="bg-forest-50 border-b border-forest-200 py-12 md:py-16">
+      <div className="bg-white border-b border-gray-100 py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <span className="text-xs font-semibold text-honey-700 uppercase tracking-widest mb-3 block">Продукти пасіки</span>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-bark mb-4">
-            Продукти пасіки
+            Більше від пасіки
           </h1>
-          <p className="text-bark/70 text-lg max-w-2xl">
+          <p className="text-gray-500 text-lg max-w-2xl">
             Крім меду, наша пасіка дає й інші цінні продукти — пилок, прополіс та горіхи в меду.
           </p>
         </div>
@@ -97,7 +98,7 @@ export default async function ProductsPage() {
           <p className="text-cream/70 mb-6">
             Зателефонуйте або залиште заявку — ми відповімо на всі питання
           </p>
-          <CTAButton href="/contact" variant="outline" className="border-cream/40 text-cream hover:bg-cream/10">
+          <CTAButton href="/contact" variant="white">
             Зв&apos;язатись з нами
           </CTAButton>
         </div>

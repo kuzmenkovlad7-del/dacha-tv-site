@@ -44,13 +44,14 @@ export default async function DeliveryPage() {
 
   return (
     <div className="bg-cream min-h-screen">
-      <div className="bg-honey-50 border-b border-honey-200 py-12 md:py-16">
+      <div className="bg-white border-b border-gray-100 py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <span className="text-xs font-semibold text-honey-700 uppercase tracking-widest mb-3 block">Доставка та оплата</span>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-bark mb-4">
             Доставка
           </h1>
-          <p className="text-bark/70 text-lg max-w-xl">
-            Інформація про відправку та способи отримання замовлення.
+          <p className="text-gray-500 text-lg max-w-xl">
+            Відправляємо по всій Україні — Новою Поштою або Укрпоштою.
           </p>
         </div>
       </div>
