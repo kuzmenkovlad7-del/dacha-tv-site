@@ -1,13 +1,32 @@
 # Дача TV — Content Map
 
 > Defines all content blocks, messaging hierarchy, and page-level content requirements.
-> This is a planning document. No code or components should be written yet.
+> Planning document. No code or components should be created yet.
+> Last revised: see git history.
+
+---
+
+## Location Language Policy
+
+Before reading the content blocks, note the location language policy that applies across the entire site:
+
+| Context | Language to use |
+|---|---|
+| Hero tagline / marketing headlines | "на Харківщині" or "поблизу Харкова" |
+| Product page descriptions | "Харківська область" — acceptable if natural |
+| About page (trust anchor) | "Коротич, Харківська область" — appropriate detail |
+| Contact page | Full: "Коротич, Пісочинська ОТГ, Харківська область" |
+| Footer | Full address |
+| Structured data / schema | Full address |
+| Internal tool (admin) | Whatever is accurate |
+
+**Do not** repeat "Пісочинська ОТГ" in hero text, product cards, or repeated marketing copy blocks. This level of administrative detail adds friction in public-facing copy without adding trust value.
 
 ---
 
 ## 1. Home Page Content Blocks
 
-The home page is the primary landing destination for YouTube and social traffic. Every block has a job. No decorative filler.
+The home page is the primary landing destination for YouTube and social traffic. Every block has a defined job. No decorative filler.
 
 ---
 
@@ -15,16 +34,17 @@ The home page is the primary landing destination for YouTube and social traffic.
 **Job:** Establish the brand immediately. Make the visitor feel they've arrived at the right place.
 
 **Content elements:**
-- Background: full-width real apiary or honey photo (not stock)
-- Brand name: **Дача TV** (with Ukrainian tagline below)
+- Background: full-width real apiary or honey photo (not stock, not studio)
+- Brand name: **Дача TV**
 - Tagline: `Справжній мед. Від нашої пасіки — до вашого столу.`
-- Subtext (1 sentence): Something like `Сімейна пасіка в Коротичі, Харківська область. Мед, пилок, прополіс та бджолині пакети.`
-- Primary CTA button: `Обрати мед` → /honey
+- Subtext (1 sentence, soft location): `Сімейна пасіка на Харківщині. Мед, пилок, прополіс та бджолині пакети.`
+- Primary CTA: `Обрати мед` → /honey
 - Secondary CTA (text link): `Дізнатись про нас` → /about
 
 **Notes:**
-- This is the highest-visibility block. Photo quality is critical.
-- On mobile, the tagline must be legible against the background image.
+- Photo quality in this block is the single most important visual decision on the site.
+- On mobile, tagline must remain legible — dark overlay or text shadow if needed.
+- Do not mention "Пісочинська ОТГ" here. "на Харківщині" is sufficient and more readable.
 
 ---
 
@@ -32,147 +52,158 @@ The home page is the primary landing destination for YouTube and social traffic.
 **Job:** Get the product in front of the visitor immediately. Reduce steps to purchase intent.
 
 **Content elements:**
-- Section heading: `Наш мед` (or `Наші продукти`)
-- 3–4 product cards featuring:
-  - Акація (best-seller — featured prominently)
-  - Липа (seasonal classic)
-  - Різнотравʼя or Сонях (third card)
-  - Горіхи в меду / Пилок (fourth card, non-honey product)
-- Each card: product name, 1-line description, photo, CTA button `Детальніше`
-- Section CTA link: `Переглянути всі сорти →` → /honey
+- Section heading: `Наш мед`
+- 3–4 product cards:
+  - Акація — best-seller, featured most prominently
+  - Липа — seasonal classic
+  - Різнотравʼя or Сонях — third card
+  - Горіхи в меду or Пилок — fourth card (non-honey product, shows range)
+- Each card: product name, 1-line character note, real photo, `Детальніше` button
+- Section CTA: `Переглянути всі сорти →` → /honey
 
 **Notes:**
-- Do not show prices here. Prices are on product pages or absent at launch.
-- Акація should be visually distinct — badge "Найпопулярніший" or similar.
+- No prices shown anywhere on this block.
+- Акація should have a visual badge: "Найпопулярніший" or "Хіт продажів".
+- Product cards are managed in Sanity — owner can reorder or feature different products seasonally.
 
 ---
 
 ### Block 3: Brand Story / Trust Intro
-**Job:** Humanize the brand. Differentiate from anonymous sellers. Build emotional connection.
+**Job:** Humanise the brand. Differentiate from anonymous sellers. Build emotional connection.
 
 **Content elements:**
 - Section heading: `Хто ми`
-- Photo: apiary or family photo (real — not staged marketing photo)
+- Real photo: apiary or family (not staged, not stock)
 - 2–3 short paragraphs:
-  - Who they are (family from Коротич, how long they've kept bees)
-  - What makes their honey different (real apiary, no blending, seasonal)
-  - Connection to content (YouTube channel — "ми ділимось своїм досвідом")
+  - Who they are — family from Харківщини, how long they've kept bees
+  - What makes their honey different — real apiary, no blending, no additives, seasonal harvest
+  - The content dimension — "ми відкрито показуємо нашу роботу на YouTube"
 - CTA: `Читати нашу історію` → /about
 
 **Notes:**
-- This block converts skeptical visitors. Keep it personal and specific, not generic.
-- Avoid phrases like "найкращий мед" without backing. Say WHY instead.
+- This block converts skeptical visitors. Keep it specific and personal — not generic.
+- Do not use phrases like "найкращий мед в Україні" without backing. Say WHY instead.
+- "поблизу Харкова" or "на Харківщині" is the right register here.
 
 ---
 
 ### Block 4: YouTube / Social Proof
-**Job:** Reinforce credibility through the existing content ecosystem.
+**Job:** Reinforce brand credibility through the existing content ecosystem.
 
 **Content elements:**
-- Section heading: `Слідкуйте за нами на YouTube`
+- Section heading: `Дивіться нас на YouTube`
 - Subtitle: `Ми відкрито розповідаємо про пасіку, збір меду та бджільництво.`
-- YouTube embed or thumbnail card (latest or most relevant video)
-- Channel name + subscriber count (if available)
-- CTA button: `Відкрити канал на YouTube` → YouTube URL
-- Social icons below: Facebook, Instagram, TikTok
+- YouTube embed or lazy-loaded thumbnail card (latest or most relevant video)
+- Channel name + subscriber count if available
+- CTA button: `Відкрити канал` → YouTube main channel URL
+- Social row below: Facebook, Instagram, TikTok icons with links
 
 **Notes:**
-- Use the main YouTube channel only (not the second channel).
-- If embedding a video, use facade loading (not autoplay) for performance.
-- Social proof here is implicit: "these people show you everything" = trust.
+- **Main YouTube channel only.** Do not link to the secondary channel anywhere on the site.
+- If embedding video: use facade loading (click-to-load) to avoid performance penalty.
+- Social proof here is implicit: a brand that shows everything publicly is a brand worth trusting.
+- YouTube URL and social links are managed in Sanity site config — owner can update without code.
 
 ---
 
 ### Block 5: How to Order
-**Job:** Remove friction. Tell visitors exactly how to get the product before they have to figure it out.
+**Job:** Remove friction. Tell visitors exactly how to get the product before they have to think about it.
 
 **Content elements:**
 - Section heading: `Як замовити`
-- 3 simple steps:
-  1. `Оберіть мед або продукт` — browse the catalog
-  2. `Залиште заявку або зателефонуйте` — form or phone
-  3. `Отримайте замовлення` — Nova Poshta across Ukraine or pickup
-- Phone number visible and tappable (mobile)
+- 3 simple steps (icon + short label):
+  1. `Оберіть мед або продукт`
+  2. `Залиште заявку або зателефонуйте`
+  3. `Отримайте замовлення Новою Поштою або заберіть особисто`
+- Phone number — large, tappable `tel:` link
 - CTA: `Перейти до каталогу` → /honey
 
 **Notes:**
-- Keep this extremely simple. 3 steps maximum.
-- Phone number must be a `tel:` link on mobile.
+- 3 steps maximum. This block should feel trivially simple.
+- Phone number styling must work on mobile as a tap-to-call link.
 
 ---
 
-### Block 6: Customer Reviews / Social Proof
+### Block 6: Customer Reviews
 **Job:** Third-party validation to overcome purchase hesitation.
 
 **Content elements:**
 - Section heading: `Відгуки покупців`
-- 3–4 short review cards:
-  - Reviewer first name + location (e.g., Олена, Харків)
-  - Star rating (visual)
-  - Short quote (1–3 sentences)
-- Optional: link to Google Reviews or Facebook reviews page
+- 3–4 review cards:
+  - Reviewer first name + city (e.g., Олена, Харків)
+  - Star rating (visual — 5 stars)
+  - Short quote (1–3 sentences, real language — not polished marketing copy)
+- Optional link: "Більше відгуків на Google" or Facebook reviews
 
 **Notes:**
-- At launch, these will be manually curated. Use real quotes only.
-- Never fabricate reviews. If no reviews yet, skip this block and add it later.
+- Reviews are managed in Sanity. Owner can add/edit from phone.
+- At launch: manually entered real quotes from existing customers (Facebook messages, Instagram DMs, etc.)
+- **Never fabricate reviews.** If no reviews are available yet, hide this block until they are.
+- Do not use polished language — raw genuine quotes convert better.
 
 ---
 
 ### Block 7: For Beekeepers
-**Job:** Secondary conversion path — capture beekeeping audience without cluttering honey buyer experience.
+**Job:** Secondary conversion path — capture the beekeeping audience without cluttering the honey buyer experience.
 
 **Content elements:**
 - Section heading: `Для пасічників`
-- Short description: bджолопакети (Buckfast, Ukrainska step, Carnica), бджолосімʼї, вулики
-- 1 CTA: `Дізнатись більше` → /beekeeper
-- Tone: peer-level, not sales-y
+- 2-sentence description: бджолопакети (Buckfast, Українська степова, Карніка), бджолосімʼї, вулики
+- Single CTA: `Дізнатись більше` → /beekeeper
+- Tone: peer-level — "ми пасічники, і розуміємо, що вам потрібно"
 
 **Notes:**
-- This is a secondary block — visually smaller than honey section.
-- Beekeepers who find it will know what it means. No need to over-explain.
+- This is a visually secondary block — smaller treatment than the honey section.
+- Beekeepers will recognise the terminology immediately. Do not over-explain to a general audience.
 
 ---
 
-### Block 8: Location / Delivery
-**Job:** Remove the "but do they ship to me?" objection.
+### Block 8: Delivery / Location Reassurance
+**Job:** Remove the "but do they ship to me?" objection before it forms.
 
 **Content elements:**
 - Section heading: `Доставка по Україні`
-- 2-column (or icon list):
-  - Мед: доставляємо по всій Україні (Nova Poshta / Укрпошта)
+- Two-line summary:
+  - Мед: відправляємо по всій Україні — Нова Пошта / Укрпошта
   - Бджолопакети / вулики: самовивіз або індивідуальна домовленість
-- Location note: `Ми знаходимось в Коротичі, Пісочинська ОТГ, Харківська область`
+- Soft location note: `Ми на Харківщині, поруч із Харковом`
 - CTA: `Детальніше про доставку` → /delivery
+
+**Notes:**
+- Location in this block: "на Харківщині" — soft and readable.
+- Do not use "Пісочинська ОТГ" here. Full address belongs on the contact page and in the footer.
 
 ---
 
 ### Block 9: Footer
 **Content elements:**
 - Logo / brand name
-- Navigation links (condensed)
-- Phone number
-- Social media icons
-- Address: Коротич, Пісочинська ОТГ, Харківська область, Україна
-- Copyright + privacy policy link
+- Condensed navigation links
+- Phone number (tappable)
+- Social media icons: YouTube, Facebook, Instagram, TikTok
+- Full address: Коротич, Пісочинська ОТГ, Харківська область, Україна
+  *(Full address is appropriate in footer — this is where users expect it)*
+- Copyright notice
+- Links: Privacy policy
 
 ---
 
 ## 2. Key Messaging Hierarchy
 
-**Level 1 — Brand promise (hero, OG tags, title):**
-> Справжній мед від сімейної пасіки в Харківській області
+**Level 1 — Brand promise (hero, OG title, page titles):**
+> Справжній мед від сімейної пасіки на Харківщині
 
-**Level 2 — Product truth (product pages, catalog):**
-> Сезонний мед без домішок. Акація, Липа, Сонях — кожен сорт зібраний в потрібний час.
+**Level 2 — Product truth (catalog, product pages):**
+> Сезонний мед без домішок. Акація, Липа, Сонях — кожен сорт зібраний у свій час.
 
-**Level 3 — Process credibility (about, product pages):**
+**Level 3 — Process credibility (about page, product descriptions):**
 > Ми самі доглядаємо за вуликами, самі качаємо, самі пакуємо. Жодних посередників.
 
-**Level 4 — Community (YouTube section, about):**
-> Більше ніж продукт — ми ділимось знаннями і показуємо пасіку зсередини.
+**Level 4 — Community (YouTube section, about page):**
+> Більше ніж продукт — ми відкрито показуємо пасіку і ділимось досвідом на YouTube.
 
-**Level 5 — Action (CTA copy everywhere):**
-> Замовити, Залишити заявку, Зателефонувати
+**Level 5 — Action (all CTA copy):**
+> Замовити / Залишити заявку / Зателефонувати
 
 ---
 
@@ -180,87 +211,99 @@ The home page is the primary landing destination for YouTube and social traffic.
 
 ### `/honey` — Honey Catalog
 - Page heading: `Наш мед`
-- Intro paragraph: 2–3 sentences about the range, how honey is collected, no additives
+- Intro: 2–3 sentences about the range, seasonal harvesting, no additives
 - Product grid: all 6 varieties
-- Each card: name, 1-line taste/character note, packaging options, CTA
-- Sidebar or section: packaging guide (what is 1L plastic vs 1L glass)
-- Bottom section: delivery note + CTA to order
+- Each card: name, 1-line character note, packaging options, CTA
+- Packaging note section: explain 1L plastic vs 1L glass (practical vs gift)
+- Bottom: delivery reminder + CTA
 
 **Honey variety content notes:**
 
-| Variety | Key message | Season note |
+| Variety | Character | Season |
 |---|---|---|
-| Акація | Light, delicate, crystallises slowly — perfect as a gift | Late spring |
-| Липа | Classic Ukrainian honey, strong aroma, medicinal reputation | Summer |
-| Сонях | Rich, golden, crystallises quickly | Late summer |
-| Різнотравʼя | Complex blend from diverse wildflowers | Summer |
-| Сади | Floral, from orchard blooms | Early spring |
-| Ліс | Forest honey, dark, complex, mineral notes | Summer |
+| Акація | Light, delicate, crystallises slowly — ideal for gifting or daily use | Late spring |
+| Липа | Classic Ukrainian honey, strong floral aroma, traditionally medicinal | Summer |
+| Сонях | Rich, golden, crystallises quickly and solidly | Late summer |
+| Різнотравʼя | Complex character from diverse wildflowers — no two batches identical | Summer |
+| Сади | Gentle floral honey from orchard blooms — early season | Early spring |
+| Ліс | Dark, complex, mineral notes — forest environment | Summer |
 
 ---
 
 ### `/honey/[slug]` — Individual Honey Page
-Each honey page should include:
-- Full name + Ukrainian name
-- Hero image (ideally lifestyle + jar)
-- Description: origin, bloom, taste profile, texture, crystallisation characteristics
+
+Each page needs:
+- Full Ukrainian name
+- Hero image (lifestyle + jar — real photos)
+- Description: origin, bloom source, taste profile, texture, crystallisation
 - Packaging options (1L plastic, 1L glass)
-- How to store
-- Suggested uses / pairings (optional)
-- Related YouTube video link (if one exists)
-- Order CTA (form or phone)
-- Related products
+- Storage guidance
+- Suggested uses / pairings (optional — keep brief)
+- YouTube video link if a directly relevant video exists
+- Order CTA (inline form or phone)
+- Related products (2–3 cards)
+
+Content lives in Sanity. Owner can update descriptions, toggle availability, change photos.
 
 ---
 
-### `/products` — Other Products
+### `/products` — Other Apiary Products
 
 | Product | Key content |
 |---|---|
-| Пилок (Pollen) | What it is, how collected, how to use, packaging |
-| Прополіс (Propolis) | Antibacterial properties, tincture/raw, usage notes |
-| Горіхи в меду | 200ml jar, which nuts, type of honey used, gift angle |
+| Пилок (Pollen) | What it is, how collected from hive, suggested daily use, packaging (TBC) |
+| Прополіс (Propolis) | Antibacterial properties, how produced, tincture vs raw, usage guidance |
+| Горіхи в меду | 200ml jar, nut variety, honey base used, gift framing |
+
+No prices shown. Order via form or phone.
 
 ---
 
 ### `/beekeeper` — Beekeeping Products
 
+**Tone throughout:** Peer-to-peer. Expert to expert. Not a sales page — a product information page with a clear inquiry path.
+
 **Page heading:** `Для пасічників`
-**Intro:** Peer-to-peer tone. "Ми пасічники, і ми розуміємо, що вам потрібно."
+
+**Intro (2 sentences):** "Ми пасічники, і розуміємо, що вам потрібно. Пропонуємо бджолопакети, бджолосімʼї та вулики — з індивідуальним підходом."
 
 **Bee Packages section:**
 - 4-frame packages
-- Available breeds: Buckfast, Українська степова, Карніка
-- Season: весна — осінь
+- Breeds: Buckfast, Українська степова, Карніка
+- Season: весна — осінь (availability varies — state this clearly)
 - No prices shown
-- "Щоб дізнатись наявність і вартість — зателефонуйте або залиште заявку"
-- Inquiry form or phone CTA
+- "Щоб дізнатись наявність та вартість — зателефонуйте або залиште заявку"
+- Inquiry form with breed preference field
 
 **Bee Colonies section:**
 - 10–12 frame colonies
-- No prices shown
-- Inquiry/call flow
-- Note: availability varies by season
+- Seasonal availability
+- No prices
+- Inquiry / call CTA
 
 **Hives section:**
-- Empty hives: дерев'яні та ППУ (polyurethane)
-- 10-frame Dadan + multi-body options
-- Hives with bees: available by inquiry
+- Empty hives: дерев'яні та ППУ
+- Дадан 10-рамковий + багатокорпусні варіанти
+- Hives with bees: by inquiry
 - No prices
-- Inquiry form or phone CTA
+- Inquiry CTA
+
+**Important note on all beekeeping products:** These involve live animals, seasonal logistics, and individual agreements. The inquiry-first flow is correct and should not be bypassed in v1 or Phase 2.
 
 ---
 
 ### `/about` — About Page
 
 **Sections:**
-1. **Our story** — how the family started beekeeping, year, location, journey
-2. **Our apiary** — Коротич, Пісочинська ОТГ, Харківська область. Photos. Size/scale (optional)
-3. **Our approach** — what they do, what they don't do, principles of quality
-4. **YouTube & content** — why they share content, channel overview
-5. **Meet us** — optional: first names / faces if comfortable sharing
+1. **Our story** — how and when the family started beekeeping, the journey
+2. **Our apiary** — location: Коротич, Харківська область (full detail is appropriate here as a trust anchor). Real photos.
+3. **Our approach** — what they do, what they don't do, quality principles
+4. **YouTube and content** — why they share openly, channel overview with link
+5. **Meet us** — optional: first names and faces if the family is comfortable sharing
 
-**Tone:** Personal, warm, confident. Not corporate. Not boastful. Specific and honest.
+**Tone:** Personal, warm, confident. Not corporate. Not boastful. Specific and real.
+
+**Location note:** Full location (Коротич, Харківська область) is appropriate and expected on the About page — visitors come here specifically to learn who and where you are.
 
 ---
 
@@ -268,35 +311,35 @@ Each honey page should include:
 
 **Content:**
 - Heading: `Зв'язатись з нами`
-- Phone number (large, tappable)
-- Business hours (if defined)
-- Short inquiry form: Name, Phone, Message (product interest), Submit
-- Optional: Telegram / Viber link
-- Location mention: Коротич, Харківська область
-- Note about response time: "Відповідаємо протягом X годин"
+- Phone number — large, tappable
+- Telegram / Viber links (tap-to-open)
+- Business hours if defined
+- Inquiry form: Name, Phone, Message, Submit
+- Response time note: "Відповідаємо протягом кількох годин"
+- Full address: Коротич, Пісочинська ОТГ, Харківська область, Україна
+  *(Full detail is expected and appropriate on the contact page)*
 
 ---
 
 ### `/delivery` — Delivery Page
 
 **Sections:**
-1. Honey and products: Nova Poshta / Укрпошта, across Ukraine, delivery timeframe
-2. Packaging: how honey is packed for shipping (jar protection)
-3. International: "Можливе відправлення за кордон — уточнюйте при замовленні"
-4. Beekeeping products: "Самовивіз або індивідуальна домовленість"
-5. Payment: bank transfer, monobank, cash (whatever is accepted)
+1. **Honey and apiary products:** Nova Poshta / Укрпошта, all of Ukraine, estimated timeframes
+2. **Packaging for shipping:** brief note on how jars are protected for transit
+3. **International:** "Можливе відправлення за кордон — уточнюйте при замовленні" (no infrastructure yet, just awareness)
+4. **Beekeeping products:** "Самовивіз або індивідуальна домовленість з доставкою"
+5. **Payment methods:** bank transfer (Monobank), cash on delivery — whatever is currently accepted
 
 ---
 
 ### `/faq` — FAQ Page
 
-**Grouped questions:**
-
 **About the products:**
 - Чи є у вашому меді цукор або домішки?
 - Як правильно зберігати мед?
-- Чому мед закристалізувався?
+- Чому мед закристалізувався? Це нормально?
 - Який мед найкраще підходить для подарунка?
+- Яка різниця між скляною та пластиковою тарою?
 
 **About ordering:**
 - Як зробити замовлення?
@@ -308,11 +351,15 @@ Each honey page should include:
 - В які регіони ви відправляєте?
 - Скільки коштує доставка?
 - Чи можете ви відправити за кордон?
+- Як упакований мед для відправлення?
 
 **About beekeeping products:**
 - Коли доступні бджолопакети?
 - Які породи бджіл ви продаєте?
-- Як відбувається передача бджолопакетів?
+- Як відбувається передача бджолопакетів / бджолосімей?
+- Чи можна купити вулик з бджолами?
+
+FAQ content is managed in Sanity — owner can add, edit, or reorder questions without a developer.
 
 ---
 
@@ -320,110 +367,124 @@ Each honey page should include:
 
 ```
 Products
-├── Мед (Honey)
-│   ├── Акація            ← Best seller, feature prominently
+├── Мед (Honey)                          → /honey and /honey/[slug]
+│   ├── Акація                           ← Best seller — feature prominently
 │   ├── Липа
 │   ├── Сонях
 │   ├── Різнотравʼя
 │   ├── Сади
 │   └── Ліс
 │
-├── Інші продукти пасіки
+├── Інші продукти пасіки                 → /products
 │   ├── Пилок
 │   ├── Прополіс
 │   └── Горіхи в меду (200ml)
 │
-└── Для пасічників (inquiry only)
+└── Для пасічників (inquiry-only)        → /beekeeper
     ├── Бджолопакети (4-рамкові)
-    │   ├── Бакфаст
+    │   ├── Buckfast
     │   ├── Українська степова
     │   └── Карніка
     ├── Бджолосімʼї (10–12 рамок)
     └── Вулики
-        ├── Порожні вулики (дерев'яні, ППУ, 10-рамковий Дадан, багатокорпусні)
+        ├── Порожні — дерев'яні (Дадан 10-рамк., багатокорпусні)
+        ├── Порожні — ППУ (Дадан 10-рамк., багатокорпусні)
         └── Вулики з бджолами
 ```
 
 **Packaging SKU map:**
 
-| Product | Packaging | Notes |
+| Product | Packaging | Status |
 |---|---|---|
-| All honey | 1L plastic | Standard |
-| All honey | 1L glass | Premium / gift |
-| Горіхи в меду | 200ml (type TBD) | Fixed size |
-| Пилок | TBD | To confirm |
-| Прополіс | TBD | To confirm |
+| All honey varieties | 1L plastic | Confirmed |
+| All honey varieties | 1L glass | Confirmed |
+| Горіхи в меду | 200ml | Confirmed |
+| Пилок | TBD | To confirm before launch |
+| Прополіс | TBD | To confirm before launch |
+
+**V1 scope:** The above is the complete product scope for v1. Do not add other product categories (lavender, garden products, lifestyle) until Phase 2D or later.
 
 ---
 
-## 5. Trust / FAQ / Delivery / Reviews Sections
+## 5. Trust / Reviews / FAQ / Delivery Placement Guide
 
-### Trust elements placement guide:
+### Trust element placement
 
-| Element | Home | Product pages | About | Beekeeper |
-|---|---|---|---|---|
-| Real photos | ✓ | ✓ | ✓ | ✓ |
-| Location mention | ✓ | — | ✓ | ✓ |
-| YouTube link | ✓ | optional | ✓ | — |
-| Customer reviews | ✓ | ✓ | — | — |
-| Phone number | ✓ (header) | ✓ | ✓ | ✓ |
-| "No additives" claim | ✓ | ✓ | ✓ | — |
-| Process transparency | — | optional | ✓ | ✓ |
+| Element | Home | Product pages | About | Beekeeper | Contact |
+|---|---|---|---|---|---|
+| Real photos | ✓ | ✓ | ✓ | ✓ | — |
+| Location (soft) | ✓ hero | — | — | — | — |
+| Location (full) | — | — | ✓ | — | ✓ |
+| YouTube link | ✓ block | optional link | ✓ | — | — |
+| Customer reviews | ✓ block | ✓ inline | — | — | — |
+| Phone number | ✓ header | ✓ header | ✓ header | ✓ header | ✓ prominent |
+| "No additives" | ✓ | ✓ | ✓ | — | — |
+| Process transparency | — | optional | ✓ | ✓ | — |
 
-### Reviews section:
-- At launch: manually curated, 3–4 real quotes
-- Format: name, city, short quote (no last names needed)
-- Source: can be from existing Facebook/Instagram comments or direct messages
-- Phase 2: integrate Google Reviews widget
+### Reviews guidelines
+- Managed in Sanity — owner adds from phone
+- Format: first name + city (no last names)
+- Source: Facebook comments, Instagram DMs, direct messages — with customer knowledge
+- 3–4 reviews minimum before showing the block
+- Do not show the block with zero reviews
+- Phase 2: connect to Google Reviews or Trustpilot widget
 
-### FAQ placement:
-- Full FAQ page at /faq
-- Inline mini-FAQ on delivery page (delivery-specific questions)
-- Inline mini-FAQ on /beekeeper (beekeeping-specific questions)
-- Inline FAQ on product pages (storage, crystallization)
+### FAQ placement
+- Full FAQ at `/faq`
+- 2–3 storage/crystallisation questions inline on each honey product page
+- 2–3 delivery questions inline on the delivery page
+- 2–3 product-specific questions inline on `/beekeeper`
 
 ---
 
 ## 6. YouTube and Social Proof Integration
 
-### YouTube integration strategy:
+### YouTube — main channel only
+
+**Rule:** All YouTube links and embeds across the site must point to the **main Дача TV channel**. The secondary channel must not be linked anywhere on the site.
 
 **Home page:**
-- Dedicated section: "Дивіться нас на YouTube"
-- Embed OR thumbnail card of best/latest video
-- Channel description (1 sentence)
-- Subscribe CTA button
+- Section: "Дивіться нас на YouTube"
+- Facade-loaded embed or thumbnail card of the most relevant video (not necessarily the latest — choose the most trust-building: apiary tour, harvest process, or breed overview)
+- Channel description: 1 sentence
+- Subscribe CTA
+- All other social icons listed below
 
 **About page:**
-- Mention YouTube channel as part of brand story
-- Embed 1 relevant video (apiary tour or honey harvest)
+- 1 embedded video (facade-loaded) — apiary tour or honey extraction
+- This is the deepest trust page — a video embed here is high value
 
-**Product pages (optional):**
-- Text link: "Дивіться як ми збираємо [variety] мед →"
-- Only if a relevant video exists
+**Product pages (honey):**
+- Text link only: "Дивіться як ми збираємо [variety] мед →"
+- Only where a directly relevant video exists — do not add generic channel links to every product
 
-**Do NOT:**
-- Auto-embed videos on every page (performance cost)
-- Embed multiple videos per page
-- Use YouTube as a substitute for real product descriptions
+**Beekeeping page:**
+- Text link to a relevant bee package or hive video if available
 
-### Social platform roles:
+**Rules:**
+- No autoplay anywhere
+- Maximum 1 embedded video per page
+- YouTube thumbnail images may be used as trust visuals (with link) on product or about pages
 
-| Platform | Role on website |
-|---|---|
-| YouTube | Primary content trust signal — embed/link |
-| Instagram | Secondary — link in footer/social icons, optional feed embed |
-| Facebook | Link to page, potential reviews link |
-| TikTok | Footer social icon only |
+### Social platform roles on the website
 
-### Social icons placement:
-- Header: optional (phone CTA takes priority)
-- Footer: all platforms
-- About page: all platforms with brief description of each
-- Home YouTube section: all platforms listed below YouTube CTA
+| Platform | Where referenced on site | Format |
+|---|---|---|
+| YouTube (main) | Home block, about page, product pages | Embed + icon link |
+| Facebook | Footer icons, about page | Icon link |
+| Instagram | Footer icons, about page | Icon link |
+| TikTok | Footer icons | Icon link only |
 
-### Future social proof (Phase 2):
-- Instagram feed widget on home or about page
-- Google Reviews integration
-- Counter: "X+ задоволених покупців" (once data exists)
-- Media mentions or blog features (if any appear)
+### Social icon placement
+- **Header:** Phone number takes priority. Social icons are optional in header — only if space allows without cluttering.
+- **Footer:** All 4 platforms — YouTube, Facebook, Instagram, TikTok
+- **About page:** All platforms listed with a brief note on what each is used for
+- **Home YouTube block:** All platforms shown below the YouTube CTA
+
+### Social links in Sanity
+All social URLs (YouTube, Facebook, Instagram, TikTok) are stored in Sanity site config. Owner can update them without a developer. Any page that renders social icons pulls from this config.
+
+### Phase 2 social additions
+- Instagram feed widget on home or about page (after verifying performance cost)
+- Google Reviews widget if review volume warrants it
+- Social proof counter: "X+ задоволених покупців" (once data exists and is trustworthy)

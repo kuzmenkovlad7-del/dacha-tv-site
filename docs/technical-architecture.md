@@ -1,247 +1,329 @@
 # Дача TV — Technical Architecture
 
-> Planning document only. No code should be written until this plan is reviewed and approved.
+> Planning document. No code should be written until this plan is reviewed and approved.
+> Last revised: see git history.
 
 ---
 
 ## 1. Recommended Stack for Fast Launch
 
-The goal is a fast, production-quality launch without overengineering. Every technology choice should be justified by real v1 requirements.
+Every choice is justified by a real v1 requirement. Nothing is added speculatively.
 
 ### Core Stack
 
 | Layer | Technology | Justification |
 |---|---|---|
-| Framework | **Next.js 14+** (App Router) | SSR/SSG for SEO, React ecosystem, Vercel-native |
-| Language | **TypeScript** | Type safety, better DX, fewer runtime errors |
-| Styling | **Tailwind CSS** | Fast to build, consistent design system, no CSS bloat |
-| Component library | **shadcn/ui** (selected components only) | Accessible, unstyled-by-default, no vendor lock-in |
-| Package manager | **pnpm** | Faster than npm, efficient disk use |
+| Framework | **Next.js 14+** (App Router) | SSR/SSG for SEO, React ecosystem, Vercel-native deployment |
+| Language | **TypeScript** | Type safety, better DX, catches schema mismatches early |
+| Styling | **Tailwind CSS** | Consistent design tokens, no CSS bloat, fast to build |
+| Component base | **shadcn/ui** (selected components only) | Accessible, unstyled-by-default, no vendor lock-in |
+| Package manager | **pnpm** | Faster, disk-efficient |
 
-### Data Layer (v1)
+### Content Layer — Sanity CMS (from day one)
 
-At launch, product data should be **static TypeScript files**, not a database. This eliminates a full CMS dependency, speeds up launch, and has zero operational cost.
+Product data, homepage sections, FAQ, reviews, contact info, and delivery text are all managed in **Sanity CMS** from day one. This is a hard requirement because:
 
-```
-/data
-  /products
-    honey.ts       ← All honey variants with metadata
-    other.ts       ← Pollen, propolis, nuts in honey
-    beekeeper.ts   ← Bee packages, colonies, hives
-  /config
-    site.ts        ← Brand name, contact, social links
-    nav.ts         ← Navigation structure
-```
+- The owners must be able to update content from a phone without a developer
+- Product availability changes seasonally
+- FAQ and review content needs to be editable independently
+- Static TypeScript files create a developer bottleneck for routine changes
 
-**Upgrade path:** When product data needs frequent updates by a non-developer, migrate to a headless CMS (see section 2).
+**What lives in Sanity:**
 
-### Forms and Inquiry Handling
+| Content type | Schema name | Editable fields |
+|---|---|---|
+| Honey product | `honeyProduct` | name, slug, description, variety, packaging, isFeatured, inStock, image, youtubeLink |
+| Other product | `apinaryProduct` | name, slug, description, packaging, inStock, image |
+| Beekeeper product | `beekeeperProduct` | name, slug, description, breeds[], seasonal note, image |
+| FAQ item | `faqItem` | question, answer, category |
+| Customer review | `review` | name, city, quote, rating, isVisible |
+| Homepage section | `homepageConfig` | featuredProducts[], heroTagline, heroSubtext |
+| Site config | `siteConfig` | phone, telegramLink, youtubeUrl, facebookUrl, instagramUrl, tiktokUrl, address |
+| Delivery/payment text | `deliveryPage` | sections with rich text |
 
-| Need | Technology |
-|---|---|
-| Form UI | React Hook Form + Zod (validation) |
-| Form submission | Next.js Server Action (no separate API route needed) |
-| Email delivery | **Resend** (modern, reliable, free tier covers v1 volume) |
-| Telegram notification | Telegram Bot API (simple HTTP POST, instant mobile notification) |
+**Sanity Studio:**
+- Hosted at `studio.dacha-tv.com` (or Sanity's managed URL)
+- Works in mobile browser — no app install required
+- Owner manages all content independently
 
-**Why Telegram bot:**
-Ukrainian business owners predominantly use Telegram. A bot notification is faster and more reliable than email for real-time order alerts. Implementation is a single API call.
+**Data fetching in Next.js:**
+- Use Sanity's `@sanity/client` with GROQ queries
+- Product pages use `generateStaticParams` + ISR (revalidate: 60s) — fast and editable
+- Homepage and FAQ use ISR — changes in Sanity appear within ~1 minute without redeployment
+- No static TypeScript product files in the source code
 
-### Analytics and Monitoring
+### Inquiry and Data Layer — Supabase
+
+All inquiry form submissions are stored in **Supabase** (managed Postgres).
+
+**Why Supabase:**
+- Managed Postgres with a generous free tier
+- Built-in REST API and TypeScript client
+- Simple enough for this scale, robust enough to grow with
+- Owner can inspect data via Supabase dashboard if needed
+- The same database powers the v1 internal inquiry dashboard
+
+**Why not Neon/Vercel Postgres:**
+- Supabase provides Row Level Security (RLS) for protecting admin routes natively
+- Better long-term fit if CRM features are added later
+
+### Notification Layer
+
+Every form submission triggers **both** notifications in parallel:
+
+| Channel | Tool | Reason |
+|---|---|---|
+| Telegram | Telegram Bot API | Instant mobile notification — primary for Ukrainian business owners |
+| Email | Resend | Reliable backup, readable on any device, archivable |
+
+Telegram is not optional. It is the primary real-time notification mechanism and must work from day one.
+
+### Analytics
 
 | Tool | Purpose | Cost |
 |---|---|---|
 | Google Analytics 4 | Traffic, conversions, source attribution | Free |
-| Google Search Console | SEO performance, keyword tracking | Free |
-| Vercel Analytics | Core Web Vitals, performance | Free tier |
+| Google Search Console | SEO, keyword tracking, indexing | Free |
+| Vercel Analytics | Core Web Vitals, performance monitoring | Free tier |
 
 ---
 
-## 2. CMS / Admin Recommendations
+## 2. CMS / Admin Architecture
 
-### v1: No CMS (static data files)
+### Sanity CMS — content management
 
-At launch, product data lives in TypeScript files in the repository. Updates require a code deployment (Vercel handles this in seconds via git push).
+**Schema design principles:**
+- Keep schemas simple — only fields that are actually edited
+- `inStock` boolean on all products — owner toggles availability from phone
+- `isVisible` / `isFeatured` fields for surfacing seasonal products
+- All text fields support Ukrainian characters natively
+- Images stored in Sanity CDN with automatic WebP delivery
 
-**Suitable when:**
-- Product catalog changes infrequently (new honey varieties, seasonal notes)
-- Owner is not editing content themselves
-- Team is technical enough to do small text edits via GitHub
+**Sanity free tier limits (as of planning):**
+- 3 users, 10GB assets, 500k API CDN requests/month
+- Sufficient for v1 volume with room to spare
+- Upgrade path is straightforward if needed
 
-### v1.5: Simple headless CMS (if needed)
+**Owner workflow for content changes:**
+1. Opens Sanity Studio in mobile browser
+2. Navigates to product / FAQ / review
+3. Makes edit or toggles availability
+4. Publishes — change appears on site within ~60 seconds (ISR)
 
-If the owner needs to manage content without developer help, the lowest-friction option is:
+No developer involved for routine content updates.
 
-**Recommended: Sanity.io (free tier)**
-- Visual editing UI
-- Ukrainian language content support
-- Real-time preview
-- Next.js integration is first-class
-- Free tier covers all v1 needs
+### Internal Inquiry Dashboard — mobile-first admin
 
-**Alternative: Notion as CMS**
-- Owner is likely already familiar with Notion
-- Can be queried via official API
-- Less structured, but zero learning curve
-- Suitable for managing FAQs, blog posts, reviews
+A lightweight password-protected route at `/admin` within the Next.js app.
 
-**Do NOT use at launch:**
-- WordPress (overkill, different stack)
-- Webflow (replaces Next.js, loses flexibility)
-- Shopify (overkill for v1, no beekeeper inquiry flow)
-- Strapi (self-hosted, operational burden)
+**Purpose:** Allow the owner to review and track inquiry status from a phone.
 
-### When to introduce CMS:
-- Owner wants to update product descriptions themselves
-- Blog/content section is added (Phase 2C)
-- Reviews need to be managed without code changes
+**This is not a complex CRM. It is a simple operational tool.**
+
+**Features:**
+- List of all inquiries (reverse-chronological)
+- Per inquiry: name, phone (tap-to-call), product interest, message, timestamp, status badge
+- Status toggle: `нова → зателефонований → виконано / скасовано`
+- Filter by status (new / contacted / completed)
+- Bulk view of "нові" inquiries at the top
+- Simple search by name or phone
+
+**Authentication:**
+- Single password (environment variable) — no user accounts needed
+- HTTP-only cookie session — secure, no JWT complexity
+- If the site outgrows this, migrate to Supabase Auth (one user account)
+
+**Mobile design requirements:**
+- Large tap targets (min 44px)
+- Status toggle as swipeable card or large button — not a tiny dropdown
+- Phone number is a `tel:` link — tap to call directly from the dashboard
+- No horizontal scrolling on mobile
+
+**Technical approach:**
+- Next.js App Router with a `/admin` route group
+- Reads directly from Supabase inquiries table
+- Status updates via Server Actions
+- No external admin framework — purpose-built in ~150–200 lines
 
 ---
 
-## 3. Form Handling Recommendations
+## 3. Form Handling
 
-### Inquiry/Order Form (honey products)
+### Honey / Apiary Product Order Form
 
 **Fields:**
 ```
-name        string, required
-phone       string, required, Ukrainian format validation
-product     select (honey variety + packaging)
-quantity    number, optional
-message     string, optional, max 500 chars
+name          string, required
+phone         string, required — Ukrainian format validation (+380 or 0XX)
+product       select — populated from Sanity honey + product catalog
+packaging     select — populated based on product selection
+quantity      number, optional
+message       text, optional, max 500 chars
+_honeypot     hidden — bot filter
 ```
 
-**Flow:**
-1. User submits form
-2. Server Action validates with Zod
-3. Send email via Resend to owner's address
-4. Send Telegram bot message to owner's Telegram chat
-5. Return success state to UI
-6. Show confirmation message to user ("Ми зв'яжемося з вами найближчим часом")
+**Submission flow:**
+1. Client validates with React Hook Form + Zod (immediate feedback)
+2. Server Action receives validated data
+3. `INSERT` to Supabase `inquiries` table (synchronous — failure blocks success response)
+4. Fire Telegram notification (async — does not block response)
+5. Fire Resend email to owner (async — does not block response)
+6. Return success → show confirmation message to user
+7. If Supabase insert fails → return error → user sees "спробуйте ще раз"
 
 **Rate limiting:**
-- Simple IP-based rate limit on the Server Action (max 3 submissions per hour per IP)
-- Add honeypot field for bot filtering
+- Max 3 submissions per IP per hour (Next.js middleware or Upstash Redis if needed)
+- Honeypot field blocks simple bots
 
-### Inquiry Form (beekeeping products)
+### Beekeeping Inquiry Form
 
 **Fields:**
 ```
 name          string, required
 phone         string, required
-product_type  select (bee packages / bee colonies / hives / hives with bees)
-breed         select (Buckfast / Українська степова / Карніка / Not sure) — shown only for packages
-quantity      string, optional (free text, "approximate")
-timing        string, optional ("планую навесні", etc.)
-message       string, optional
+product_type  select — Бджолопакети / Бджолосімʼї / Порожній вулик / Вулик з бджолами
+breed         select — shown only when product_type = Бджолопакети
+              (Buckfast / Українська степова / Карніка / Не визначився)
+quantity      string, optional — free text ("2–3 пакети", etc.)
+timing        string, optional — ("навесні", "якомога швидше", etc.)
+message       text, optional
+_honeypot     hidden
 ```
 
-**Same notification flow as above.**
+Same notification and storage flow as honey form.
 
-### Email templates (Resend)
+### Notification Templates
 
-Two email templates needed:
-1. **Owner notification** — plaintext, all form fields, reply-to set to customer phone
-2. **Customer confirmation** — simple branded HTML, "thank you, we will call you"
+**Telegram message format:**
+```
+🆕 Нова заявка — [type]
 
-Customer confirmation email is optional at launch but recommended for professionalism.
+Ім'я: [name]
+Телефон: [phone] (tap-to-call in Telegram)
+Продукт: [product]
+Кількість: [quantity]
+Повідомлення: [message]
+Час: [timestamp]
+```
+
+**Owner email (Resend):**
+- Subject: `Нова заявка від [name] — Дача TV`
+- Reply-to: not applicable (owner calls back)
+- Body: all fields in readable format
+- Link to admin dashboard
+
+**Customer confirmation message:**
+- Shown on-screen immediately after form submission
+- Text: "Дякуємо! Ми зв'яжемося з вами найближчим часом."
+- Optional: send a Resend confirmation email to customer if email field is added (Phase 2)
 
 ---
 
-## 4. Database Structure for Inquiries and Products
+## 4. Database Schema
 
-### v1: No database for products (static files)
-
-### v1: Inquiry log (optional but recommended)
-
-Even at launch, storing inquiries in a database is valuable:
-- Prevents loss if email delivery fails
-- Enables future admin panel
-- Simple audit trail
-
-**Recommended: Vercel Postgres (Neon) or Planetscale free tier**
-
-**Inquiry table:**
+### Supabase — Inquiries
 
 ```sql
 CREATE TABLE inquiries (
-  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  created_at    TIMESTAMPTZ DEFAULT NOW(),
-  type          TEXT NOT NULL, -- 'honey_order' | 'beekeeper_inquiry'
-  name          TEXT NOT NULL,
-  phone         TEXT NOT NULL,
-  product       TEXT,
-  breed         TEXT,          -- for bee packages
-  quantity      TEXT,
-  message       TEXT,
-  status        TEXT DEFAULT 'new', -- 'new' | 'contacted' | 'completed' | 'cancelled'
-  notes         TEXT           -- internal owner notes
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  type            TEXT NOT NULL CHECK (type IN ('honey_order', 'beekeeper_inquiry', 'general')),
+  name            TEXT NOT NULL,
+  phone           TEXT NOT NULL,
+  product         TEXT,
+  packaging       TEXT,
+  breed           TEXT,           -- bee packages only
+  quantity        TEXT,
+  timing          TEXT,           -- beekeeping inquiries
+  message         TEXT,
+  status          TEXT NOT NULL DEFAULT 'new'
+                  CHECK (status IN ('new', 'contacted', 'completed', 'cancelled')),
+  admin_notes     TEXT,           -- internal notes from owner
+  notified_at     TIMESTAMPTZ     -- when Telegram notification was sent
 );
+
+-- Index for admin dashboard default view
+CREATE INDEX inquiries_status_created ON inquiries (status, created_at DESC);
 ```
 
-**Status updates:** At launch, status is updated manually via a simple admin page or directly in the DB. No complex admin UI needed.
+**Row Level Security:**
+- Table is not publicly readable
+- Server-side operations (Server Actions) use the service role key
+- The service role key is only in environment variables — never exposed to client
 
-### Simple admin view (optional v1.5):
+### Sanity — Schema overview (GROQ/TypeScript types)
 
-A password-protected Next.js route `/admin/inquiries` showing a table of all inquiries with status toggle. No external admin framework needed — 50–100 lines of code.
+Content schemas are defined in the Sanity Studio config. Key types:
 
-### v2: Product database (when CMS is introduced)
+```typescript
+// honeyProduct
+{
+  _id: string
+  _type: 'honeyProduct'
+  name: string                  // "Акацієвий мед"
+  slug: { current: string }
+  variety: string               // "Акація"
+  description: PortableText
+  packaging: string[]           // ['1L пластик', '1L скло']
+  isFeatured: boolean
+  inStock: boolean
+  image: SanityImageAsset
+  youtubeVideoLink?: string
+}
 
-```sql
-CREATE TABLE products (
-  id            UUID PRIMARY KEY,
-  slug          TEXT UNIQUE NOT NULL,
-  category      TEXT,  -- 'honey' | 'other' | 'beekeeper'
-  name_ua       TEXT,
-  description_ua TEXT,
-  is_active     BOOLEAN DEFAULT true,
-  requires_inquiry BOOLEAN DEFAULT false,
-  created_at    TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE product_variants (
-  id          UUID PRIMARY KEY,
-  product_id  UUID REFERENCES products(id),
-  name_ua     TEXT,  -- '1л скло', '1л пластик', '200мл'
-  price       NUMERIC(10,2), -- null = price on inquiry
-  in_stock    BOOLEAN DEFAULT true
-);
+// siteConfig (singleton)
+{
+  _type: 'siteConfig'
+  phone: string
+  telegramUrl: string
+  youtubeUrl: string            // main channel only
+  facebookUrl: string
+  instagramUrl: string
+  tiktokUrl: string
+  addressDisplay: string        // "Коротич, Харківська область"
+  addressFull: string           // "Коротич, Пісочинська ОТГ, Харківська область"
+}
 ```
 
 ---
 
-## 5. What Should Be Built Now vs Deferred
+## 5. What to Build Now vs Defer
 
-### Build now (v1):
+### Build now (v1 — required at launch):
 
-| Feature | Why now |
+| Feature | Justification |
 |---|---|
-| All static pages (home, honey, products, beekeeper, about, contact, delivery, faq) | Core commercial need |
-| Honey product pages (6 varieties) | Primary revenue driver |
-| Inquiry/order forms | Primary conversion mechanism |
-| Email + Telegram notifications | Owner must receive leads |
-| Mobile-optimized design | Majority of traffic is mobile |
+| All public pages (home, honey, products, beekeeper, about, contact, delivery, faq) | Core commercial need |
+| All honey product pages (6 varieties) | Primary revenue driver |
+| Sanity CMS with all schemas | Owner must manage content from phone — day one |
+| Supabase inquiries table | Lead storage — no inquiry should be lost |
+| Honey order form + beekeeping inquiry form | Primary conversion mechanism |
+| Telegram bot notifications | Real-time lead alerts to owner's phone |
+| Resend email notifications | Backup and audit trail |
+| Mobile-first inquiry dashboard `/admin` | Owner must be able to manage inquiries from phone |
+| Mobile-optimised design throughout | Majority of social traffic is mobile |
+| SEO: metadata, OG tags, structured data | Indexable from day 1 |
+| Sitemap.xml | Crawlable from day 1 |
 | GA4 + Search Console | Measure from day 1 |
-| SEO metadata per page | Indexability from day 1 |
-| Sitemap.xml | Crawlability |
 | 404 page | Basic site quality |
 | Privacy policy page | Legal minimum |
 
-### Defer (Phase 2+):
+### Defer to Phase 2+:
 
 | Feature | Why defer |
 |---|---|
-| Shopping cart / checkout | Volume doesn't justify yet |
-| Payment gateway (LiqPay, Monobank) | Manual payment works at launch |
-| User accounts | No use case in v1 |
-| CMS / admin panel | Static files sufficient at launch |
-| Blog / content section | YouTube fills this role |
-| Reviews widget | Manual curation sufficient at launch |
-| Nova Poshta API integration | Manual booking works at launch |
-| Inventory management | Not needed at v1 volume |
-| Email newsletter | No list yet |
-| International e-commerce | Mention only, no infrastructure |
-| Multi-language (EN/DE) | Ukraine-first at launch |
+| Shopping cart / checkout | Volume doesn't justify the complexity yet |
+| Payment gateway (LiqPay, Monobank) | Manual bank transfer works at v1 volume |
+| User accounts / login | No use case |
+| Blog / content section | YouTube fills this role at launch |
+| Nova Poshta API | Manual booking works at v1 volume |
+| Inventory levels / stock counts | Boolean inStock toggle in Sanity is sufficient |
+| Email confirmation to buyer | On-screen confirmation + phone callback is sufficient at launch |
+| Instagram feed embed | Performance cost — defer until Phase 2 |
+| Google Reviews widget | Not enough reviews at launch to justify |
+| Multi-language | Ukraine-first at launch |
+| International e-commerce | Mention only — no infrastructure |
+| Expanded product categories | Keep v1 tightly scoped |
 
 ---
 
@@ -249,215 +331,208 @@ CREATE TABLE product_variants (
 
 ### Hosting: Vercel
 
-**Why Vercel:**
-- Native Next.js deployment (zero config)
-- Free tier covers v1 traffic comfortably
+**Why:**
+- Native Next.js deployment — zero config
+- Free tier handles v1 traffic
 - Automatic HTTPS
-- Global CDN (fast for Ukraine via EU edge nodes)
-- Preview deployments per git branch
-- Easy environment variable management
+- EU CDN edge nodes — acceptable latency for Ukraine
+- Preview deployments per branch — review before merging
+- Simple environment variable management
 
-**Environment variables needed:**
+### Environment Variables
+
 ```
-RESEND_API_KEY          # Email delivery
-TELEGRAM_BOT_TOKEN      # Bot notifications
-TELEGRAM_CHAT_ID        # Owner's chat ID
-DATABASE_URL            # If using Postgres for inquiry log
-NEXT_PUBLIC_GA_ID       # Google Analytics
+# Content
+NEXT_PUBLIC_SANITY_PROJECT_ID
+NEXT_PUBLIC_SANITY_DATASET
+SANITY_API_TOKEN                # Read token for ISR fetching
+
+# Database
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY       # Server-side only — never exposed to client
+
+# Notifications
+RESEND_API_KEY
+TELEGRAM_BOT_TOKEN
+TELEGRAM_CHAT_ID                # Owner's personal chat ID or group
+
+# Admin
+ADMIN_PASSWORD                  # Single password for /admin route
+
+# Analytics
+NEXT_PUBLIC_GA_MEASUREMENT_ID
 ```
 
 ### Domain
 
-- Register a `.ua` or `.com.ua` domain (preferred for Ukrainian SEO)
-- Alternative: `.com` if international expansion is planned
-- Configure DNS at Vercel or use external registrar (Hostpro, NIC.UA are common in Ukraine)
-- Automatic SSL via Vercel
+- `.ua` or `.com.ua` preferred for Ukrainian SEO (register via Hostpro or NIC.UA)
+- `.com` as fallback if international expansion is the priority
+- Point DNS to Vercel — automatic SSL provisioning
 
-### Deployment workflow:
-
-```
-developer → git push → GitHub → Vercel auto-deploys
-                    ↓
-              Preview URL (for review before merge)
-                    ↓
-              Merge to main → Production deploy
-```
-
-### Branch strategy:
+### Deployment Workflow
 
 ```
-main           → Production (dacha-tv.com or similar)
-dev / staging  → Preview deployments
-feature/*      → Individual feature work
+feature/* branch
+    → git push
+    → Vercel preview deployment (test URL)
+    → review and approve
+    → merge to main
+    → Vercel production deployment (automatic)
+```
+
+Content changes in Sanity do not require a deployment — ISR handles revalidation automatically.
+
+### Branch Strategy
+
+```
+main        → Production
+staging     → Pre-production review (optional)
+feature/*   → Feature development
 ```
 
 ---
 
-## 7. SEO / Metadata / Image Handling Notes
+## 7. SEO / Metadata / Image Handling
 
 ### Metadata (Next.js 14 Metadata API)
 
-Each page exports a `generateMetadata` function or static `metadata` object:
+Each page exports a `generateMetadata` function. Product pages generate metadata from Sanity data.
 
+**Required per page:**
+- Unique `<title>` including brand name: `Акацієвий мед | Дача TV`
+- `<meta description>` 150–160 chars, Ukrainian, includes natural keywords
+- Open Graph: title, description, image (1200×630), locale `uk_UA`
+- Canonical URL
+
+**Example — honey product page:**
 ```typescript
-// Example: honey variety page
-export const metadata: Metadata = {
-  title: 'Акацієвий мед | Дача TV',
-  description: 'Натуральний акацієвий мед від сімейної пасіки в Коротичі, Харківська область. 1л скло та пластик.',
-  openGraph: {
-    title: 'Акацієвий мед | Дача TV',
-    description: '...',
-    images: ['/images/honey/akatsiya-og.jpg'],
-    locale: 'uk_UA',
-    type: 'website',
-  },
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const product = await getHoneyProduct(params.slug)
+  return {
+    title: `${product.name} | Дача TV`,
+    description: `Натуральний ${product.name.toLowerCase()} від сімейної пасіки на Харківщині. ${product.packaging.join(', ')}.`,
+    openGraph: {
+      images: [{ url: urlFor(product.image).width(1200).height(630).url() }],
+      locale: 'uk_UA',
+    },
+  }
 }
 ```
-
-**Required metadata per page:**
-- `<title>` — unique per page, includes brand name
-- `<meta description>` — 150–160 chars, Ukrainian, includes keywords
-- Open Graph tags — for Facebook/Telegram link previews
-- Canonical URL — prevent duplicate content
 
 ### Structured Data (JSON-LD)
 
-| Page | Schema type |
+| Page | Schema |
 |---|---|
-| Home | `Organization`, `LocalBusiness` |
-| Honey product pages | `Product` (without price if not shown) |
-| Contact/About | `LocalBusiness` with address |
+| Home | `Organization` + `LocalBusiness` |
+| Honey product pages | `Product` (no price field required) |
+| About / Contact | `LocalBusiness` with full address |
 | FAQ | `FAQPage` |
 
-**LocalBusiness schema example:**
-```json
-{
-  "@type": "LocalBusiness",
-  "name": "Дача TV",
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "Коротич",
-    "addressRegion": "Харківська область",
-    "addressCountry": "UA"
-  },
-  "telephone": "+380XXXXXXXXX",
-  "url": "https://dacha-tv.com"
-}
-```
+**LocalBusiness schema uses the full address** (Коротич, Пісочинська ОТГ, Харківська область) — this is appropriate and expected in structured data regardless of what the visible copy shows.
 
 ### Image Handling
 
-**Next.js `<Image>` component** must be used for all images:
+**All images rendered via Next.js `<Image>` component:**
 - Automatic WebP conversion
-- Lazy loading
+- Lazy loading (except hero — use `priority` prop)
 - Responsive srcsets
-- Prevents layout shift (CLS)
+- CLS prevention via explicit `width` and `height`
 
-**Image organization:**
-```
-/public/images
-  /honey/           ← Product photos (akatsiya.jpg, lypa.jpg, etc.)
-  /products/        ← Pollen, propolis, nuts photos
-  /apiary/          ← Location / process photos
-  /team/            ← Family / people photos (if used)
-  /og/              ← Open Graph images (1200×630)
-```
+**Sanity image handling:**
+- Product photos stored in Sanity CDN
+- Use `@sanity/image-url` with explicit dimensions for consistent output
+- Alt text stored as a field in Sanity — owner sets it when uploading
 
-**Image format requirements:**
-- Source images: high-res JPG/PNG from real photos
-- Serve as: WebP via Next.js Image component
-- OG images: 1200×630px JPG (pre-generated)
-- Alt text: always in Ukrainian, descriptive
+**Static image organisation (for non-Sanity images — OG, icons, etc.):**
+```
+/public
+  /images
+    /og/        ← OG images 1200×630 (home, about, key products)
+    /icons/     ← Favicon, apple touch icon
+```
 
 **Performance targets:**
-- LCP (Largest Contentful Paint): < 2.5s
-- Hero image: preloaded (`priority` prop on Next.js Image)
-- No unoptimized images
-- Target: 90+ Lighthouse score on mobile
+- LCP < 2.5s on mobile
+- Hero image: `priority` prop + explicit dimensions
+- Lighthouse mobile score: 90+
+- No unoptimised images (`unoptimized` prop forbidden)
 
 ---
 
 ## 8. Future Automation Opportunities
 
-Listed in priority order based on business impact:
+Prioritised by commercial impact.
 
-### Immediate (implement when volume justifies):
+### Implement when volume triggers it:
 
-**1. Telegram Bot order notifications**
-- Simple: single Telegram Bot API call in Server Action
-- Instant notification on owner's phone
-- Can be built as part of v1 if desired
+**1. Nova Poshta API integration**
+- Auto-calculate delivery cost by recipient city
+- Generate waybill from admin dashboard
+- Trigger: 20+ honey orders/week
 
-**2. Auto-reply SMS or Viber to customer**
-- After form submission, send automated "дякуємо, зателефонуємо" message
-- Requires Turbosms or Alpha SMS gateway (Ukrainian providers)
+**2. Payment link generation (Monobank / LiqPay)**
+- After inquiry confirmed → generate and send payment link to customer
+- Webhook on payment → update inquiry status automatically
+- Trigger: 30+ orders/week or customer demand
 
-### Short-term (Phase 2):
+**3. Automated customer SMS on form submission**
+- "Дякуємо, зателефонуємо найближчим часом" via TurboSMS or AlphaSMS
+- Trigger: volume or customer experience improvement priority
 
-**3. Nova Poshta API integration**
-- Look up delivery cost based on city
-- Generate waybill automatically
-- Track shipment status
-
-**4. Payment integration (LiqPay or Monobank Acquiring)**
-- Generate payment link for honey orders
-- Webhook on payment confirmed → update order status
-- Trigger shipping
-
-**5. Google Reviews auto-request**
-- After confirmed delivery, send SMS with Google review link
-- Low effort, high trust-building ROI
+**4. Post-delivery review request**
+- After inquiry status set to `completed` → send SMS or Telegram with Google review link
+- Very high ROI for trust-building
+- Trigger: Phase 2 whenever delivery tracking exists
 
 ### Medium-term (Phase 2C+):
 
-**6. Email marketing (Brevo/Mailchimp)**
-- Collect emails at order time (opt-in)
+**5. Email marketing — Brevo / Mailchimp**
+- Opt-in email at order time
 - Seasonal campaigns: "Акація сезон відкрито", "Нова партія меду"
 
-**7. CRM integration**
-- Connect inquiry form to simple CRM (Pipedrive or similar)
-- Track leads from first touch to completed order
+**6. Inventory sync beyond boolean**
+- Track stock quantities in Supabase
+- Show "залишилось X банок" on product page (urgency without false scarcity)
 
-**8. Inventory sync**
-- Admin marks product as "out of stock"
-- Product page shows "наразі немає в наявності" automatically
-- Re-stock notification opt-in for customers
+**7. Sanity webhook → revalidate specific page**
+- Currently: ISR revalidates every 60s
+- Improvement: Sanity `onPublish` webhook triggers immediate page revalidation
+- Implementation: a single Vercel API route receiving Sanity webhook
 
 ### Long-term (Phase 3):
 
-**9. EU market infrastructure**
-- EN/DE language support via Next.js i18n
-- European payment methods (Stripe)
-- EU-compliant privacy / GDPR full implementation
+**8. EU infrastructure**
+- Next.js i18n for EN/DE routes
+- Stripe or Mollie for European payments
+- Full GDPR compliance layer
 
-**10. Subscription honey**
-- Recurring orders for regular customers
-- Monthly/quarterly honey delivery
-- Requires Stripe subscriptions or similar
-
-**11. Loyalty / referral system**
-- Discount code generation
-- Referral tracking
-- Only relevant at significant scale
+**9. Subscription honey delivery**
+- Recurring orders for returning customers
+- Requires Stripe Billing or similar
 
 ---
 
 ## Summary: V1 Technology Footprint
 
 ```
-Next.js 14 (App Router)
+Next.js 14+ (App Router)
 TypeScript
 Tailwind CSS
 shadcn/ui (selected components)
 React Hook Form + Zod
-Resend (email)
-Telegram Bot API (notifications)
-Vercel (hosting)
-Vercel Postgres or Neon (inquiry storage — optional at launch)
-Google Analytics 4
-Google Search Console
+
+Sanity CMS                    ← Content management (owner-editable from phone)
+Supabase (Postgres)           ← Inquiry storage + admin dashboard data
+Resend                        ← Email notifications
+Telegram Bot API              ← Real-time mobile notifications
+
+Vercel                        ← Hosting + deployment
+Google Analytics 4            ← Traffic and conversion tracking
+Google Search Console         ← SEO monitoring
+Vercel Analytics              ← Performance monitoring
 ```
 
-**Total third-party services at launch: 5–6**
+**Third-party services: 8**
 **Monthly cost at v1 scale: $0 (all free tiers)**
-**Time to deploy first version: 1–2 weeks of focused development**
+**Developer dependencies for routine content updates: 0**
+**Time to deploy v1: 2–3 weeks of focused development**
