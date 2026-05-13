@@ -23,7 +23,7 @@ const NAV_LINKS = [
 export function Footer({ siteConfig }: FooterProps) {
   const phone = siteConfig?.phone || FALLBACK_PHONE
   const address = siteConfig?.addressFull || FALLBACK_ADDRESS
-  const currentYear = 2024
+  const currentYear = new Date().getFullYear()
 
   return (
     <footer className="bg-bark text-cream/80 mt-auto">

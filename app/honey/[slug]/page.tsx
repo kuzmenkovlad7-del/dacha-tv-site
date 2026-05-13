@@ -130,7 +130,6 @@ export default async function HoneyProductPage({ params }: Props) {
       availability: product.inStock
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
-      priceCurrency: 'UAH',
       seller: { '@type': 'Organization', name: 'Дача TV' },
     },
     image: imageUrl || undefined,
