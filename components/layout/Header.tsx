@@ -24,7 +24,7 @@ export function Header({ siteSettings }: HeaderProps) {
           </Link>
 
           {/* Desktop navigation (center) */}
-          <Navigation phone={phone} phoneSecondary={phoneSecondary} />
+          <Navigation phone={phone} phoneSecondary={phoneSecondary} siteSettings={siteSettings} />
 
           {/* Phone — desktop only */}
           {phone && (
