@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { GeneralContactForm } from '@/components/forms/GeneralContactForm'
 import { PhoneLink } from '@/components/shared/PhoneLink'
+import { SocialIcons } from '@/components/shared/SocialIcons'
 import { StructuredData } from '@/components/shared/StructuredData'
 import { getSiteSettings } from '@/lib/supabase/queries'
 
@@ -117,6 +118,13 @@ export default async function ContactPage() {
                 Найшвидший спосіб — зателефонувати або написати в Telegram.
               </p>
             </div>
+
+            {/* Social links */}
+            <SocialIcons
+              siteSettings={siteSettings}
+              className="flex items-center gap-2 flex-wrap"
+              iconClassName="w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:text-bark hover:border-bark transition-all"
+            />
           </div>
 
           {/* Contact form */}

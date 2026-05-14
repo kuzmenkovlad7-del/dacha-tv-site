@@ -118,41 +118,34 @@ export default async function AboutPage() {
             На нашому YouTube-каналі ми показуємо пасіку зсередини: підготовку до сезону, роботу з вуликами, збір та фасування меду. Підписуйтесь — ми нічого не приховуємо.
           </p>
 
-          {/* YouTube channel promo */}
-          <div className="aspect-video rounded-2xl overflow-hidden bg-gradient-to-br from-bark via-honey-950 to-forest-950 flex flex-col items-center justify-center mb-6 border border-honey-900/30">
-            <svg className="w-14 h-14 text-red-500 mb-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-            </svg>
-            <p className="text-cream font-serif text-xl font-semibold mb-2">Дача TV на YouTube</p>
-            <p className="text-cream/60 text-sm text-center max-w-xs px-4">
-              Відео про пасіку, сезонну роботу і бджільництво — відкрито, без прикрас
-            </p>
-            {siteSettings?.youtube_url && (
-              <a
-                href={siteSettings.youtube_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors min-h-[48px]"
-              >
-                Відкрити канал
-              </a>
-            )}
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            {siteSettings?.youtube_url && (
-              <a
-                href={siteSettings.youtube_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors min-h-[48px]"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          {/* YouTube channel card */}
+          <div className="rounded-2xl bg-bark overflow-hidden mb-6">
+            <div className="px-8 py-10 flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <div className="w-14 h-14 bg-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                 </svg>
-                Відкрити канал
-              </a>
-            )}
+              </div>
+              <div className="flex-1">
+                <p className="font-serif text-xl font-bold text-cream mb-1">Дача TV на YouTube</p>
+                <p className="text-cream/60 text-sm leading-relaxed">
+                  Пасіка зсередини: підготовка вуликів, качка меду, робота з бджолопакетами — відкрито, без прикрас.
+                </p>
+              </div>
+              {siteSettings?.youtube_url && (
+                <a
+                  href={siteSettings.youtube_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-full transition-colors min-h-[48px] whitespace-nowrap"
+                >
+                  Відкрити канал
+                </a>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
             <SocialIcons
               siteSettings={siteSettings}
               className="flex items-center gap-2"
