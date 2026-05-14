@@ -25,7 +25,7 @@ export default async function AdminSettingsPage() {
               type="tel"
               defaultValue={settings?.phone ?? ''}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400"
-              placeholder="+380XXXXXXXXX"
+              placeholder="+380 XX XXX XXXX"
             />
           </div>
 
@@ -39,7 +39,7 @@ export default async function AdminSettingsPage() {
               type="tel"
               defaultValue={settings?.phone_secondary ?? ''}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400"
-              placeholder="+380XXXXXXXXX"
+              placeholder="+380 XX XXX XXXX"
             />
           </div>
 
