@@ -14,7 +14,7 @@ const schema = z.object({
   name: z.string().min(2, "Ім'я має містити щонайменше 2 символи"),
   phone: z
     .string()
-    .regex(ukrainianPhone, 'Введіть коректний номер телефону (+380XXXXXXXXX або 0XXXXXXXXX)'),
+    .regex(ukrainianPhone, 'Введіть номер у форматі +380XXXXXXXXX або 0XXXXXXXXX'),
   productType: z.string().min(1, 'Оберіть тип продукту'),
   breed: z.string().optional(),
   quantity: z.string().optional(),
@@ -131,7 +131,7 @@ export function BeekeeperInquiryForm({ preselectedProductType }: BeekeeperInquir
             'min-h-[48px] text-base',
             errors.name ? 'border-red-400' : 'border-forest-200'
           )}
-          placeholder="Олена"
+          placeholder="Ваше ім'я"
         />
         {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
       </div>
@@ -152,7 +152,7 @@ export function BeekeeperInquiryForm({ preselectedProductType }: BeekeeperInquir
             'min-h-[48px] text-base',
             errors.phone ? 'border-red-400' : 'border-forest-200'
           )}
-          placeholder="+380XXXXXXXXX"
+          placeholder="+380 XX XXX XXXX"
         />
         {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
       </div>
