@@ -1,3 +1,9 @@
+import {
+  LAUNCH_YOUTUBE_URL,
+  LAUNCH_FACEBOOK_URL,
+  LAUNCH_INSTAGRAM_URL,
+  LAUNCH_TIKTOK_URL,
+} from '@/lib/launch-defaults'
 import type { SiteSettings } from '@/types'
 
 interface SocialIconsProps {
@@ -39,23 +45,19 @@ function TikTokIcon() {
 }
 
 export function SocialIcons({ siteSettings, className, iconClassName }: SocialIconsProps) {
-  if (!siteSettings) return null
-
   const socials = [
-    { url: siteSettings.youtube_url, Icon: YouTubeIcon, label: 'YouTube' },
-    { url: siteSettings.facebook_url, Icon: FacebookIcon, label: 'Facebook' },
-    { url: siteSettings.instagram_url, Icon: InstagramIcon, label: 'Instagram' },
-    { url: siteSettings.tiktok_url, Icon: TikTokIcon, label: 'TikTok' },
-  ].filter((s) => Boolean(s.url))
-
-  if (socials.length === 0) return null
+    { url: siteSettings?.youtube_url || LAUNCH_YOUTUBE_URL, Icon: YouTubeIcon, label: 'YouTube' },
+    { url: siteSettings?.facebook_url || LAUNCH_FACEBOOK_URL, Icon: FacebookIcon, label: 'Facebook' },
+    { url: siteSettings?.instagram_url || LAUNCH_INSTAGRAM_URL, Icon: InstagramIcon, label: 'Instagram' },
+    { url: siteSettings?.tiktok_url || LAUNCH_TIKTOK_URL, Icon: TikTokIcon, label: 'TikTok' },
+  ]
 
   return (
     <div className={className}>
       {socials.map(({ url, Icon, label }) => (
         <a
           key={label}
-          href={url!}
+          href={url}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={label}

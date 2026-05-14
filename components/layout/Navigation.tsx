@@ -6,6 +6,14 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { formatPhoneDisplay, formatPhoneTel } from '@/lib/utils'
+import {
+  LAUNCH_PHONE,
+  LAUNCH_PHONE_SECONDARY,
+  LAUNCH_YOUTUBE_URL,
+  LAUNCH_INSTAGRAM_URL,
+  LAUNCH_FACEBOOK_URL,
+  LAUNCH_TIKTOK_URL,
+} from '@/lib/launch-defaults'
 import type { SiteSettings } from '@/types'
 
 const NAV_ITEMS = [
@@ -24,11 +32,9 @@ interface NavigationProps {
 }
 
 function DrawerSocialIcons({ siteSettings }: { siteSettings: SiteSettings | null | undefined }) {
-  if (!siteSettings) return null
-
   const socials = [
     {
-      url: siteSettings.instagram_url,
+      url: siteSettings?.instagram_url || LAUNCH_INSTAGRAM_URL,
       label: 'Instagram',
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -37,7 +43,7 @@ function DrawerSocialIcons({ siteSettings }: { siteSettings: SiteSettings | null
       ),
     },
     {
-      url: siteSettings.youtube_url,
+      url: siteSettings?.youtube_url || LAUNCH_YOUTUBE_URL,
       label: 'YouTube',
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -46,7 +52,7 @@ function DrawerSocialIcons({ siteSettings }: { siteSettings: SiteSettings | null
       ),
     },
     {
-      url: siteSettings.facebook_url,
+      url: siteSettings?.facebook_url || LAUNCH_FACEBOOK_URL,
       label: 'Facebook',
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -55,7 +61,7 @@ function DrawerSocialIcons({ siteSettings }: { siteSettings: SiteSettings | null
       ),
     },
     {
-      url: siteSettings.tiktok_url,
+      url: siteSettings?.tiktok_url || LAUNCH_TIKTOK_URL,
       label: 'TikTok',
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -64,7 +70,7 @@ function DrawerSocialIcons({ siteSettings }: { siteSettings: SiteSettings | null
       ),
     },
     {
-      url: siteSettings.telegram_url,
+      url: siteSettings?.telegram_url || null,
       label: 'Telegram',
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -77,7 +83,7 @@ function DrawerSocialIcons({ siteSettings }: { siteSettings: SiteSettings | null
   if (socials.length === 0) return null
 
   return (
-    <div className="flex items-center gap-2 pt-1">
+    <div className="flex items-center gap-2 pt-1 flex-wrap">
       {socials.map(({ url, label, icon }) => (
         <a
           key={label}
@@ -111,6 +117,8 @@ function MobilePhoneLink({ phone }: { phone: string }) {
 export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: NavigationProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const pathname = usePathname()
+  const resolvedPhone = phone || LAUNCH_PHONE
+  const resolvedPhoneSecondary = phoneSecondary || LAUNCH_PHONE_SECONDARY
 
   useEffect(() => {
     setDrawerOpen(false)
@@ -229,8 +237,8 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
 
         {/* Drawer footer — phone(s) + social + CTA */}
         <div className="px-6 py-6 border-t border-gray-100 space-y-3">
-          {phone && <MobilePhoneLink phone={phone} />}
-          {phoneSecondary && <MobilePhoneLink phone={phoneSecondary} />}
+          <MobilePhoneLink phone={resolvedPhone} />
+          <MobilePhoneLink phone={resolvedPhoneSecondary} />
           <DrawerSocialIcons siteSettings={siteSettings} />
           <Link
             href="/honey"

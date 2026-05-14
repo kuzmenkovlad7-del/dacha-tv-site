@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { ProductGrid } from '@/components/products/ProductGrid'
 import { CTAButton } from '@/components/shared/CTAButton'
 import { getAllApiaryProducts } from '@/lib/supabase/queries'
+
 export const metadata: Metadata = {
   title: 'Продукти пасіки',
   description:
@@ -30,29 +31,7 @@ export default async function ProductsPage() {
         </div>
       </div>
 
-      {/* Product descriptions */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-          <div className="bg-white rounded-xl p-6 border border-honey-100">
-            <h2 className="font-serif text-xl font-bold text-bark mb-3">Квітковий пилок</h2>
-            <p className="text-bark/70 text-sm leading-relaxed">
-              Зібраний бджолами з квіток і накопичений у вуликах. Містить білки, вітаміни та мінерали. Рекомендують як природну добавку до харчування.
-            </p>
-          </div>
-          <div className="bg-white rounded-xl p-6 border border-honey-100">
-            <h2 className="font-serif text-xl font-bold text-bark mb-3">Прополіс</h2>
-            <p className="text-bark/70 text-sm leading-relaxed">
-              Смолиста речовина, яку бджоли виробляють для захисту вулика. Відомий антибактеріальними властивостями. Натуральний або у вигляді настоянки.
-            </p>
-          </div>
-          <div className="bg-white rounded-xl p-6 border border-honey-100">
-            <h2 className="font-serif text-xl font-bold text-bark mb-3">Горіхи в меду</h2>
-            <p className="text-bark/70 text-sm leading-relaxed">
-              200ml скляна банка горіхів, залитих свіжим медом. Чудовий подарунок або корисний перекус. Суміш горіхів та натуральний мед нашої пасіки.
-            </p>
-          </div>
-        </div>
-
         <ProductGrid products={products} />
       </div>
 
