@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { formatPhoneDisplay, formatPhoneTel } from '@/lib/utils'
@@ -19,6 +20,7 @@ interface NavigationProps {
   phone?: string | null
   phoneSecondary?: string | null
   siteSettings?: SiteSettings | null
+  logoPath?: string | null
 }
 
 function DrawerSocialIcons({ siteSettings }: { siteSettings: SiteSettings | null | undefined }) {
@@ -106,7 +108,7 @@ function MobilePhoneLink({ phone }: { phone: string }) {
   )
 }
 
-export function Navigation({ phone, phoneSecondary, siteSettings }: NavigationProps) {
+export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: NavigationProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const pathname = usePathname()
 
@@ -179,10 +181,20 @@ export function Navigation({ phone, phoneSecondary, siteSettings }: NavigationPr
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <Link
             href="/"
-            className="font-serif font-bold text-xl text-bark"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             onClick={() => setDrawerOpen(false)}
+            aria-label="Дача TV — на головну"
           >
-            Дача TV
+            {logoPath && (
+              <Image
+                src={logoPath}
+                alt=""
+                width={32}
+                height={32}
+                className="w-8 h-8 object-contain"
+              />
+            )}
+            <span className="font-serif font-bold text-xl text-bark">Дача TV</span>
           </Link>
           <button
             type="button"

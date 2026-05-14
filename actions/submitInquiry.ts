@@ -17,6 +17,7 @@ const honeyOrderSchema = z.object({
   packaging: z.string().optional(),
   quantity: z.string().optional(),
   message: z.string().max(500, 'Повідомлення не може перевищувати 500 символів').optional(),
+  source: z.string().optional(),
   _honeypot: z.string().max(0, 'Відмовлено'),
 })
 
@@ -30,6 +31,7 @@ const beekeeperInquirySchema = z.object({
   quantity: z.string().optional(),
   timing: z.string().optional(),
   message: z.string().max(500, 'Повідомлення не може перевищувати 500 символів').optional(),
+  source: z.string().optional(),
   _honeypot: z.string().max(0, 'Відмовлено'),
 })
 
@@ -39,6 +41,7 @@ const generalContactSchema = z.object({
     .string()
     .regex(ukrainianPhone, 'Введіть коректний номер телефону (+380XXXXXXXXX або 0XXXXXXXXX)'),
   message: z.string().max(500, 'Повідомлення не може перевищувати 500 символів').optional(),
+  source: z.string().optional(),
   _honeypot: z.string().max(0, 'Відмовлено'),
 })
 
@@ -52,6 +55,7 @@ export async function submitHoneyOrder(formData: FormData): Promise<ActionResult
     packaging: formData.get('packaging'),
     quantity: formData.get('quantity'),
     message: formData.get('message'),
+    source: formData.get('source'),
     _honeypot: formData.get('_honeypot') ?? '',
   }
 
@@ -74,6 +78,7 @@ export async function submitHoneyOrder(formData: FormData): Promise<ActionResult
     packaging: data.packaging,
     quantity: data.quantity,
     message: data.message,
+    source: data.source,
   }
 
   try {
@@ -86,6 +91,7 @@ export async function submitHoneyOrder(formData: FormData): Promise<ActionResult
       packaging: inquiryData.packaging ?? null,
       quantity: inquiryData.quantity ?? null,
       message: inquiryData.message ?? null,
+      source: inquiryData.source ?? null,
     })
 
     if (error) {
@@ -95,7 +101,6 @@ export async function submitHoneyOrder(formData: FormData): Promise<ActionResult
     return { success: false, error: 'Не вдалося зберегти заявку. Будь ласка, спробуйте ще раз або зателефонуйте нам.' }
   }
 
-  // Non-blocking notifications
   sendTelegramNotification(inquiryData).catch(() => {})
   sendEmailNotification(inquiryData).catch(() => {})
 
@@ -111,6 +116,7 @@ export async function submitBeekeeperInquiry(formData: FormData): Promise<Action
     quantity: formData.get('quantity'),
     timing: formData.get('timing'),
     message: formData.get('message'),
+    source: formData.get('source'),
     _honeypot: formData.get('_honeypot') ?? '',
   }
 
@@ -134,6 +140,7 @@ export async function submitBeekeeperInquiry(formData: FormData): Promise<Action
     quantity: data.quantity,
     timing: data.timing,
     message: data.message,
+    source: data.source,
   }
 
   try {
@@ -147,6 +154,7 @@ export async function submitBeekeeperInquiry(formData: FormData): Promise<Action
       quantity: inquiryData.quantity ?? null,
       timing: inquiryData.timing ?? null,
       message: inquiryData.message ?? null,
+      source: inquiryData.source ?? null,
     })
 
     if (error) {
@@ -167,6 +175,7 @@ export async function submitGeneralContact(formData: FormData): Promise<ActionRe
     name: formData.get('name'),
     phone: formData.get('phone'),
     message: formData.get('message'),
+    source: formData.get('source'),
     _honeypot: formData.get('_honeypot') ?? '',
   }
 
@@ -186,6 +195,7 @@ export async function submitGeneralContact(formData: FormData): Promise<ActionRe
     name: data.name,
     phone: data.phone,
     message: data.message,
+    source: data.source,
   }
 
   try {
@@ -195,6 +205,7 @@ export async function submitGeneralContact(formData: FormData): Promise<ActionRe
       name: inquiryData.name,
       phone: inquiryData.phone,
       message: inquiryData.message ?? null,
+      source: inquiryData.source ?? null,
     })
 
     if (error) {
