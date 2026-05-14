@@ -6,7 +6,6 @@ interface FooterProps {
   siteSettings: SiteSettings | null
 }
 
-const FALLBACK_PHONE = '+380XXXXXXXXX'
 const FALLBACK_ADDRESS = 'Коротич, Пісочинська ОТГ, Харківська область, Україна'
 
 const NAV_LINKS = [
@@ -60,7 +59,8 @@ function TelegramIcon() {
 }
 
 export function Footer({ siteSettings }: FooterProps) {
-  const phone = siteSettings?.phone || FALLBACK_PHONE
+  const phone = siteSettings?.phone || null
+  const phoneSecondary = siteSettings?.phone_secondary || null
   const address = siteSettings?.address_full || FALLBACK_ADDRESS
   const currentYear = new Date().getFullYear()
 
@@ -149,13 +149,24 @@ export function Footer({ siteSettings }: FooterProps) {
               Контакти
             </h3>
             <div className="space-y-4">
-              <div>
-                <PhoneLink
-                  phone={phone}
-                  showIcon
-                  className="text-bark font-semibold text-base hover:text-honey-700 transition-colors"
-                />
-              </div>
+              {phone && (
+                <div>
+                  <PhoneLink
+                    phone={phone}
+                    showIcon
+                    className="text-bark font-semibold text-base hover:text-honey-700 transition-colors"
+                  />
+                </div>
+              )}
+              {phoneSecondary && (
+                <div>
+                  <PhoneLink
+                    phone={phoneSecondary}
+                    showIcon
+                    className="text-bark font-semibold text-base hover:text-honey-700 transition-colors"
+                  />
+                </div>
+              )}
               <address className="text-sm text-gray-500 not-italic leading-relaxed">
                 {address}
               </address>

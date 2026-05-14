@@ -15,10 +15,25 @@ const NAV_ITEMS = [
 ]
 
 interface NavigationProps {
-  phone?: string
+  phone?: string | null
+  phoneSecondary?: string | null
 }
 
-export function Navigation({ phone }: NavigationProps) {
+function MobilePhoneLink({ phone }: { phone: string }) {
+  return (
+    <a
+      href={`tel:${formatPhoneTel(phone)}`}
+      className="flex items-center justify-center gap-2 w-full py-3.5 border-2 border-honey-200 text-bark font-semibold rounded-full transition-colors hover:border-honey-400 min-h-[52px]"
+    >
+      <svg className="w-4 h-4 text-honey-700 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+      </svg>
+      {formatPhoneDisplay(phone)}
+    </a>
+  )
+}
+
+export function Navigation({ phone, phoneSecondary }: NavigationProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const pathname = usePathname()
 
@@ -34,9 +49,6 @@ export function Navigation({ phone }: NavigationProps) {
     }
     return () => { document.body.style.overflow = '' }
   }, [drawerOpen])
-
-  const phoneDisplay = phone ? formatPhoneDisplay(phone) : null
-  const phoneTel = phone ? formatPhoneTel(phone) : null
 
   return (
     <>
@@ -130,19 +142,10 @@ export function Navigation({ phone }: NavigationProps) {
           ))}
         </nav>
 
-        {/* Drawer footer — phone + CTA */}
+        {/* Drawer footer — phone(s) + CTA */}
         <div className="px-6 py-6 border-t border-gray-100 space-y-3">
-          {phoneDisplay && phoneTel && (
-            <a
-              href={`tel:${phoneTel}`}
-              className="flex items-center justify-center gap-2 w-full py-3.5 border-2 border-honey-200 text-bark font-semibold rounded-full transition-colors hover:border-honey-400 min-h-[52px]"
-            >
-              <svg className="w-4 h-4 text-honey-700 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-              {phoneDisplay}
-            </a>
-          )}
+          {phone && <MobilePhoneLink phone={phone} />}
+          {phoneSecondary && <MobilePhoneLink phone={phoneSecondary} />}
           <Link
             href="/honey"
             onClick={() => setDrawerOpen(false)}

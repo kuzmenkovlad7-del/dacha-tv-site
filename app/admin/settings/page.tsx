@@ -18,12 +18,26 @@ export default async function AdminSettingsPage() {
       <form action={saveSiteSettings} className="space-y-5 bg-white rounded-2xl p-6 border border-honey-100">
         <div className="grid grid-cols-1 gap-5">
           <div>
-            <label htmlFor="phone" className="block text-sm font-semibold text-bark mb-1">Телефон</label>
+            <label htmlFor="phone" className="block text-sm font-semibold text-bark mb-1">Телефон (основний)</label>
             <input
               id="phone"
               name="phone"
               type="tel"
               defaultValue={settings?.phone ?? ''}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400"
+              placeholder="+380XXXXXXXXX"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="phone_secondary" className="block text-sm font-semibold text-bark mb-1">
+              Телефон (додатковий) <span className="font-normal text-gray-400">— необов&apos;язково</span>
+            </label>
+            <input
+              id="phone_secondary"
+              name="phone_secondary"
+              type="tel"
+              defaultValue={settings?.phone_secondary ?? ''}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400"
               placeholder="+380XXXXXXXXX"
             />

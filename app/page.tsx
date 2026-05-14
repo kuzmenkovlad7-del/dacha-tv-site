@@ -13,8 +13,6 @@ import {
   getVisibleReviews,
   getSiteSettings,
 } from '@/lib/supabase/queries'
-import type { HoneyProduct } from '@/types'
-
 export const metadata: Metadata = {
   title: 'Дача TV — Натуральний мед від сімейної пасіки на Харківщині',
   description:
@@ -26,22 +24,12 @@ export const metadata: Metadata = {
   },
 }
 
-// Static fallback so the home page always shows honey products before Supabase is populated
-const STATIC_HONEY_FALLBACK: HoneyProduct[] = [
-  { id: 'f-acacia', name: 'Мед Акація', slug: 'acacia', variety: 'Акація', description: null, packaging: ['1L пластик', '1L скло'], is_featured: true, in_stock: true, display_order: 1, image_url: null, image_alt: null, youtube_video_link: null },
-  { id: 'f-linden', name: 'Мед Липа', slug: 'linden', variety: 'Липа', description: null, packaging: ['1L пластик', '1L скло'], is_featured: true, in_stock: true, display_order: 2, image_url: null, image_alt: null, youtube_video_link: null },
-  { id: 'f-sunflower', name: 'Мед Сонях', slug: 'sunflower', variety: 'Сонях', description: null, packaging: ['1L пластик', '1L скло'], is_featured: true, in_stock: true, display_order: 3, image_url: null, image_alt: null, youtube_video_link: null },
-  { id: 'f-wildflower', name: "Мед Різнотрав'я", slug: 'wildflower', variety: "Різнотрав'я", description: null, packaging: ['1L пластик', '1L скло'], is_featured: false, in_stock: true, display_order: 4, image_url: null, image_alt: null, youtube_video_link: null },
-]
-
 export default async function HomePage() {
   const [featuredHoneyProducts, reviews, siteSettings] = await Promise.all([
     getFeaturedHoneyProducts().catch(() => []),
     getVisibleReviews().catch(() => []),
     getSiteSettings().catch(() => null),
   ])
-
-  const displayProducts = featuredHoneyProducts.length > 0 ? featuredHoneyProducts : STATIC_HONEY_FALLBACK
 
   const localBusinessSchema = {
     '@context': 'https://schema.org',
@@ -77,7 +65,7 @@ export default async function HomePage() {
         siteSettings={siteSettings}
       />
 
-      <ProductPreview products={displayProducts} />
+      <ProductPreview products={featuredHoneyProducts} />
 
       <BrandStory />
 

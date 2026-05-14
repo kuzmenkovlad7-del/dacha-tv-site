@@ -16,14 +16,15 @@ export const metadata: Metadata = {
 
 export default async function ContactPage() {
   const siteSettings = await getSiteSettings().catch(() => null)
-  const phone = siteSettings?.phone || '+380XXXXXXXXX'
+  const phone = siteSettings?.phone || null
+  const phoneSecondary = siteSettings?.phone_secondary || null
   const address = siteSettings?.address_full || 'Коротич, Пісочинська ОТГ, Харківська область, Україна'
 
   const localBusinessSchema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: 'Дача TV',
-    telephone: phone,
+    telephone: phone || undefined,
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Коротич',
@@ -59,15 +60,27 @@ export default async function ContactPage() {
               Контактна інформація
             </h2>
 
-            {/* Phone — large and prominent */}
-            <div className="bg-honey-50 rounded-2xl p-6 border border-honey-200 mb-6">
-              <p className="text-bark/60 text-sm mb-2">Телефон (дзвінки та Viber):</p>
-              <PhoneLink
-                phone={phone}
-                showIcon
-                className="text-2xl font-bold"
-              />
-            </div>
+            {/* Phone(s) */}
+            {phone && (
+              <div className="bg-honey-50 rounded-2xl p-6 border border-honey-200 mb-4">
+                <p className="text-bark/60 text-sm mb-2">Телефон (дзвінки та Viber):</p>
+                <PhoneLink
+                  phone={phone}
+                  showIcon
+                  className="text-2xl font-bold"
+                />
+              </div>
+            )}
+            {phoneSecondary && (
+              <div className="bg-honey-50 rounded-2xl p-6 border border-honey-200 mb-6">
+                <p className="text-bark/60 text-sm mb-2">Додатковий телефон:</p>
+                <PhoneLink
+                  phone={phoneSecondary}
+                  showIcon
+                  className="text-2xl font-bold"
+                />
+              </div>
+            )}
 
             {/* Telegram */}
             {siteSettings?.telegram_url && (
