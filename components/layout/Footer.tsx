@@ -1,6 +1,11 @@
 import Link from 'next/link'
+import Image from 'next/image'
+import { existsSync } from 'fs'
+import { join } from 'path'
 import { PhoneLink } from '@/components/shared/PhoneLink'
 import type { SiteSettings } from '@/types'
+
+const LOGO_PATH = '/images/dacha-tv/logo.png'
 
 interface FooterProps {
   siteSettings: SiteSettings | null
@@ -63,6 +68,7 @@ export function Footer({ siteSettings }: FooterProps) {
   const phoneSecondary = siteSettings?.phone_secondary || null
   const address = siteSettings?.address_full || FALLBACK_ADDRESS
   const currentYear = new Date().getFullYear()
+  const hasLogo = existsSync(join(process.cwd(), 'public', LOGO_PATH))
 
   const socials = [
     { url: siteSettings?.youtube_url, Icon: YouTubeIcon, label: 'YouTube' },
@@ -80,9 +86,18 @@ export function Footer({ siteSettings }: FooterProps) {
           <div className="md:col-span-1">
             <Link
               href="/"
-              className="font-serif font-bold text-2xl text-bark hover:text-honey-700 transition-colors block mb-3"
+              className="inline-flex items-center gap-2.5 hover:opacity-80 transition-opacity mb-3"
             >
-              Дача TV
+              {hasLogo && (
+                <Image
+                  src={LOGO_PATH}
+                  alt="Дача TV"
+                  width={36}
+                  height={36}
+                  className="w-9 h-9 object-contain"
+                />
+              )}
+              <span className="font-serif font-bold text-2xl text-bark">Дача TV</span>
             </Link>
             <p className="text-sm text-gray-500 leading-relaxed mb-5">
               Натуральний мед від сімейної пасіки на Харківщині. Напряму від виробника.

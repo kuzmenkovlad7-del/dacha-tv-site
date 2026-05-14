@@ -20,6 +20,7 @@ const schema = z.object({
   quantity: z.string().optional(),
   timing: z.string().optional(),
   message: z.string().max(500).optional(),
+  source: z.string().optional(),
   _honeypot: z.string().max(0).optional(),
 })
 
@@ -27,6 +28,7 @@ type FormData = z.infer<typeof schema>
 
 interface BeekeeperInquiryFormProps {
   preselectedProductType?: string
+  source?: string
 }
 
 const PRODUCT_TYPES = [
@@ -43,7 +45,7 @@ const BREEDS = [
   'Не визначився',
 ]
 
-export function BeekeeperInquiryForm({ preselectedProductType }: BeekeeperInquiryFormProps) {
+export function BeekeeperInquiryForm({ preselectedProductType, source }: BeekeeperInquiryFormProps) {
   const [submitState, setSubmitState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -57,6 +59,7 @@ export function BeekeeperInquiryForm({ preselectedProductType }: BeekeeperInquir
     resolver: zodResolver(schema),
     defaultValues: {
       productType: preselectedProductType || '',
+      source: source || '',
       _honeypot: '',
     },
   })
@@ -113,6 +116,7 @@ export function BeekeeperInquiryForm({ preselectedProductType }: BeekeeperInquir
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
       <div className="hidden" aria-hidden="true">
         <input {...register('_honeypot')} tabIndex={-1} autoComplete="off" />
+        <input {...register('source')} type="hidden" />
       </div>
 
       {/* Name */}

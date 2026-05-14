@@ -16,12 +16,17 @@ const schema = z.object({
     .string()
     .regex(ukrainianPhone, 'Введіть номер у форматі +380XXXXXXXXX або 0XXXXXXXXX'),
   message: z.string().max(500).optional(),
+  source: z.string().optional(),
   _honeypot: z.string().max(0).optional(),
 })
 
 type FormData = z.infer<typeof schema>
 
-export function GeneralContactForm() {
+interface GeneralContactFormProps {
+  source?: string
+}
+
+export function GeneralContactForm({ source }: GeneralContactFormProps) {
   const [submitState, setSubmitState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -32,7 +37,7 @@ export function GeneralContactForm() {
     reset,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { _honeypot: '' },
+    defaultValues: { source: source || '', _honeypot: '' },
   })
 
   async function onSubmit(data: FormData) {
@@ -84,6 +89,7 @@ export function GeneralContactForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
       <div className="hidden" aria-hidden="true">
         <input {...register('_honeypot')} tabIndex={-1} autoComplete="off" />
+        <input {...register('source')} type="hidden" />
       </div>
 
       <div>

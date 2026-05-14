@@ -61,6 +61,20 @@ export async function getAllApiaryProducts(): Promise<ApiaryProduct[]> {
   return data ?? []
 }
 
+export async function getApiaryProductBySlug(slug: string): Promise<ApiaryProduct | null> {
+  const client = getClient()
+  if (!client) return null
+  const { data } = await client.from('apiary_products').select('*').eq('slug', slug).single()
+  return data ?? null
+}
+
+export async function getAllApiaryProductSlugs(): Promise<string[]> {
+  const client = getClient()
+  if (!client) return []
+  const { data } = await client.from('apiary_products').select('slug')
+  return (data ?? []).map((r: { slug: string }) => r.slug)
+}
+
 export async function getAllBeekeeperProducts(): Promise<BeekeeperProduct[]> {
   const client = getClient()
   if (!client) return []

@@ -132,7 +132,7 @@ export default async function ContactPage() {
             <h2 className="font-serif text-2xl font-bold text-bark mb-6">
               Надіслати повідомлення
             </h2>
-            <GeneralContactForm />
+            <GeneralContactForm source="/contact" />
           </div>
         </div>
       </div>

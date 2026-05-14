@@ -252,6 +252,7 @@ export default async function HoneyProductPage({ params }: Props) {
               <HoneyOrderForm
                 preselectedProduct={product.name}
                 packagingOptions={product.packaging || []}
+                source={`/honey/${slug}`}
               />
             </div>
           </div>

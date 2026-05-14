@@ -19,6 +19,7 @@ const schema = z.object({
   packaging: z.string().optional(),
   quantity: z.string().optional(),
   message: z.string().max(500).optional(),
+  source: z.string().optional(),
   _honeypot: z.string().max(0).optional(),
 })
 
@@ -28,6 +29,7 @@ interface HoneyOrderFormProps {
   preselectedProduct?: string
   packagingOptions?: string[]
   productOptions?: string[]
+  source?: string
 }
 
 const DEFAULT_PRODUCTS = [
@@ -45,6 +47,7 @@ export function HoneyOrderForm({
   preselectedProduct,
   packagingOptions = DEFAULT_PACKAGING,
   productOptions = DEFAULT_PRODUCTS,
+  source,
 }: HoneyOrderFormProps) {
   const [submitState, setSubmitState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
@@ -58,6 +61,7 @@ export function HoneyOrderForm({
     resolver: zodResolver(schema),
     defaultValues: {
       product: preselectedProduct || '',
+      source: source || '',
       _honeypot: '',
     },
   })
@@ -109,13 +113,9 @@ export function HoneyOrderForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-      {/* Honeypot — hidden from users, catches bots */}
       <div className="hidden" aria-hidden="true">
-        <input
-          {...register('_honeypot')}
-          tabIndex={-1}
-          autoComplete="off"
-        />
+        <input {...register('_honeypot')} tabIndex={-1} autoComplete="off" />
+        <input {...register('source')} type="hidden" />
       </div>
 
       {/* Name */}

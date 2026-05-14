@@ -36,6 +36,13 @@ export interface ApiaryProduct {
   name: string
   slug: string
   description: string | null
+  short_description: string | null
+  composition: string | null
+  usage_notes: string | null
+  storage_info: string | null
+  weight_g: number | null
+  is_featured: boolean
+  gallery_images: string[] | null
   packaging: string[] | null
   in_stock: boolean
   display_order: number
@@ -104,4 +111,5 @@ export interface InquiryData {
   quantity?: string
   timing?: string
   message?: string
+  source?: string
 }
