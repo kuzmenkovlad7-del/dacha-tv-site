@@ -1,3 +1,6 @@
+import Image from 'next/image'
+import { existsSync } from 'fs'
+import { join } from 'path'
 import { CTAButton } from '@/components/shared/CTAButton'
 
 const TRUST_POINTS = [
@@ -19,44 +22,45 @@ const TRUST_POINTS = [
   },
 ]
 
+const BRAND_STORY_IMAGE = '/images/dacha-tv/brand-story.jpg'
+
 export function BrandStory() {
+  const hasImage = existsSync(join(process.cwd(), 'public', BRAND_STORY_IMAGE))
+
   return (
     <section className="py-20 md:py-28 bg-white" aria-labelledby="brand-story-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* Photo placeholder */}
-          <div className="relative order-2 lg:order-1">
-            <div
-              className="aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br from-honey-100 via-honey-200 to-honey-300 flex items-center justify-center"
-              aria-label="Фото пасіки Дача TV — буде замінено на реальне фото"
-            >
-              <div className="text-center p-8">
-                <div className="w-20 h-20 bg-honey-500/20 rounded-full flex items-center justify-center mx-auto mb-5">
-                  <svg className="w-10 h-10 text-honey-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+        <div className={`grid grid-cols-1 ${hasImage ? 'lg:grid-cols-2' : ''} gap-16 items-center`}>
+          {/* Apiary photo — only shown when image file exists */}
+          {hasImage && (
+            <div className="relative order-2 lg:order-1">
+              <div className="aspect-[4/3] rounded-3xl overflow-hidden">
+                <Image
+                  src={BRAND_STORY_IMAGE}
+                  alt="Пасіка Дача TV — Коротич, Харківська область"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
+
+              {/* Floating stat card */}
+              <div className="absolute -bottom-5 -right-4 sm:-right-6 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 flex items-center gap-3">
+                <div className="w-11 h-11 bg-honey-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-honey-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
                   </svg>
                 </div>
-                <p className="text-honey-800 font-semibold mb-1">Фото пасіки</p>
-                <p className="text-honey-700 text-sm">Коротич, Харківська область</p>
+                <div>
+                  <p className="font-serif font-bold text-bark text-sm">6 сортів меду</p>
+                  <p className="text-gray-400 text-xs">Акація, Липа, Сонях і ще 3</p>
+                </div>
               </div>
             </div>
-
-            {/* Floating stat card */}
-            <div className="absolute -bottom-5 -right-4 sm:-right-6 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 flex items-center gap-3">
-              <div className="w-11 h-11 bg-honey-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-honey-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-serif font-bold text-bark text-sm">6 сортів меду</p>
-                <p className="text-gray-400 text-xs">Акація, Липа, Сонях і ще 3</p>
-              </div>
-            </div>
-          </div>
+          )}
 
           {/* Text content */}
-          <div className="order-1 lg:order-2">
+          <div className={hasImage ? 'order-1 lg:order-2' : ''}>
             <span className="text-xs font-semibold text-honey-700 uppercase tracking-widest mb-4 block">
               Хто ми
             </span>

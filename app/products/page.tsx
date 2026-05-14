@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { ProductGrid } from '@/components/products/ProductGrid'
 import { CTAButton } from '@/components/shared/CTAButton'
-import { getAllApinaryProducts } from '@/lib/sanity/queries'
+import { getAllApiaryProducts } from '@/lib/supabase/queries'
+import type { ApiaryProduct } from '@/types'
 
 export const metadata: Metadata = {
   title: 'Продукти пасіки',
@@ -13,50 +14,57 @@ export const metadata: Metadata = {
   },
 }
 
-// Fallback static products shown when Sanity is not yet populated
-const STATIC_PRODUCTS = [
+// Fallback static products shown when Supabase is not yet populated
+const STATIC_PRODUCTS: ApiaryProduct[] = [
   {
-    _id: 'static-pollen',
-    _type: 'apinaryProduct' as const,
+    id: 'static-pollen',
     name: 'Квітковий пилок',
-    slug: { current: 'pollen' },
-    description: [],
+    slug: 'pollen',
+    description: null,
     packaging: ['Уточнюйте при замовленні'],
-    inStock: true,
+    in_stock: true,
+    display_order: 1,
+    image_url: null,
+    image_alt: null,
   },
   {
-    _id: 'static-propolis',
-    _type: 'apinaryProduct' as const,
+    id: 'static-propolis',
     name: 'Прополіс',
-    slug: { current: 'propolis' },
-    description: [],
+    slug: 'propolis',
+    description: null,
     packaging: ['Уточнюйте при замовленні'],
-    inStock: true,
+    in_stock: true,
+    display_order: 2,
+    image_url: null,
+    image_alt: null,
   },
   {
-    _id: 'static-nuts',
-    _type: 'apinaryProduct' as const,
+    id: 'static-nuts',
     name: 'Горіхи в меду',
-    slug: { current: 'nuts-in-honey' },
-    description: [],
+    slug: 'nuts-in-honey',
+    description: null,
     packaging: ['200ml'],
-    inStock: true,
+    in_stock: true,
+    display_order: 3,
+    image_url: null,
+    image_alt: null,
   },
 ]
 
 export default async function ProductsPage() {
-  const sanityProducts = await getAllApinaryProducts().catch(() => [])
-  const products = sanityProducts.length > 0 ? sanityProducts : STATIC_PRODUCTS
+  const supabaseProducts = await getAllApiaryProducts().catch(() => [])
+  const products = supabaseProducts.length > 0 ? supabaseProducts : STATIC_PRODUCTS
 
   return (
     <div className="bg-cream min-h-screen">
       {/* Page header */}
-      <div className="bg-forest-50 border-b border-forest-200 py-12 md:py-16">
+      <div className="bg-white border-b border-gray-100 py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <span className="text-xs font-semibold text-honey-700 uppercase tracking-widest mb-3 block">Продукти пасіки</span>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-bark mb-4">
-            Продукти пасіки
+            Більше від пасіки
           </h1>
-          <p className="text-bark/70 text-lg max-w-2xl">
+          <p className="text-gray-500 text-lg max-w-2xl">
             Крім меду, наша пасіка дає й інші цінні продукти — пилок, прополіс та горіхи в меду.
           </p>
         </div>
@@ -97,7 +105,7 @@ export default async function ProductsPage() {
           <p className="text-cream/70 mb-6">
             Зателефонуйте або залиште заявку — ми відповімо на всі питання
           </p>
-          <CTAButton href="/contact" variant="outline" className="border-cream/40 text-cream hover:bg-cream/10">
+          <CTAButton href="/contact" variant="white">
             Зв&apos;язатись з нами
           </CTAButton>
         </div>

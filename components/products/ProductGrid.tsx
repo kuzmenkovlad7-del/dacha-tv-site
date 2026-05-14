@@ -3,10 +3,10 @@
 import { useState } from 'react'
 import { ProductCard } from './ProductCard'
 import { HoneyOrderForm } from '@/components/forms/HoneyOrderForm'
-import type { ApinaryProduct } from '@/types'
+import type { ApiaryProduct } from '@/types'
 
 interface ProductGridProps {
-  products: ApinaryProduct[]
+  products: ApiaryProduct[]
 }
 
 export function ProductGrid({ products }: ProductGridProps) {
@@ -27,7 +27,7 @@ export function ProductGrid({ products }: ProductGridProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {products.map((product) => (
           <ProductCard
-            key={product._id}
+            key={product.id}
             product={product}
             onOrder={() => setSelectedProduct(product.name)}
           />

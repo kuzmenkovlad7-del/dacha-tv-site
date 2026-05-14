@@ -1,13 +1,13 @@
 import { YouTubeFacade } from '@/components/shared/YouTubeFacade'
 import { SocialIcons } from '@/components/shared/SocialIcons'
-import type { SiteConfig } from '@/types'
+import type { SiteSettings } from '@/types'
 
 interface YouTubeSectionProps {
-  siteConfig: SiteConfig | null
+  siteSettings: SiteSettings | null
   videoId?: string
 }
 
-export function YouTubeSection({ siteConfig, videoId }: YouTubeSectionProps) {
+export function YouTubeSection({ siteSettings, videoId }: YouTubeSectionProps) {
   return (
     <section className="py-16 md:py-24 bg-bark" aria-labelledby="youtube-heading">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,9 +35,9 @@ export function YouTubeSection({ siteConfig, videoId }: YouTubeSectionProps) {
             <p className="text-cream/60 text-sm text-center max-w-xs px-4">
               Відео про пасіку, збір меду і бджільництво — відкрито, без прикрас
             </p>
-            {siteConfig?.youtubeUrl && (
+            {siteSettings?.youtube_url && (
               <a
-                href={siteConfig.youtubeUrl}
+                href={siteSettings.youtube_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-6 inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors min-h-[48px]"
@@ -49,9 +49,9 @@ export function YouTubeSection({ siteConfig, videoId }: YouTubeSectionProps) {
         )}
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          {siteConfig?.youtubeUrl && (
+          {siteSettings?.youtube_url && (
             <a
-              href={siteConfig.youtubeUrl}
+              href={siteSettings.youtube_url}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors min-h-[48px]"
@@ -64,7 +64,7 @@ export function YouTubeSection({ siteConfig, videoId }: YouTubeSectionProps) {
           )}
 
           <SocialIcons
-            siteConfig={siteConfig}
+            siteSettings={siteSettings}
             className="flex items-center gap-2"
             iconClassName="text-cream/60 hover:text-honey-300 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
           />

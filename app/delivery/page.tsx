@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { getDeliveryPage } from '@/lib/sanity/queries'
 
 export const metadata: Metadata = {
   title: 'Доставка',
@@ -34,45 +33,29 @@ const STATIC_SECTIONS = [
   },
 ]
 
-export default async function DeliveryPage() {
-  const deliveryData = await getDeliveryPage().catch(() => null)
-
-  const sections =
-    deliveryData?.sections && deliveryData.sections.length > 0
-      ? deliveryData.sections
-      : STATIC_SECTIONS
-
+export default function DeliveryPage() {
   return (
     <div className="bg-cream min-h-screen">
-      <div className="bg-honey-50 border-b border-honey-200 py-12 md:py-16">
+      <div className="bg-white border-b border-gray-100 py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <span className="text-xs font-semibold text-honey-700 uppercase tracking-widest mb-3 block">Доставка та оплата</span>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-bark mb-4">
             Доставка
           </h1>
-          <p className="text-bark/70 text-lg max-w-xl">
-            Інформація про відправку та способи отримання замовлення.
+          <p className="text-gray-500 text-lg max-w-xl">
+            Відправляємо по всій Україні — Новою Поштою або Укрпоштою.
           </p>
         </div>
       </div>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-        {sections.map((section, idx) => (
+        {STATIC_SECTIONS.map((section, idx) => (
           <article key={idx} className="bg-white rounded-2xl p-6 border border-honey-100 shadow-sm">
             <h2 className="font-serif text-2xl font-bold text-bark mb-4">
               {section.heading}
             </h2>
             <div className="text-bark/80 leading-relaxed">
-              {typeof section.body === 'string' ? (
-                <p>{section.body}</p>
-              ) : (
-                Array.isArray(section.body) && section.body.length > 0 ? (
-                  <p>{section.body.map((b) =>
-                    typeof b === 'object' && b !== null && 'children' in b
-                      ? (b.children as Array<{ text: string }>)?.map((c) => c.text).join('')
-                      : ''
-                  ).join('\n')}</p>
-                ) : null
-              )}
+              <p>{section.body}</p>
             </div>
           </article>
         ))}

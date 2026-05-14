@@ -9,12 +9,10 @@ import { BeekeeperTeaser } from '@/components/home/BeekeeperTeaser'
 import { DeliveryTeaser } from '@/components/home/DeliveryTeaser'
 import { StructuredData } from '@/components/shared/StructuredData'
 import {
-  getFeaturedProducts,
+  getFeaturedHoneyProducts,
   getVisibleReviews,
-  getSiteConfig,
-  getHomepageConfig,
-} from '@/lib/sanity/queries'
-
+  getSiteSettings,
+} from '@/lib/supabase/queries'
 export const metadata: Metadata = {
   title: 'Дача TV — Натуральний мед від сімейної пасіки на Харківщині',
   description:
@@ -27,18 +25,11 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [featuredProducts, reviews, siteConfig, homepageConfig] = await Promise.all([
-    getFeaturedProducts().catch(() => []),
+  const [featuredHoneyProducts, reviews, siteSettings] = await Promise.all([
+    getFeaturedHoneyProducts().catch(() => []),
     getVisibleReviews().catch(() => []),
-    getSiteConfig().catch(() => null),
-    getHomepageConfig().catch(() => null),
+    getSiteSettings().catch(() => null),
   ])
-
-  // Use homepage config products if available, otherwise use featured flag
-  const displayProducts =
-    homepageConfig?.featuredProductIds && homepageConfig.featuredProductIds.length > 0
-      ? homepageConfig.featuredProductIds
-      : featuredProducts
 
   const localBusinessSchema = {
     '@context': 'https://schema.org',
@@ -48,7 +39,7 @@ export default async function HomePage() {
     description:
       'Сімейна пасіка на Харківщині. Натуральний мед, пилок, прополіс та бджолині пакети напряму від виробника.',
     url: process.env.NEXT_PUBLIC_SITE_URL || 'https://dacha-tv.com',
-    telephone: siteConfig?.phone || '',
+    telephone: siteSettings?.phone || '',
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Коротич',
@@ -57,10 +48,10 @@ export default async function HomePage() {
       addressCountry: 'UA',
     },
     sameAs: [
-      siteConfig?.youtubeUrl,
-      siteConfig?.facebookUrl,
-      siteConfig?.instagramUrl,
-      siteConfig?.tiktokUrl,
+      siteSettings?.youtube_url,
+      siteSettings?.facebook_url,
+      siteSettings?.instagram_url,
+      siteSettings?.tiktok_url,
     ].filter(Boolean),
   }
 
@@ -69,18 +60,18 @@ export default async function HomePage() {
       <StructuredData data={localBusinessSchema} />
 
       <Hero
-        tagline={homepageConfig?.heroTagline}
-        subtext={homepageConfig?.heroSubtext}
-        siteConfig={siteConfig}
+        tagline={siteSettings?.hero_tagline ?? undefined}
+        subtext={siteSettings?.hero_subtext ?? undefined}
+        siteSettings={siteSettings}
       />
 
-      <ProductPreview products={displayProducts} />
+      <ProductPreview products={featuredHoneyProducts} />
 
       <BrandStory />
 
-      <YouTubeSection siteConfig={siteConfig} />
+      <YouTubeSection siteSettings={siteSettings} />
 
-      <HowToOrder siteConfig={siteConfig} />
+      <HowToOrder siteSettings={siteSettings} />
 
       {reviews.length > 0 && <Reviews reviews={reviews} />}
 

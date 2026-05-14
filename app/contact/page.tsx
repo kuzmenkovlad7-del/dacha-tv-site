@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { GeneralContactForm } from '@/components/forms/GeneralContactForm'
 import { PhoneLink } from '@/components/shared/PhoneLink'
 import { StructuredData } from '@/components/shared/StructuredData'
-import { getSiteConfig } from '@/lib/sanity/queries'
+import { getSiteSettings } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
   title: "Зв'язатись з нами",
@@ -15,15 +15,16 @@ export const metadata: Metadata = {
 }
 
 export default async function ContactPage() {
-  const siteConfig = await getSiteConfig().catch(() => null)
-  const phone = siteConfig?.phone || '+380XXXXXXXXX'
-  const address = siteConfig?.addressFull || 'Коротич, Пісочинська ОТГ, Харківська область, Україна'
+  const siteSettings = await getSiteSettings().catch(() => null)
+  const phone = siteSettings?.phone || null
+  const phoneSecondary = siteSettings?.phone_secondary || null
+  const address = siteSettings?.address_full || 'Коротич, Пісочинська ОТГ, Харківська область, Україна'
 
   const localBusinessSchema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: 'Дача TV',
-    telephone: phone,
+    telephone: phone || undefined,
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Коротич',
@@ -38,12 +39,13 @@ export default async function ContactPage() {
     <div className="bg-cream min-h-screen">
       <StructuredData data={localBusinessSchema} />
 
-      <div className="bg-honey-50 border-b border-honey-200 py-12 md:py-16">
+      <div className="bg-white border-b border-gray-100 py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <span className="text-xs font-semibold text-honey-700 uppercase tracking-widest mb-3 block">Контакти</span>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-bark mb-4">
             Зв&apos;язатись з нами
           </h1>
-          <p className="text-bark/70 text-lg max-w-xl">
+          <p className="text-gray-500 text-lg max-w-xl">
             Відповідаємо протягом кількох годин. Найшвидший спосіб — зателефонувати.
           </p>
         </div>
@@ -58,22 +60,34 @@ export default async function ContactPage() {
               Контактна інформація
             </h2>
 
-            {/* Phone — large and prominent */}
-            <div className="bg-honey-50 rounded-2xl p-6 border border-honey-200 mb-6">
-              <p className="text-bark/60 text-sm mb-2">Телефон (дзвінки та Viber):</p>
-              <PhoneLink
-                phone={phone}
-                showIcon
-                className="text-2xl font-bold"
-              />
-            </div>
+            {/* Phone(s) */}
+            {phone && (
+              <div className="bg-honey-50 rounded-2xl p-6 border border-honey-200 mb-4">
+                <p className="text-bark/60 text-sm mb-2">Телефон (дзвінки та Viber):</p>
+                <PhoneLink
+                  phone={phone}
+                  showIcon
+                  className="text-2xl font-bold"
+                />
+              </div>
+            )}
+            {phoneSecondary && (
+              <div className="bg-honey-50 rounded-2xl p-6 border border-honey-200 mb-6">
+                <p className="text-bark/60 text-sm mb-2">Додатковий телефон:</p>
+                <PhoneLink
+                  phone={phoneSecondary}
+                  showIcon
+                  className="text-2xl font-bold"
+                />
+              </div>
+            )}
 
             {/* Telegram */}
-            {siteConfig?.telegramUrl && (
+            {siteSettings?.telegram_url && (
               <div className="bg-blue-50 rounded-2xl p-5 border border-blue-200 mb-6">
                 <p className="text-bark/60 text-sm mb-2">Telegram:</p>
                 <a
-                  href={siteConfig.telegramUrl}
+                  href={siteSettings.telegram_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-blue-700 font-semibold text-lg hover:text-blue-900 transition-colors min-h-[44px]"

@@ -1,9 +1,9 @@
 import { CTAButton } from '@/components/shared/CTAButton'
 import { PhoneLink } from '@/components/shared/PhoneLink'
-import type { SiteConfig } from '@/types'
+import type { SiteSettings } from '@/types'
 
 interface HowToOrderProps {
-  siteConfig: SiteConfig | null
+  siteSettings: SiteSettings | null
 }
 
 const STEPS = [
@@ -39,7 +39,7 @@ const STEPS = [
   },
 ]
 
-export function HowToOrder({ siteConfig }: HowToOrderProps) {
+export function HowToOrder({ siteSettings }: HowToOrderProps) {
   return (
     <section className="py-20 md:py-28 bg-bark" aria-labelledby="how-to-order-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -80,9 +80,9 @@ export function HowToOrder({ siteConfig }: HowToOrderProps) {
             Перейти до каталогу
           </CTAButton>
 
-          {siteConfig?.phone && (
+          {siteSettings?.phone && (
             <PhoneLink
-              phone={siteConfig.phone}
+              phone={siteSettings.phone}
               showIcon
               className="text-xl font-bold text-honey-300 hover:text-honey-200 transition-colors"
             />

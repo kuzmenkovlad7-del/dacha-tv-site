@@ -1,16 +1,15 @@
 import Link from 'next/link'
 import { Navigation } from './Navigation'
 import { PhoneLink } from '@/components/shared/PhoneLink'
-import type { SiteConfig } from '@/types'
+import type { SiteSettings } from '@/types'
 
 interface HeaderProps {
-  siteConfig: SiteConfig | null
+  siteSettings: SiteSettings | null
 }
 
-const FALLBACK_PHONE = '+380XXXXXXXXX'
-
-export function Header({ siteConfig }: HeaderProps) {
-  const phone = siteConfig?.phone || FALLBACK_PHONE
+export function Header({ siteSettings }: HeaderProps) {
+  const phone = siteSettings?.phone || null
+  const phoneSecondary = siteSettings?.phone_secondary || null
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-black/8 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/72">
@@ -25,16 +24,18 @@ export function Header({ siteConfig }: HeaderProps) {
           </Link>
 
           {/* Desktop navigation (center) */}
-          <Navigation />
+          <Navigation phone={phone} phoneSecondary={phoneSecondary} />
 
           {/* Phone — desktop only */}
-          <div className="hidden md:flex items-center">
-            <PhoneLink
-              phone={phone}
-              showIcon
-              className="text-sm font-semibold text-bark/80 hover:text-honey-700 transition-colors"
-            />
-          </div>
+          {phone && (
+            <div className="hidden md:flex items-center">
+              <PhoneLink
+                phone={phone}
+                showIcon
+                className="text-sm font-semibold text-bark/80 hover:text-honey-700 transition-colors"
+              />
+            </div>
+          )}
         </div>
       </div>
     </header>

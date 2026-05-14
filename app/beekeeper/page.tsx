@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { BeekeeperSection } from '@/components/beekeeper/BeekeeperSection'
 import { BeekeeperInquiryForm } from '@/components/forms/BeekeeperInquiryForm'
-import { getAllBeekeeperProducts } from '@/lib/sanity/queries'
+import { getAllBeekeeperProducts } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
   title: 'Для пасічників',
@@ -16,21 +16,22 @@ export const metadata: Metadata = {
 export default async function BeekeeperPage() {
   const products = await getAllBeekeeperProducts().catch(() => [])
 
-  const packageProducts = products.filter((p) => p.productType === 'bee_packages')
-  const colonyProducts = products.filter((p) => p.productType === 'bee_colonies')
+  const packageProducts = products.filter((p) => p.product_type === 'bee_packages')
+  const colonyProducts = products.filter((p) => p.product_type === 'bee_colonies')
   const hiveProducts = products.filter(
-    (p) => p.productType === 'empty_hives' || p.productType === 'hives_with_bees'
+    (p) => p.product_type === 'empty_hives' || p.product_type === 'hives_with_bees'
   )
 
   return (
     <div className="bg-cream min-h-screen">
       {/* Page header */}
-      <div className="bg-forest-900 py-16 md:py-20">
+      <div className="bg-white border-b border-gray-100 py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="font-serif text-4xl md:text-5xl font-bold text-cream mb-4">
-            Для пасічників
+          <span className="text-xs font-semibold text-honey-700 uppercase tracking-widest mb-3 block">Для пасічників</span>
+          <h1 className="font-serif text-4xl md:text-5xl font-bold text-bark mb-4">
+            Бджолопакети та вулики
           </h1>
-          <p className="text-cream/80 text-lg max-w-2xl">
+          <p className="text-gray-500 text-lg max-w-2xl">
             Ми пасічники, і розуміємо, що вам потрібно. Пропонуємо бджолопакети, бджолосім&apos;ї та вулики — з індивідуальним підходом.
           </p>
         </div>

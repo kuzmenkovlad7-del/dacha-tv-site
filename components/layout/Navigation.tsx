@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { formatPhoneDisplay, formatPhoneTel } from '@/lib/utils'
 
 const NAV_ITEMS = [
   { href: '/honey', label: 'Мед' },
@@ -13,16 +14,33 @@ const NAV_ITEMS = [
   { href: '/contact', label: 'Контакти' },
 ]
 
-export function Navigation() {
+interface NavigationProps {
+  phone?: string | null
+  phoneSecondary?: string | null
+}
+
+function MobilePhoneLink({ phone }: { phone: string }) {
+  return (
+    <a
+      href={`tel:${formatPhoneTel(phone)}`}
+      className="flex items-center justify-center gap-2 w-full py-3.5 border-2 border-honey-200 text-bark font-semibold rounded-full transition-colors hover:border-honey-400 min-h-[52px]"
+    >
+      <svg className="w-4 h-4 text-honey-700 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+      </svg>
+      {formatPhoneDisplay(phone)}
+    </a>
+  )
+}
+
+export function Navigation({ phone, phoneSecondary }: NavigationProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const pathname = usePathname()
 
-  // Close drawer on route change
   useEffect(() => {
     setDrawerOpen(false)
   }, [pathname])
 
-  // Prevent body scroll when drawer is open
   useEffect(() => {
     if (drawerOpen) {
       document.body.style.overflow = 'hidden'
@@ -52,7 +70,7 @@ export function Navigation() {
         ))}
       </nav>
 
-      {/* Mobile hamburger button */}
+      {/* Mobile hamburger */}
       <button
         type="button"
         className="md:hidden p-2 text-bark/70 hover:text-bark transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -106,7 +124,7 @@ export function Navigation() {
         </div>
 
         {/* Drawer nav links */}
-        <nav className="flex flex-col flex-1 px-4 py-6 gap-1">
+        <nav className="flex flex-col flex-1 px-4 py-6 gap-1 overflow-y-auto">
           {NAV_ITEMS.map(({ href, label }) => (
             <Link
               key={href}
@@ -124,8 +142,10 @@ export function Navigation() {
           ))}
         </nav>
 
-        {/* Drawer footer */}
-        <div className="px-6 py-6 border-t border-gray-100">
+        {/* Drawer footer — phone(s) + CTA */}
+        <div className="px-6 py-6 border-t border-gray-100 space-y-3">
+          {phone && <MobilePhoneLink phone={phone} />}
+          {phoneSecondary && <MobilePhoneLink phone={phoneSecondary} />}
           <Link
             href="/honey"
             onClick={() => setDrawerOpen(false)}
