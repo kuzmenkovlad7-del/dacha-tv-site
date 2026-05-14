@@ -1,15 +1,15 @@
 import Link from 'next/link'
 import { CTAButton } from '@/components/shared/CTAButton'
 import { PhoneLink } from '@/components/shared/PhoneLink'
-import type { SiteConfig } from '@/types'
+import type { SiteSettings } from '@/types'
 
 interface HeroProps {
   tagline?: string
   subtext?: string
-  siteConfig: SiteConfig | null
+  siteSettings: SiteSettings | null
 }
 
-export function Hero({ tagline, subtext, siteConfig }: HeroProps) {
+export function Hero({ tagline, subtext, siteSettings }: HeroProps) {
   const displayTagline = tagline || 'Справжній мед. Від нашої пасіки — до вашого столу.'
   const displaySubtext =
     subtext || 'Сімейна пасіка на Харківщині. Мед, пилок, прополіс та бджолині пакети — напряму від виробника.'
@@ -74,11 +74,11 @@ export function Hero({ tagline, subtext, siteConfig }: HeroProps) {
           </div>
 
           {/* Phone — shown when available */}
-          {siteConfig?.phone && (
+          {siteSettings?.phone && (
             <div className="mt-10 pt-10 border-t border-white/10 flex items-center gap-3">
               <span className="text-white/40 text-sm">або зателефонуйте:</span>
               <PhoneLink
-                phone={siteConfig.phone}
+                phone={siteSettings.phone}
                 showIcon
                 className="text-xl font-bold text-honey-300 hover:text-honey-200 transition-colors"
               />

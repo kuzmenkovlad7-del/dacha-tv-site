@@ -6,79 +6,38 @@
 
 ---
 
-## Блок 1 — Sanity (контент-база)
-
-### 1. Створіть проект
-1. sanity.io → Sign in → **Create new project**
-2. Назва: будь-яка, Dataset: `production`
-3. Запишіть **Project ID** (8 символів на головній сторінці проекту)
-
-### 2. Отримайте токен
-1. sanity.io → ваш проект → **Settings → API → Tokens**
-2. **Add API token** → Name: `vercel` → Permissions: **Editor** → Save
-3. Скопіюйте токен — він показується **один раз**
-
-### 3. Внесіть мінімальний контент
-Відкрийте Studio (`/studio` на вашому Vercel-домені або `localhost:3000/studio`).
-
-**Обов'язково:**
-
-| Розділ | Що заповнити |
-|--------|-------------|
-| Налаштування сайту | Ваш телефон (формат `+380...`) |
-| Мед → додайте хоча б 1 продукт | Назва + Сорт (з випадаючого списку) + В наявності = увімкнено |
-
-Без телефону — шапка порожня. Без продукту — каталог порожній.
-
-Фото, відгуки, FAQ — додайте пізніше, сайт працює і без них.
-
----
-
-## Блок 2 — Supabase (для прийому заявок)
+## Блок 1 — Supabase (база даних + контент)
 
 ### 1. Створіть проект
 1. supabase.com → **New project** → будь-яка назва, регіон EU
 2. Збережіть пароль бази даних (знадобиться якщо щось піде не так)
 
-### 2. Створіть таблицю
-**SQL Editor** → вставте і натисніть **Run**:
+### 2. Створіть таблиці
+**SQL Editor** → вставте вміст файлу `supabase/migrations/001_content_tables.sql` → натисніть **Run**
 
-```sql
-create table if not exists inquiries (
-  id uuid default gen_random_uuid() primary key,
-  created_at timestamptz default now(),
-  name text not null,
-  phone text not null,
-  product text,
-  message text,
-  source text
-);
+Потім вставте `supabase/migrations/002_seed.sql` → **Run** (наповнює базу початковими даними).
 
-alter table inquiries enable row level security;
+### 3. Створіть Storage bucket для зображень
+1. Supabase → **Storage** → **New bucket**
+2. Назва: `site-media`
+3. Public: **увімкнено** (для публічного читання фото)
 
-create policy "service_role_all" on inquiries
-  for all using (auth.role() = 'service_role');
-```
-
-### 3. Запишіть ключі
-supabase.com → проект → **Settings → API**:
+### 4. Запишіть ключі
+Supabase → проект → **Settings → API**:
 - **URL** (наприклад `https://abcxyz.supabase.co`)
 - **anon public** key
 - **service_role** key (прихований — натисніть "Reveal")
 
 ---
 
-## Блок 3 — Vercel (деплой)
+## Блок 2 — Vercel (деплой)
 
-### Обов'язкові змінні середовища — 7 штук
+### Обов'язкові змінні середовища — 4 штуки
 
-Vercel → ваш проект → **Settings → Environment Variables** → додайте кожну:
+Vercel → ваш проект → **Settings → Environment Variables** → додайте кожну в **Production** та **Preview**:
 
 | Назва змінної | Значення |
 |---------------|----------|
-| `NEXT_PUBLIC_SANITY_PROJECT_ID` | Project ID з Sanity (8 символів) |
-| `NEXT_PUBLIC_SANITY_DATASET` | `production` |
-| `SANITY_API_TOKEN` | Токен з Sanity (починається з `sk`) |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL з Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon key з Supabase |
 | `SUPABASE_SERVICE_ROLE_KEY` | service_role key з Supabase |
@@ -87,6 +46,23 @@ Vercel → ваш проект → **Settings → Environment Variables** → д
 > ⚠️ `SUPABASE_SERVICE_ROLE_KEY` — лише сервер, ніколи не `NEXT_PUBLIC_`.
 
 Після додавання всіх змінних: **Deployments → три крапки → Redeploy**.
+
+---
+
+## Блок 3 — Внесення контенту через адмін-панель
+
+Після успішного деплою відкрийте `/admin` → введіть `ADMIN_PASSWORD`.
+
+**Обов'язково:**
+
+| Розділ | Що заповнити |
+|--------|-------------|
+| Налаштування | Ваш телефон (формат `+380...`), адреса |
+| Мед → додайте хоча б 1 продукт | Назва + В наявності = увімкнено |
+
+Без телефону — шапка порожня. Без продукту — каталог порожній.
+
+Фото, відгуки, FAQ — додайте пізніше, сайт працює і без них.
 
 ---
 
@@ -108,6 +84,6 @@ Vercel → ваш проект → **Settings → Environment Variables** → д
 
 - Telegram-сповіщення (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`)
 - Email-сповіщення (Resend)
-- Фото продуктів у Sanity
+- Завантаження фото продуктів через `/admin`
 - Відгуки та FAQ
 - Власний домен

@@ -2,14 +2,13 @@
 
 Покроковий план запуску сайту Дача TV. Виконуйте кроки по порядку — кожен наступний залежить від попереднього.
 
-Орієнтовний час: **2–4 години** при готових матеріалах (фото, тексти, облікові записи).
+Орієнтовний час: **2–3 години** при готових матеріалах (фото, тексти, облікові записи).
 
 ---
 
 ## Передумови
 
 Перед початком підготуйте:
-- [ ] Обліковий запис на **sanity.io** (безкоштовно)
 - [ ] Обліковий запис на **supabase.com** (безкоштовно)
 - [ ] Обліковий запис на **vercel.com** (безкоштовно)
 - [ ] Telegram-бот (якщо потрібні сповіщення) — створити через BotFather
@@ -19,60 +18,29 @@
 
 ---
 
-## Крок 1 — Налаштування Sanity
+## Крок 1 — Налаштування Supabase
 
 ### 1.1 Створення проекту
-1. Зайдіть на [sanity.io](https://sanity.io) → Create new project
-2. Назва: `dacha-tv` (або будь-яка)
-3. Dataset: `production`
-4. Запишіть **Project ID** (8 символів, наприклад `abc123xy`)
-
-### 1.2 API Token
-1. sanity.io → ваш проект → Settings → API → Tokens
-2. Add API token → Name: `vercel-server` → Permissions: **Editor**
-3. Скопіюйте токен — він показується лише один раз!
-
-### 1.3 CORS для Studio
-1. sanity.io → Settings → API → CORS Origins
-2. Додайте `https://ваш-домен.vercel.app` (після деплою)
-3. Для локальної розробки: `http://localhost:3000`
-
----
-
-## Крок 2 — Налаштування Supabase
-
-### 2.1 Створення проекту
 1. Зайдіть на [supabase.com](https://supabase.com) → New project
 2. Ім'я: `dacha-tv`, регіон: EU West або Central
 3. Пароль бази даних — збережіть його!
 
-### 2.2 Створення таблиці
-1. Supabase → SQL Editor → вставте та виконайте:
+### 1.2 Створення таблиць та початкові дані
+1. Supabase → **SQL Editor**
+2. Вставте вміст `supabase/migrations/001_content_tables.sql` → Run
+3. Вставте вміст `supabase/migrations/002_seed.sql` → Run (початкові дані)
 
-```sql
-create table if not exists inquiries (
-  id uuid default gen_random_uuid() primary key,
-  created_at timestamptz default now(),
-  name text not null,
-  phone text not null,
-  product text,
-  message text,
-  source text
-);
+### 1.3 Storage bucket для зображень
+1. Supabase → **Storage** → **New bucket**
+2. Назва: `site-media`, Public: **увімкнено**
 
-alter table inquiries enable row level security;
-
-create policy "service_role_all" on inquiries
-  for all using (auth.role() = 'service_role');
-```
-
-### 2.3 Ключі доступу
+### 1.4 Ключі доступу
 1. Supabase → Settings → API
 2. Запишіть **URL**, **anon key**, **service_role key**
 
 ---
 
-## Крок 3 — Telegram-бот (необов'язково)
+## Крок 2 — Telegram-бот (необов'язково)
 
 Якщо хочете отримувати замовлення у Telegram:
 
@@ -87,7 +55,7 @@ create policy "service_role_all" on inquiries
 
 ---
 
-## Крок 4 — Resend (необов'язково)
+## Крок 3 — Resend (необов'язково)
 
 Якщо хочете email-сповіщення про замовлення:
 
@@ -97,21 +65,18 @@ create policy "service_role_all" on inquiries
 
 ---
 
-## Крок 5 — Vercel (деплой)
+## Крок 4 — Vercel (деплой)
 
-### 5.1 Підключення репозиторію
+### 4.1 Підключення репозиторію
 1. vercel.com → New Project → Import Git Repository
 2. Оберіть репозиторій `dacha-tv-site`
 3. Framework: **Next.js** (визначиться автоматично)
 4. **НЕ** натискайте Deploy відразу — спочатку додайте змінні
 
-### 5.2 Змінні середовища
+### 4.2 Змінні середовища
 Додайте всі змінні з файлу `docs/vercel-env-checklist.md`:
 
 **Обов'язкові (без них сайт не запуститься):**
-- `NEXT_PUBLIC_SANITY_PROJECT_ID`
-- `NEXT_PUBLIC_SANITY_DATASET` → `production`
-- `SANITY_API_TOKEN`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -124,28 +89,29 @@ create policy "service_role_all" on inquiries
 - `RESEND_FROM_EMAIL`
 - `RESEND_TO_EMAIL`
 
-### 5.3 Деплой
+### 4.3 Деплой
 1. Натисніть **Deploy**
 2. Дочекайтесь успішного білду (зазвичай 2–5 хвилин)
 3. Vercel дасть URL виду `dacha-tv-site-xxx.vercel.app`
 
 ---
 
-## Крок 6 — Внесення контенту у Sanity
+## Крок 5 — Внесення контенту через адмін-панель
 
-Відкрийте `https://ваш-домен.vercel.app/studio` і дотримуйтесь порядку з `docs/sanity-content-entry-guide.md`:
+Відкрийте `https://ваш-домен.vercel.app/admin`, введіть `ADMIN_PASSWORD`.
 
-1. **Налаштування сайту** — телефон, адреса, соцмережі
+Дотримуйтесь порядку з `docs/admin-content-guide.md`:
+
+1. **Налаштування** — телефон, адреса, соцмережі, YouTube
 2. **Мед** — всі доступні сорти з фото
-3. **Відгуки** — мінімум 3–5 реальних відгуків
+3. **Відгуки** — мінімум 3–5 реальних відгуків, увімкніть "Видимий"
 4. **Продукти пасіки** — пилок, прополіс тощо (якщо є)
 5. **Для пасічників** — якщо зараз сезон
 6. **FAQ** — мінімум 5–7 питань
-7. **Налаштування головної** — якщо хочете обрати конкретні сорти для головної
 
 ---
 
-## Крок 7 — Тестування перед відкриттям
+## Крок 6 — Тестування перед відкриттям
 
 Пройдіть по кожному пункту:
 
@@ -153,7 +119,7 @@ create policy "service_role_all" on inquiries
 - [ ] Шапка показує ваш реальний телефон
 - [ ] `/honey` показує ваші продукти з фото
 - [ ] Головна сторінка: рекомендовані сорти відображаються
-- [ ] Відгуки з'являються (хоча б один з увімкненим "Показувати на сайті")
+- [ ] Відгуки з'являються (хоча б один з увімкненим "Видимий")
 - [ ] `/faq` показує ваші питання
 
 ### Форми (критично!)
@@ -166,6 +132,7 @@ create policy "service_role_all" on inquiries
 - [ ] `/admin` запитує пароль
 - [ ] Вхід з вашим `ADMIN_PASSWORD` працює
 - [ ] Список замовлень відображається
+- [ ] Можна додати/редагувати продукт
 
 ### Мобільний пристрій
 - [ ] Відкрийте сайт на смартфоні
@@ -175,32 +142,29 @@ create policy "service_role_all" on inquiries
 
 ### Технічне
 - [ ] Сторінка 404 показує зрозуміле повідомлення (не білу сторінку)
-- [ ] `/studio` відкривається після деплою (і після додавання CORS)
 
 ---
 
-## Крок 8 — Власний домен (якщо є)
+## Крок 7 — Власний домен (якщо є)
 
 1. Vercel → Settings → Domains → Add Domain
 2. Введіть ваш домен (наприклад `dachatv.ua`)
 3. Vercel покаже DNS-записи — додайте їх у реєстратора домену
 4. Зачекайте 5–60 хвилин на поширення DNS
-5. Поверніться у Sanity → Settings → API → CORS Origins → додайте `https://dachatv.ua`
 
 ---
 
 ## Після запуску
 
 - Слідкуйте за новими замовленнями в `/admin` або через Telegram
-- Вимикайте "В наявності" для сортів, що закінчились
-- Додавайте відгуки і вмикайте "Показувати на сайті" після перевірки
-- Оновлення продуктів — одразу з'являються на сайті (через 60 секунд кешу)
+- Вимикайте "В наявності" для сортів, що закінчились (через `/admin/honey`)
+- Додавайте відгуки і вмикайте "Видимий" після перевірки (через `/admin/reviews`)
+- Оновлення продуктів — одразу з'являються на сайті
 
 ---
 
 ## Контакти та підтримка
 
 - Документація Next.js: `node_modules/next/dist/docs/`
-- Документація Sanity: [sanity.io/docs](https://sanity.io/docs)
 - Документація Supabase: [supabase.com/docs](https://supabase.com/docs)
 - Документація Vercel: [vercel.com/docs](https://vercel.com/docs)

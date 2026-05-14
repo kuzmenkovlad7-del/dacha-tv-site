@@ -1,9 +1,8 @@
 import Image from 'next/image'
-import { urlFor } from '@/lib/sanity/image'
-import type { ApinaryProduct } from '@/types'
+import type { ApiaryProduct } from '@/types'
 
 interface ProductCardProps {
-  product: ApinaryProduct
+  product: ApiaryProduct
   onOrder?: () => void
 }
 
@@ -11,11 +10,7 @@ const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmJiZjI0Ii8+PC9zdmc+'
 
 export function ProductCard({ product, onOrder }: ProductCardProps) {
-  const hasValidImage = product.image?.asset?._ref && product.image.asset._ref.length > 0
-  const imageUrl =
-    hasValidImage && product.image
-      ? urlFor(product.image).width(400).height(400).url()
-      : null
+  const imageUrl = product.image_url || null
 
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-honey-100 flex flex-col">
@@ -23,7 +18,7 @@ export function ProductCard({ product, onOrder }: ProductCardProps) {
         {imageUrl ? (
           <Image
             src={imageUrl}
-            alt={product.image?.alt || `${product.name} від пасіки Дача TV`}
+            alt={product.image_alt || `${product.name} від пасіки Дача TV`}
             fill
             className="object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -37,7 +32,7 @@ export function ProductCard({ product, onOrder }: ProductCardProps) {
             </span>
           </div>
         )}
-        {!product.inStock && (
+        {!product.in_stock && (
           <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
             <span className="bg-gray-800 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
               Немає в наявності
@@ -68,7 +63,7 @@ export function ProductCard({ product, onOrder }: ProductCardProps) {
           <button
             type="button"
             onClick={onOrder}
-            disabled={!product.inStock}
+            disabled={!product.in_stock}
             className="w-full inline-flex items-center justify-center gap-1 px-4 py-3 bg-bark text-white font-semibold text-sm rounded-full transition-colors min-h-[44px] hover:bg-bark-light disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Замовити

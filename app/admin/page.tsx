@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { InquiryCard } from '@/components/admin/InquiryCard'

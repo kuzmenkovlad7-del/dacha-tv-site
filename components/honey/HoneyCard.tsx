@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { urlFor } from '@/lib/sanity/image'
 import type { HoneyProduct } from '@/types'
 
 interface HoneyCardProps {
@@ -21,10 +20,7 @@ const VARIETY_NOTES: Record<string, string> = {
 
 export function HoneyCard({ product }: HoneyCardProps) {
   const note = VARIETY_NOTES[product.variety] || `Натуральний мед ${product.variety.toLowerCase()}`
-  const hasValidImage = product.image?.asset?._ref && product.image.asset._ref.length > 0
-  const imageUrl = hasValidImage
-    ? urlFor(product.image).width(500).height(500).url()
-    : null
+  const imageUrl = product.image_url || null
 
   return (
     <article className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-bark/20 hover:shadow-xl transition-all duration-300 flex flex-col">
@@ -33,7 +29,7 @@ export function HoneyCard({ product }: HoneyCardProps) {
         {imageUrl ? (
           <Image
             src={imageUrl}
-            alt={product.image?.alt || `${product.name} — мед від пасіки Дача TV`}
+            alt={product.image_alt || `${product.name} — мед від пасіки Дача TV`}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -49,7 +45,7 @@ export function HoneyCard({ product }: HoneyCardProps) {
         )}
 
         {/* Featured badge */}
-        {product.isFeatured && (
+        {product.is_featured && (
           <div className="absolute top-3 left-3">
             <span className="bg-honey-700 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">
               Популярний
@@ -58,7 +54,7 @@ export function HoneyCard({ product }: HoneyCardProps) {
         )}
 
         {/* Out of stock overlay */}
-        {!product.inStock && (
+        {!product.in_stock && (
           <div className="absolute inset-0 bg-white/75 backdrop-blur-[1px] flex items-center justify-center">
             <span className="bg-bark text-white text-sm font-semibold px-4 py-2 rounded-full">
               Немає в наявності
@@ -92,7 +88,7 @@ export function HoneyCard({ product }: HoneyCardProps) {
         )}
 
         <Link
-          href={`/honey/${product.slug.current}`}
+          href={`/honey/${product.slug}`}
           className="inline-flex items-center justify-center gap-1.5 w-full px-4 py-3 bg-bark text-white font-semibold text-sm rounded-full transition-colors hover:bg-bark-light min-h-[44px] group-hover:bg-honey-700"
           aria-label={`Детальніше про ${product.name}`}
         >

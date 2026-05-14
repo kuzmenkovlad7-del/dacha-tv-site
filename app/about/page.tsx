@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { SocialIcons } from '@/components/shared/SocialIcons'
 import { CTAButton } from '@/components/shared/CTAButton'
-import { getSiteConfig } from '@/lib/sanity/queries'
+import { getSiteSettings } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
   title: 'Про нас',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 }
 
 export default async function AboutPage() {
-  const siteConfig = await getSiteConfig().catch(() => null)
+  const siteSettings = await getSiteSettings().catch(() => null)
 
   return (
     <div className="bg-cream min-h-screen">
@@ -112,7 +112,7 @@ export default async function AboutPage() {
             На нашому YouTube-каналі ми показуємо пасіку зсередини: підготовку до сезону, роботу з вуликами, збір та фасування меду. Підписуйтесь — ми нічого не приховуємо.
           </p>
 
-          {/* YouTube channel promo — embed added here once real video ID is available */}
+          {/* YouTube channel promo */}
           <div className="aspect-video rounded-2xl overflow-hidden bg-gradient-to-br from-bark via-honey-950 to-forest-950 flex flex-col items-center justify-center mb-6 border border-honey-900/30">
             <svg className="w-14 h-14 text-red-500 mb-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
@@ -121,9 +121,9 @@ export default async function AboutPage() {
             <p className="text-cream/60 text-sm text-center max-w-xs px-4">
               Відео про пасіку, сезонну роботу і бджільництво — відкрито, без прикрас
             </p>
-            {siteConfig?.youtubeUrl && (
+            {siteSettings?.youtube_url && (
               <a
-                href={siteConfig.youtubeUrl}
+                href={siteSettings.youtube_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-6 inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors min-h-[48px]"
@@ -134,9 +134,9 @@ export default async function AboutPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            {siteConfig?.youtubeUrl && (
+            {siteSettings?.youtube_url && (
               <a
-                href={siteConfig.youtubeUrl}
+                href={siteSettings.youtube_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors min-h-[48px]"
@@ -148,7 +148,7 @@ export default async function AboutPage() {
               </a>
             )}
             <SocialIcons
-              siteConfig={siteConfig}
+              siteSettings={siteSettings}
               className="flex items-center gap-2"
               iconClassName="text-bark/50 hover:text-honey-700 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
             />

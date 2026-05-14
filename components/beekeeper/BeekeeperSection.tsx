@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import { urlFor } from '@/lib/sanity/image'
 import type { BeekeeperProduct } from '@/types'
 
 interface BeekeeperSectionProps {
@@ -15,20 +14,18 @@ export function BeekeeperSection({ products }: BeekeeperSectionProps) {
   return (
     <div className="space-y-8">
       {products.map((product) => {
-        const imageUrl = product.image
-          ? urlFor(product.image).width(600).height(400).url()
-          : null
+        const imageUrl = product.image_url || null
 
         return (
           <article
-            key={product._id}
+            key={product.id}
             className="bg-white rounded-2xl overflow-hidden border border-forest-100 shadow-sm"
           >
             {imageUrl && (
               <div className="relative h-48 md:h-64">
                 <Image
                   src={imageUrl}
-                  alt={product.image?.alt || `${product.name} — пасіка Дача TV`}
+                  alt={product.image_alt || `${product.name} — пасіка Дача TV`}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 600px"
@@ -42,12 +39,12 @@ export function BeekeeperSection({ products }: BeekeeperSectionProps) {
                 {product.name}
               </h3>
 
-              {product.seasonNote && (
+              {product.season_note && (
                 <p className="text-forest-700 text-sm font-medium mb-3 inline-flex items-center gap-1.5">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  {product.seasonNote}
+                  {product.season_note}
                 </p>
               )}
 
@@ -65,6 +62,10 @@ export function BeekeeperSection({ products }: BeekeeperSectionProps) {
                     ))}
                   </div>
                 </div>
+              )}
+
+              {product.description && (
+                <p className="text-bark/70 leading-relaxed">{product.description}</p>
               )}
             </div>
           </article>

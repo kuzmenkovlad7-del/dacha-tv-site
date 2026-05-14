@@ -6,22 +6,12 @@
 
 ## Обов'язкові змінні (без них сайт не працює)
 
-### Sanity CMS
-
-| Змінна | Де взяти | Приклад |
-|--------|----------|---------|
-| `NEXT_PUBLIC_SANITY_PROJECT_ID` | sanity.io → Project → Settings → API | `abc123xy` |
-| `NEXT_PUBLIC_SANITY_DATASET` | sanity.io → Project → Datasets | `production` |
-| `SANITY_API_TOKEN` | sanity.io → Settings → API → Tokens → Create new (Editor) | `sk...` |
-
-> `NEXT_PUBLIC_*` — видимі у браузері. `SANITY_API_TOKEN` — лише сервер.
-
-### Supabase (для форм замовлення)
+### Supabase (контент + форми замовлення)
 
 | Змінна | Де взяти | Приклад |
 |--------|----------|---------|
 | `NEXT_PUBLIC_SUPABASE_URL` | supabase.com → Project → Settings → API | `https://xxx.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | supabase.com → Project → Settings → API | `eyJ...` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | supabase.com → Project → Settings → API → anon public | `eyJ...` |
 | `SUPABASE_SERVICE_ROLE_KEY` | supabase.com → Project → Settings → API → service_role | `eyJ...` |
 
 > ⚠️ `SUPABASE_SERVICE_ROLE_KEY` — НІКОЛИ не використовуйте з префіксом `NEXT_PUBLIC_`. Це ключ з повним доступом до бази даних.
@@ -30,7 +20,7 @@
 
 | Змінна | Що вводити |
 |--------|-----------|
-| `ADMIN_PASSWORD` | Придумайте надійний пароль (мінімум 16 символів, букви+цифри+символи). Приклад: `Dacha!TV_2025@Honey` |
+| `ADMIN_PASSWORD` | Придумайте надійний пароль (мінімум 16 символів, букви+цифри+символи). Наприклад: `Dacha!TV_2025@Honey` |
 
 ---
 
@@ -59,7 +49,7 @@
 2. Для кожної змінної:
    - Name: точна назва зі списку вище
    - Value: значення
-   - Environment: оберіть **Production** (і **Preview** якщо потрібно тестувати)
+   - Environment: оберіть **Production** та **Preview**
 3. Натисніть **Save**
 4. Після додавання всіх змінних — **Redeploy** (Deployments → три крапки → Redeploy)
 
@@ -69,9 +59,9 @@
 
 | Перевірка | Ознака успіху |
 |-----------|--------------|
-| Sanity підключений | `/studio` відкривається, `/honey` показує продукти |
-| Supabase підключений | Форма замовлення відправляється без помилки |
+| Supabase підключений | `/honey` показує продукти (або порожній каталог до внесення контенту) |
 | Admin panel | `/admin` запитує пароль, вхід з `ADMIN_PASSWORD` працює |
+| Форми | Форма замовлення відправляється без помилки |
 | Telegram | Тестове замовлення → повідомлення у Telegram |
 | Resend | Тестове замовлення → лист на `RESEND_TO_EMAIL` |
 
@@ -81,9 +71,6 @@
 
 | Змінна | Production | Preview | Development |
 |--------|-----------|---------|-------------|
-| `NEXT_PUBLIC_SANITY_PROJECT_ID` | ✅ | ✅ | ✅ (в .env.local) |
-| `NEXT_PUBLIC_SANITY_DATASET` | `production` | `production` | `production` |
-| `SANITY_API_TOKEN` | ✅ | ✅ | ✅ (в .env.local) |
 | `NEXT_PUBLIC_SUPABASE_URL` | ✅ | ✅ | ✅ (в .env.local) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | ✅ | ✅ (в .env.local) |
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ | ✅ | ✅ (в .env.local) |
@@ -98,10 +85,6 @@
 Створіть файл `.env.local` у корені проекту (він вже в `.gitignore`):
 
 ```env
-NEXT_PUBLIC_SANITY_PROJECT_ID=ваш_project_id
-NEXT_PUBLIC_SANITY_DATASET=production
-SANITY_API_TOKEN=ваш_sanity_token
-
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=ваш_anon_key
 SUPABASE_SERVICE_ROLE_KEY=ваш_service_role_key

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
-import { getAllFaqItems } from '@/lib/sanity/queries'
+import { getAllFaqItems } from '@/lib/supabase/queries'
 import { StructuredData } from '@/components/shared/StructuredData'
-import type { FaqCategory } from '@/types'
+import type { FaqItem } from '@/types'
 
 export const metadata: Metadata = {
   title: 'Часті запитання',
@@ -13,28 +13,30 @@ export const metadata: Metadata = {
   },
 }
 
-const STATIC_FAQ: Array<{ question: string; answer: string; category: FaqCategory; order: number; _id: string; _type: 'faqItem' }> = [
+type FaqCategory = 'products' | 'ordering' | 'delivery' | 'beekeeping'
+
+const STATIC_FAQ: FaqItem[] = [
   // Products
-  { _id: 's1', _type: 'faqItem', category: 'products', order: 1, question: 'Чи є у вашому меді цукор або домішки?', answer: 'Ні. Ми не додаємо нічого зайвого — жодного цукру, підсолоджувачів або ароматизаторів. Тільки натуральний мед, зібраний бджолами з квіток.' },
-  { _id: 's2', _type: 'faqItem', category: 'products', order: 2, question: 'Як правильно зберігати мед?', answer: 'Зберігайте в прохолодному темному місці при температурі 10–20°C. Не тримайте в холодильнику — зайва вологість не корисна для меду. Скляна банка краще за пластик для довготривалого зберігання.' },
-  { _id: 's3', _type: 'faqItem', category: 'products', order: 3, question: 'Чому мед закристалізувався? Це нормально?', answer: 'Так, це абсолютно нормально і є ознакою натурального меду. Кристалізація не погіршує якість. Якщо хочете рідкий мед — злегка підігрійте на водяній бані при температурі не вище 40°C.' },
-  { _id: 's4', _type: 'faqItem', category: 'products', order: 4, question: 'Який мед найкраще підходить для подарунка?', answer: 'Акація — найпопулярніший подарунковий вибір через ніжний смак і повільну кристалізацію. Скляна банка виглядає особливо гарно. Горіхи в меду — ще один чудовий варіант для подарунка.' },
-  { _id: 's5', _type: 'faqItem', category: 'products', order: 5, question: 'Яка різниця між скляною та пластиковою тарою?', answer: 'Скло — кращий вибір для тривалого зберігання і подарунків. Пластик — легший, дешевший у доставці, зручніший для щоденного використання. Мед в обох варіантах ідентичний за якістю.' },
+  { id: 's1', category: 'products', display_order: 1, question: 'Чи є у вашому меді цукор або домішки?', answer: 'Ні. Ми не додаємо нічого зайвого — жодного цукру, підсолоджувачів або ароматизаторів. Тільки натуральний мед, зібраний бджолами з квіток.' },
+  { id: 's2', category: 'products', display_order: 2, question: 'Як правильно зберігати мед?', answer: 'Зберігайте в прохолодному темному місці при температурі 10–20°C. Не тримайте в холодильнику — зайва вологість не корисна для меду. Скляна банка краще за пластик для довготривалого зберігання.' },
+  { id: 's3', category: 'products', display_order: 3, question: 'Чому мед закристалізувався? Це нормально?', answer: 'Так, це абсолютно нормально і є ознакою натурального меду. Кристалізація не погіршує якість. Якщо хочете рідкий мед — злегка підігрійте на водяній бані при температурі не вище 40°C.' },
+  { id: 's4', category: 'products', display_order: 4, question: 'Який мед найкраще підходить для подарунка?', answer: 'Акація — найпопулярніший подарунковий вибір через ніжний смак і повільну кристалізацію. Скляна банка виглядає особливо гарно. Горіхи в меду — ще один чудовий варіант для подарунка.' },
+  { id: 's5', category: 'products', display_order: 5, question: 'Яка різниця між скляною та пластиковою тарою?', answer: 'Скло — кращий вибір для тривалого зберігання і подарунків. Пластик — легший, дешевший у доставці, зручніший для щоденного використання. Мед в обох варіантах ідентичний за якістю.' },
   // Ordering
-  { _id: 's6', _type: 'faqItem', category: 'ordering', order: 1, question: 'Як зробити замовлення?', answer: 'Оберіть продукт на сайті, заповніть форму або зателефонуйте нам напряму. Ми зв\'яжемося з вами протягом кількох годин для підтвердження та узгодження деталей.' },
-  { _id: 's7', _type: 'faqItem', category: 'ordering', order: 2, question: 'Яка мінімальна кількість для замовлення?', answer: 'Мінімальна кількість не встановлена. Можна замовити навіть одну банку. При замовленні від кількох одиниць обговоримо умови індивідуально.' },
-  { _id: 's8', _type: 'faqItem', category: 'ordering', order: 3, question: 'Чи можна замовити оптом?', answer: 'Так, оптові замовлення розглядаємо. Зв\'яжіться з нами для обговорення умов і наявності.' },
-  { _id: 's9', _type: 'faqItem', category: 'ordering', order: 4, question: 'Чи можливий самовивіз?', answer: 'Так, самовивіз можливий у Коротичі, Харківська область. Уточніть зручний час при замовленні.' },
+  { id: 's6', category: 'ordering', display_order: 1, question: 'Як зробити замовлення?', answer: 'Оберіть продукт на сайті, заповніть форму або зателефонуйте нам напряму. Ми зв\'яжемося з вами протягом кількох годин для підтвердження та узгодження деталей.' },
+  { id: 's7', category: 'ordering', display_order: 2, question: 'Яка мінімальна кількість для замовлення?', answer: 'Мінімальна кількість не встановлена. Можна замовити навіть одну банку. При замовленні від кількох одиниць обговоримо умови індивідуально.' },
+  { id: 's8', category: 'ordering', display_order: 3, question: 'Чи можна замовити оптом?', answer: 'Так, оптові замовлення розглядаємо. Зв\'яжіться з нами для обговорення умов і наявності.' },
+  { id: 's9', category: 'ordering', display_order: 4, question: 'Чи можливий самовивіз?', answer: 'Так, самовивіз можливий у Коротичі, Харківська область. Уточніть зручний час при замовленні.' },
   // Delivery
-  { _id: 's10', _type: 'faqItem', category: 'delivery', order: 1, question: 'В які регіони ви відправляєте?', answer: 'По всій Україні — Новою Поштою або Укрпоштою. Відправляємо в усі регіони, де доступна служба доставки.' },
-  { _id: 's11', _type: 'faqItem', category: 'delivery', order: 2, question: 'Скільки коштує доставка?', answer: 'Вартість доставки розраховується за тарифами Нової Пошти або Укрпошти і залежить від ваги та адреси. Уточнюємо при оформленні замовлення.' },
-  { _id: 's12', _type: 'faqItem', category: 'delivery', order: 3, question: 'Чи можете ви відправити за кордон?', answer: 'Відправлення за кордон можливе — уточнюйте при замовленні. Умови залежать від країни та поточних регуляцій.' },
-  { _id: 's13', _type: 'faqItem', category: 'delivery', order: 4, question: 'Як упакований мед для відправлення?', answer: 'Банки упаковуємо в захисну упаковку, яка запобігає пошкодженням. Скляні банки додатково фіксуємо. Ви отримаєте товар у цілості.' },
+  { id: 's10', category: 'delivery', display_order: 1, question: 'В які регіони ви відправляєте?', answer: 'По всій Україні — Новою Поштою або Укрпоштою. Відправляємо в усі регіони, де доступна служба доставки.' },
+  { id: 's11', category: 'delivery', display_order: 2, question: 'Скільки коштує доставка?', answer: 'Вартість доставки розраховується за тарифами Нової Пошти або Укрпошти і залежить від ваги та адреси. Уточнюємо при оформленні замовлення.' },
+  { id: 's12', category: 'delivery', display_order: 3, question: 'Чи можете ви відправити за кордон?', answer: 'Відправлення за кордон можливе — уточнюйте при замовленні. Умови залежать від країни та поточних регуляцій.' },
+  { id: 's13', category: 'delivery', display_order: 4, question: 'Як упакований мед для відправлення?', answer: 'Банки упаковуємо в захисну упаковку, яка запобігає пошкодженням. Скляні банки додатково фіксуємо. Ви отримаєте товар у цілості.' },
   // Beekeeping
-  { _id: 's14', _type: 'faqItem', category: 'beekeeping', order: 1, question: 'Коли доступні бджолопакети?', answer: 'Бджолопакети доступні навесні та влітку — зазвичай з квітня по серпень. Точні терміни залежать від сезону. Радимо залишати заявку завчасно.' },
-  { _id: 's15', _type: 'faqItem', category: 'beekeeping', order: 2, question: 'Які породи бджіл ви продаєте?', answer: 'Продаємо бджолопакети порід Buckfast, Українська степова та Карніка. Кожна порода має свої особливості — підберемо під ваші умови.' },
-  { _id: 's16', _type: 'faqItem', category: 'beekeeping', order: 3, question: 'Як відбувається передача бджолопакетів?', answer: 'Виключно самовивозом або за індивідуальною домовленістю — живих тварин не відправляємо поштою. Передача відбувається особисто, з поясненням особливостей конкретної сім\'ї.' },
-  { _id: 's17', _type: 'faqItem', category: 'beekeeping', order: 4, question: 'Чи можна купити вулик з бджолами?', answer: 'Так, вулики з бджолами продаємо — за індивідуальною домовленістю. Залиште заявку для обговорення деталей.' },
+  { id: 's14', category: 'beekeeping', display_order: 1, question: 'Коли доступні бджолопакети?', answer: 'Бджолопакети доступні навесні та влітку — зазвичай з квітня по серпень. Точні терміни залежать від сезону. Радимо залишати заявку завчасно.' },
+  { id: 's15', category: 'beekeeping', display_order: 2, question: 'Які породи бджіл ви продаєте?', answer: 'Продаємо бджолопакети порід Buckfast, Українська степова та Карніка. Кожна порода має свої особливості — підберемо під ваші умови.' },
+  { id: 's16', category: 'beekeeping', display_order: 3, question: 'Як відбувається передача бджолопакетів?', answer: 'Виключно самовивозом або за індивідуальною домовленістю — живих тварин не відправляємо поштою. Передача відбувається особисто, з поясненням особливостей конкретної сім\'ї.' },
+  { id: 's17', category: 'beekeeping', display_order: 4, question: 'Чи можна купити вулик з бджолами?', answer: 'Так, вулики з бджолами продаємо — за індивідуальною домовленістю. Залиште заявку для обговорення деталей.' },
 ]
 
 const CATEGORY_LABELS: Record<FaqCategory, string> = {
@@ -47,8 +49,8 @@ const CATEGORY_LABELS: Record<FaqCategory, string> = {
 const CATEGORIES: FaqCategory[] = ['products', 'ordering', 'delivery', 'beekeeping']
 
 export default async function FaqPage() {
-  const sanityItems = await getAllFaqItems().catch(() => [])
-  const items = sanityItems.length > 0 ? sanityItems : STATIC_FAQ
+  const supabaseItems = await getAllFaqItems().catch(() => [])
+  const items = supabaseItems.length > 0 ? supabaseItems : STATIC_FAQ
 
   // Build structured data
   const faqSchema = {
@@ -102,7 +104,7 @@ export default async function FaqPage() {
               <div className="space-y-3">
                 {catItems.map((item) => (
                   <details
-                    key={item._id}
+                    key={item.id}
                     className="bg-white rounded-xl border border-honey-100 shadow-sm overflow-hidden group"
                   >
                     <summary className="flex items-center justify-between gap-4 p-5 cursor-pointer font-semibold text-bark hover:text-honey-700 transition-colors min-h-[56px]">
