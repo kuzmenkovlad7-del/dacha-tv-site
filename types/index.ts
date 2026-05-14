@@ -1,6 +1,7 @@
 export interface SiteSettings {
   id: number
   phone: string | null
+  phone_secondary: string | null
   address_full: string | null
   address_display: string | null
   telegram_url: string | null

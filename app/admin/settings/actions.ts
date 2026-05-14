@@ -7,6 +7,7 @@ export async function saveSiteSettings(formData: FormData) {
   await client.from('site_settings').upsert({
     id: 1,
     phone: formData.get('phone') as string || null,
+    phone_secondary: formData.get('phone_secondary') as string || null,
     address_full: formData.get('address_full') as string || null,
     address_display: formData.get('address_display') as string || null,
     telegram_url: formData.get('telegram_url') as string || null,
