@@ -66,6 +66,12 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
 
+        {product.price_uah && (
+          <p className="text-sm font-semibold text-bark mb-3">
+            {product.price_uah} грн
+          </p>
+        )}
+
         <div className="mt-auto">
           <Link
             href={`/products/${product.slug}`}

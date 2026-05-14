@@ -180,6 +180,13 @@ export default async function HoneyProductPage({ params }: Props) {
               {product.name}
             </h1>
 
+            {/* Short description */}
+            {(product.short_description || details?.taste) && (
+              <p className="text-bark/70 text-base leading-relaxed mb-4">
+                {product.short_description || details?.taste}
+              </p>
+            )}
+
             {!product.in_stock && (
               <div className="bg-gray-100 text-gray-700 rounded-lg px-4 py-3 mb-4 text-sm font-medium">
                 Наразі немає в наявності. Залиште заявку — ми повідомимо, коли з&apos;явиться.
@@ -188,7 +195,7 @@ export default async function HoneyProductPage({ params }: Props) {
 
             {/* Packaging */}
             {product.packaging && product.packaging.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-6">
+              <div className="flex flex-wrap gap-2 mb-4">
                 {product.packaging.map((pack) => (
                   <span
                     key={pack}
@@ -200,30 +207,81 @@ export default async function HoneyProductPage({ params }: Props) {
               </div>
             )}
 
+            {/* Price block */}
+            {(product.price_plastic_uah || product.price_glass_uah) && (
+              <div className="flex flex-wrap gap-4 mb-6 py-3 border-t border-b border-honey-100">
+                {product.price_plastic_uah && (
+                  <div>
+                    <span className="text-xs text-bark/50 block mb-0.5">Пластик</span>
+                    <span className="text-xl font-bold text-bark">{product.price_plastic_uah} грн</span>
+                  </div>
+                )}
+                {product.price_glass_uah && (
+                  <div>
+                    <span className="text-xs text-bark/50 block mb-0.5">Скло</span>
+                    <span className="text-xl font-bold text-bark">{product.price_glass_uah} грн</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Details table */}
-            {details && (
-              <dl className="space-y-4 mb-8">
+            <dl className="space-y-3 mb-6">
+              {details?.season && (
                 <div className="grid grid-cols-3 gap-2">
                   <dt className="text-sm font-medium text-bark/60">Сезон</dt>
                   <dd className="col-span-2 text-sm text-bark">{details.season}</dd>
                 </div>
+              )}
+              {(product.aroma_notes) && (
+                <div className="grid grid-cols-3 gap-2">
+                  <dt className="text-sm font-medium text-bark/60">Аромат</dt>
+                  <dd className="col-span-2 text-sm text-bark">{product.aroma_notes}</dd>
+                </div>
+              )}
+              {(product.taste_notes || details?.taste) && (
                 <div className="grid grid-cols-3 gap-2">
                   <dt className="text-sm font-medium text-bark/60">Смак</dt>
-                  <dd className="col-span-2 text-sm text-bark">{details.taste}</dd>
+                  <dd className="col-span-2 text-sm text-bark">{product.taste_notes || details?.taste}</dd>
                 </div>
+              )}
+              {product.color_note && (
+                <div className="grid grid-cols-3 gap-2">
+                  <dt className="text-sm font-medium text-bark/60">Колір</dt>
+                  <dd className="col-span-2 text-sm text-bark">{product.color_note}</dd>
+                </div>
+              )}
+              {(product.crystallization_note || details?.crystallisation) && (
                 <div className="grid grid-cols-3 gap-2">
                   <dt className="text-sm font-medium text-bark/60">Кристалізація</dt>
-                  <dd className="col-span-2 text-sm text-bark">{details.crystallisation}</dd>
+                  <dd className="col-span-2 text-sm text-bark">{product.crystallization_note || details?.crystallisation}</dd>
                 </div>
+              )}
+              {details?.storage && (
                 <div className="grid grid-cols-3 gap-2">
                   <dt className="text-sm font-medium text-bark/60">Зберігання</dt>
                   <dd className="col-span-2 text-sm text-bark">{details.storage}</dd>
                 </div>
+              )}
+              {(product.recommended_use || details?.uses) && (
                 <div className="grid grid-cols-3 gap-2">
-                  <dt className="text-sm font-medium text-bark/60">Для чого</dt>
-                  <dd className="col-span-2 text-sm text-bark">{details.uses}</dd>
+                  <dt className="text-sm font-medium text-bark/60">Рекомендовано</dt>
+                  <dd className="col-span-2 text-sm text-bark">{product.recommended_use || details?.uses}</dd>
                 </div>
-              </dl>
+              )}
+              {product.packaging_note && (
+                <div className="grid grid-cols-3 gap-2">
+                  <dt className="text-sm font-medium text-bark/60">Упаковка</dt>
+                  <dd className="col-span-2 text-sm text-bark">{product.packaging_note}</dd>
+                </div>
+              )}
+            </dl>
+
+            {/* Full description */}
+            {product.full_description && (
+              <div className="prose prose-sm text-bark/80 mb-6 leading-relaxed">
+                <p>{product.full_description}</p>
+              </div>
             )}
 
             {/* YouTube link */}
