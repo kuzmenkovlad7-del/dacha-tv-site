@@ -11,10 +11,11 @@ import {
   LAUNCH_FACEBOOK_URL,
   LAUNCH_INSTAGRAM_URL,
   LAUNCH_TIKTOK_URL,
+  LAUNCH_LOGO_PATH,
 } from '@/lib/launch-defaults'
 import type { SiteSettings } from '@/types'
 
-const LOGO_PATH = '/images/dacha-tv/logo.png'
+const LOGO_PATH = LAUNCH_LOGO_PATH
 
 interface FooterProps {
   siteSettings: SiteSettings | null

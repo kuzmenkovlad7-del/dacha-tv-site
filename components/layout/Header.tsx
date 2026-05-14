@@ -4,14 +4,14 @@ import { existsSync } from 'fs'
 import { join } from 'path'
 import { Navigation } from './Navigation'
 import { PhoneLink } from '@/components/shared/PhoneLink'
-import { LAUNCH_PHONE, LAUNCH_PHONE_SECONDARY } from '@/lib/launch-defaults'
+import { LAUNCH_PHONE, LAUNCH_PHONE_SECONDARY, LAUNCH_LOGO_PATH } from '@/lib/launch-defaults'
 import type { SiteSettings } from '@/types'
 
 interface HeaderProps {
   siteSettings: SiteSettings | null
 }
 
-const LOGO_PATH = '/images/dacha-tv/logo.png'
+const LOGO_PATH = LAUNCH_LOGO_PATH
 
 export function Header({ siteSettings }: HeaderProps) {
   const phone = siteSettings?.phone || LAUNCH_PHONE
