@@ -4,6 +4,11 @@ import { PhoneLink } from '@/components/shared/PhoneLink'
 import { SocialIcons } from '@/components/shared/SocialIcons'
 import { StructuredData } from '@/components/shared/StructuredData'
 import { getSiteSettings } from '@/lib/supabase/queries'
+import {
+  LAUNCH_PHONE,
+  LAUNCH_PHONE_SECONDARY,
+  LAUNCH_ADDRESS,
+} from '@/lib/launch-defaults'
 
 export const metadata: Metadata = {
   title: "Зв'язатись з нами",
@@ -17,15 +22,15 @@ export const metadata: Metadata = {
 
 export default async function ContactPage() {
   const siteSettings = await getSiteSettings().catch(() => null)
-  const phone = siteSettings?.phone || null
-  const phoneSecondary = siteSettings?.phone_secondary || null
-  const address = siteSettings?.address_full || 'Коротич, Пісочинська ОТГ, Харківська область, Україна'
+  const phone = siteSettings?.phone || LAUNCH_PHONE
+  const phoneSecondary = siteSettings?.phone_secondary || LAUNCH_PHONE_SECONDARY
+  const address = siteSettings?.address_full || LAUNCH_ADDRESS
 
   const localBusinessSchema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: 'Дача TV',
-    telephone: phone || undefined,
+    telephone: phone,
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Коротич',
@@ -61,27 +66,25 @@ export default async function ContactPage() {
               Контактна інформація
             </h2>
 
-            {/* Phone(s) */}
-            {phone && (
-              <div className="bg-honey-50 rounded-2xl p-6 border border-honey-200 mb-4">
-                <p className="text-bark/60 text-sm mb-2">Телефон (дзвінки та Viber):</p>
-                <PhoneLink
-                  phone={phone}
-                  showIcon
-                  className="text-2xl font-bold"
-                />
-              </div>
-            )}
-            {phoneSecondary && (
-              <div className="bg-honey-50 rounded-2xl p-6 border border-honey-200 mb-6">
-                <p className="text-bark/60 text-sm mb-2">Додатковий телефон:</p>
-                <PhoneLink
-                  phone={phoneSecondary}
-                  showIcon
-                  className="text-2xl font-bold"
-                />
-              </div>
-            )}
+            {/* Primary phone */}
+            <div className="bg-honey-50 rounded-2xl p-6 border border-honey-200 mb-4">
+              <p className="text-bark/60 text-sm mb-2">Телефон (дзвінки та Viber):</p>
+              <PhoneLink
+                phone={phone}
+                showIcon
+                className="text-2xl font-bold"
+              />
+            </div>
+
+            {/* Secondary phone */}
+            <div className="bg-honey-50 rounded-2xl p-6 border border-honey-200 mb-6">
+              <p className="text-bark/60 text-sm mb-2">Додатковий телефон:</p>
+              <PhoneLink
+                phone={phoneSecondary}
+                showIcon
+                className="text-2xl font-bold"
+              />
+            </div>
 
             {/* Telegram */}
             {siteSettings?.telegram_url && (
@@ -110,7 +113,7 @@ export default async function ContactPage() {
             </div>
 
             {/* Response time */}
-            <div className="bg-forest-50 rounded-xl p-4 border border-forest-200">
+            <div className="bg-forest-50 rounded-xl p-4 border border-forest-200 mb-6">
               <p className="text-forest-800 text-sm font-medium">
                 Відповідаємо протягом кількох годин
               </p>
@@ -120,11 +123,14 @@ export default async function ContactPage() {
             </div>
 
             {/* Social links */}
-            <SocialIcons
-              siteSettings={siteSettings}
-              className="flex items-center gap-2 flex-wrap"
-              iconClassName="w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:text-bark hover:border-bark transition-all"
-            />
+            <div className="mt-2">
+              <p className="text-sm text-bark/60 mb-3">Ми в соціальних мережах:</p>
+              <SocialIcons
+                siteSettings={siteSettings}
+                className="flex items-center gap-2 flex-wrap"
+                iconClassName="w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:text-bark hover:border-bark transition-all"
+              />
+            </div>
           </div>
 
           {/* Contact form */}

@@ -1,0 +1,8 @@
+export const LAUNCH_PHONE = '+380967657772'
+export const LAUNCH_PHONE_SECONDARY = '+380934665801'
+export const LAUNCH_YOUTUBE_URL = 'https://www.youtube.com/@dacha_tv'
+export const LAUNCH_YOUTUBE_VIDEO_ID = 'Qwmi6Igjp4I'
+export const LAUNCH_INSTAGRAM_URL = 'https://instagram.com/dachatv.store'
+export const LAUNCH_FACEBOOK_URL = 'https://facebook.com/kuzmenko.sergej'
+export const LAUNCH_TIKTOK_URL = 'https://tiktok.com/@vladkuzmenkosxy'
+export const LAUNCH_ADDRESS = 'Коротич, Пісочинська ОТГ, Харківська область, Україна'

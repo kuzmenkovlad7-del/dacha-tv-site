@@ -4,6 +4,7 @@ import { existsSync } from 'fs'
 import { join } from 'path'
 import { Navigation } from './Navigation'
 import { PhoneLink } from '@/components/shared/PhoneLink'
+import { LAUNCH_PHONE, LAUNCH_PHONE_SECONDARY } from '@/lib/launch-defaults'
 import type { SiteSettings } from '@/types'
 
 interface HeaderProps {
@@ -13,8 +14,8 @@ interface HeaderProps {
 const LOGO_PATH = '/images/dacha-tv/logo.png'
 
 export function Header({ siteSettings }: HeaderProps) {
-  const phone = siteSettings?.phone || null
-  const phoneSecondary = siteSettings?.phone_secondary || null
+  const phone = siteSettings?.phone || LAUNCH_PHONE
+  const phoneSecondary = siteSettings?.phone_secondary || LAUNCH_PHONE_SECONDARY
   const hasLogo = existsSync(join(process.cwd(), 'public', LOGO_PATH))
 
   return (
@@ -51,15 +52,13 @@ export function Header({ siteSettings }: HeaderProps) {
           />
 
           {/* Phone — desktop only */}
-          {phone && (
-            <div className="hidden md:flex items-center">
-              <PhoneLink
-                phone={phone}
-                showIcon
-                className="text-sm font-semibold text-bark/80 hover:text-honey-700 transition-colors"
-              />
-            </div>
-          )}
+          <div className="hidden md:flex items-center">
+            <PhoneLink
+              phone={phone}
+              showIcon
+              className="text-sm font-semibold text-bark/80 hover:text-honey-700 transition-colors"
+            />
+          </div>
         </div>
       </div>
     </header>
