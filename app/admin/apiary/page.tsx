@@ -74,7 +74,7 @@ export default async function AdminApiaryPage() {
       {/* Add form */}
       <div id="add-form" className="bg-white rounded-2xl border border-honey-100 p-6 max-w-2xl">
         <h2 className="font-serif text-lg font-bold text-bark mb-4">Додати продукт</h2>
-        <form action={createApiaryProduct} encType="multipart/form-data" className="space-y-4">
+        <form action={createApiaryProduct} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-bark mb-1">Назва</label>
@@ -105,8 +105,10 @@ export default async function AdminApiaryPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-bark mb-1">Зображення</label>
-            <input name="image" type="file" accept="image/*" className="w-full text-sm text-bark/70" />
+            <label className="block text-sm font-semibold text-bark mb-1">Зображення (URL або шлях)</label>
+            <input name="image_url" type="text"
+              placeholder="https://... або /images/dacha-tv/products/..."
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" name="in_stock" defaultChecked className="w-4 h-4 accent-honey-600" />

@@ -12,7 +12,7 @@ export default function AdminFlowersNewPage() {
     <div className="px-4 sm:px-6 py-8 max-w-2xl">
       <h1 className="font-serif text-2xl font-bold text-bark mb-6">Нова квітка</h1>
 
-      <form action={createFlowerProduct} encType="multipart/form-data" className="space-y-5 bg-white rounded-2xl p-6 border border-honey-100">
+      <form action={createFlowerProduct} className="space-y-5 bg-white rounded-2xl p-6 border border-honey-100">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-bark mb-1">Назва</label>
@@ -112,13 +112,10 @@ export default function AdminFlowersNewPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Зображення</label>
-          <input name="image" type="file" accept="image/*"
-            className="w-full text-sm text-bark/70 mb-2" />
-          <p className="text-xs text-bark/40 mb-1">Або вкажіть шлях до файлу з папки public:</p>
-          <input name="image_path" type="text"
-            placeholder="/images/dacha-tv/flowers/назва-файлу.jpg"
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          <label className="block text-sm font-semibold text-bark mb-1">Зображення (URL або шлях)</label>
+          <input name="image_url" type="text"
+            placeholder="https://... або /images/dacha-tv/flowers/..."
+            className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
         </div>
 
         <div>

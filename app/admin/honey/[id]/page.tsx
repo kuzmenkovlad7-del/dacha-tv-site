@@ -30,7 +30,7 @@ export default async function AdminHoneyEditPage({ params }: Props) {
     <div className="px-4 sm:px-6 py-8 max-w-2xl">
       <h1 className="font-serif text-2xl font-bold text-bark mb-6">Редагувати: {product.name}</h1>
 
-      <form action={updateWithId} encType="multipart/form-data" className="space-y-5 bg-white rounded-2xl p-6 border border-honey-100">
+      <form action={updateWithId} className="space-y-5 bg-white rounded-2xl p-6 border border-honey-100">
         <div>
           <label htmlFor="name" className="block text-sm font-semibold text-bark mb-1">Назва</label>
           <input id="name" name="name" type="text" required defaultValue={product.name}
@@ -145,19 +145,10 @@ export default async function AdminHoneyEditPage({ params }: Props) {
         </div>
 
         <div>
-          <label htmlFor="image_url" className="block text-sm font-semibold text-bark mb-1">URL зображення (прямий шлях)</label>
-          <input id="image_url" name="image_url_manual" type="text" defaultValue={product.image_url ?? ''}
-            placeholder="/images/dacha-tv/honey/назва.jpg"
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400 mb-2" />
-        </div>
-
-        <div>
-          <label htmlFor="image" className="block text-sm font-semibold text-bark mb-1">Або завантажити нове зображення</label>
-          {product.image_url && (
-            <p className="text-xs text-gray-500 mb-1">Поточне: <a href={product.image_url} target="_blank" rel="noopener" className="underline">{product.image_url}</a></p>
-          )}
-          <input id="image" name="image" type="file" accept="image/*"
-            className="w-full text-sm text-bark/70" />
+          <label htmlFor="image_url" className="block text-sm font-semibold text-bark mb-1">Зображення (URL або шлях)</label>
+          <input id="image_url" name="image_url" type="text" defaultValue={product.image_url ?? ''}
+            placeholder="https://... або /images/dacha-tv/honey/..."
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
         </div>
 
         <div>
