@@ -4,6 +4,7 @@ const TYPE_LABELS: Record<string, string> = {
   honey_order: 'Замовлення меду',
   beekeeper_inquiry: 'Заявка пасічника',
   general: 'Загальна заявка',
+  flower_inquiry: '🌸 Замовлення квітів',
 }
 
 function formatTelegramMessage(inquiry: InquiryData): string {
@@ -39,28 +40,47 @@ function formatTelegramMessage(inquiry: InquiryData): string {
 
 export async function sendTelegramNotification(inquiry: InquiryData): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN
-  const chatId = process.env.TELEGRAM_CHAT_ID
+  if (!token) return
 
-  if (!token || !chatId) {
-    return
-  }
+  // Flower inquiries can be routed to a separate chat if configured
+  const isFlower = inquiry.type === 'flower_inquiry'
+  const chatId = isFlower
+    ? (process.env.TELEGRAM_CHAT_ID_FLOWERS || process.env.TELEGRAM_CHAT_ID)
+    : process.env.TELEGRAM_CHAT_ID
+
+  if (!chatId) return
 
   const text = formatTelegramMessage(inquiry)
 
-  try {
-    await fetch(
-      `https://api.telegram.org/bot${token}/sendMessage`,
-      {
+  const tasks: Promise<void>[] = []
+
+  tasks.push(
+    fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
+    }).then(() => {}).catch(() => {})
+  )
+
+  // Optional n8n / webhook forwarding — set WEBHOOK_URL env var to enable
+  const webhookUrl = process.env.WEBHOOK_URL
+  if (webhookUrl) {
+    tasks.push(
+      fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          chat_id: chatId,
-          text,
-          parse_mode: 'HTML',
+          type: inquiry.type,
+          name: inquiry.name,
+          phone: inquiry.phone,
+          product: inquiry.product ?? null,
+          message: inquiry.message ?? null,
+          source: inquiry.source ?? null,
+          timestamp: new Date().toISOString(),
         }),
-      }
+      }).then(() => {}).catch(() => {})
     )
-  } catch {
-    // Non-blocking — do not propagate
   }
+
+  await Promise.allSettled(tasks)
 }

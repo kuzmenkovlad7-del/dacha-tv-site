@@ -6,6 +6,7 @@ export interface SiteSettings {
   address_display: string | null
   telegram_url: string | null
   youtube_url: string | null
+  featured_youtube_video_url: string | null
   instagram_url: string | null
   facebook_url: string | null
   tiktok_url: string | null
@@ -61,6 +62,7 @@ export interface ApiaryProduct {
   display_order: number
   image_url: string | null
   image_alt: string | null
+  youtube_video_url: string | null
   created_at?: string
   updated_at?: string
 }
@@ -110,9 +112,33 @@ export interface Inquiry {
   created_at: string
 }
 
+export interface FlowerProduct {
+  id: string
+  name: string
+  slug: string
+  category: string
+  variety: string | null
+  short_description: string | null
+  full_description: string | null
+  price_uah: number | null
+  color: string | null
+  bloom_season: string | null
+  height_cm: number | null
+  lighting: string | null
+  packaging_note: string | null
+  display_order: number
+  is_featured: boolean
+  in_stock: boolean
+  image_url: string | null
+  image_alt: string | null
+  youtube_video_url: string | null
+  created_at?: string
+  updated_at?: string
+}
+
 // Legacy type aliases kept for backward compatibility with admin components and inquiry actions
 export type InquiryStatus = 'new' | 'contacted' | 'completed' | 'cancelled'
-export type InquiryType = 'honey_order' | 'beekeeper_inquiry' | 'general'
+export type InquiryType = 'honey_order' | 'beekeeper_inquiry' | 'general' | 'flower_inquiry'
 
 export interface InquiryData {
   type: InquiryType

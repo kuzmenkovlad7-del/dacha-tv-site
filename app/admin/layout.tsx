@@ -5,6 +5,7 @@ const NAV_LINKS = [
   { href: '/admin/settings', label: 'Налаштування' },
   { href: '/admin/honey', label: 'Мед' },
   { href: '/admin/apiary', label: 'Продукти пасіки' },
+  { href: '/admin/flowers', label: 'Квіти' },
   { href: '/admin/beekeeper', label: 'Для пасічників' },
   { href: '/admin/reviews', label: 'Відгуки' },
   { href: '/admin/faq', label: 'FAQ' },

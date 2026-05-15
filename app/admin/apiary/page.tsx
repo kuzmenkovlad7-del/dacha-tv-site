@@ -2,8 +2,7 @@ export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAllApiaryProducts } from '@/lib/supabase/queries'
-import { getAdminClient } from '@/lib/supabase/admin'
-import { createApiaryProduct, updateApiaryProduct, deleteApiaryProduct } from './actions'
+import { createApiaryProduct } from './actions'
 
 export const metadata: Metadata = {
   title: 'Адмін — Продукти пасіки',
@@ -15,7 +14,10 @@ export default async function AdminApiaryPage() {
 
   return (
     <div className="px-4 sm:px-6 py-8">
-      <h1 className="font-serif text-2xl font-bold text-bark mb-6">Продукти пасіки</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-serif text-2xl font-bold text-bark">Продукти пасіки</h1>
+        <a href="#add-form" className="bg-bark text-white font-semibold px-4 py-2 rounded-lg text-sm min-h-[40px] flex items-center hover:bg-bark-light transition-colors">+ Додати</a>
+      </div>
 
       {/* Products list */}
       {products.length === 0 ? (
@@ -40,13 +42,12 @@ export default async function AdminApiaryPage() {
                     <span className={`inline-block w-2 h-2 rounded-full ${product.in_stock ? 'bg-green-500' : 'bg-gray-300'}`} />
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <form action={deleteApiaryProduct.bind(null, product.id)} className="inline">
-                      <button type="submit"
-                        className="text-red-600 hover:text-red-800 text-xs font-medium transition-colors"
-                        onClick={(e) => { if (!confirm('Видалити?')) e.preventDefault() }}>
-                        Видалити
-                      </button>
-                    </form>
+                    <Link
+                      href={`/admin/apiary/${product.id}`}
+                      className="text-honey-700 hover:text-honey-900 font-medium transition-colors"
+                    >
+                      Редагувати
+                    </Link>
                   </td>
                 </tr>
               ))}
@@ -56,7 +57,7 @@ export default async function AdminApiaryPage() {
       )}
 
       {/* Add form */}
-      <div className="bg-white rounded-2xl border border-honey-100 p-6 max-w-2xl">
+      <div id="add-form" className="bg-white rounded-2xl border border-honey-100 p-6 max-w-2xl">
         <h2 className="font-serif text-lg font-bold text-bark mb-4">Додати продукт</h2>
         <form action={createApiaryProduct} encType="multipart/form-data" className="space-y-4">
           <div className="grid grid-cols-2 gap-4">

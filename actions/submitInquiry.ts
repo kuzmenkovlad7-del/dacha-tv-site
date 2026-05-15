@@ -221,6 +221,71 @@ export async function submitGeneralContact(formData: FormData): Promise<ActionRe
   return { success: true }
 }
 
+const flowerInquirySchema = z.object({
+  name: z.string().min(2, "Ім'я має містити щонайменше 2 символи"),
+  phone: z
+    .string()
+    .regex(ukrainianPhone, 'Введіть коректний номер телефону (+380XXXXXXXXX або 0XXXXXXXXX)'),
+  product: z.string().optional(),
+  message: z.string().max(500, 'Повідомлення не може перевищувати 500 символів').optional(),
+  source: z.string().optional(),
+  _honeypot: z.string().max(0, 'Відмовлено'),
+})
+
+export async function submitFlowerInquiry(formData: FormData): Promise<ActionResult> {
+  const raw = {
+    name: formData.get('name'),
+    phone: formData.get('phone'),
+    product: formData.get('product'),
+    message: formData.get('message'),
+    source: formData.get('source'),
+    _honeypot: formData.get('_honeypot') ?? '',
+  }
+
+  const parsed = flowerInquirySchema.safeParse(raw)
+
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const [key, errors] of Object.entries(parsed.error.flatten().fieldErrors)) {
+      fieldErrors[key] = errors ?? []
+    }
+    return { success: false, error: 'Перевірте правильність введених даних', fieldErrors }
+  }
+
+  const data = parsed.data
+  const inquiryData: InquiryData = {
+    type: 'flower_inquiry',
+    name: data.name,
+    phone: data.phone,
+    product: data.product,
+    message: data.message,
+    source: data.source,
+  }
+
+  try {
+    const supabase = getSupabaseClient()
+    const { error } = await supabase.from('inquiries').insert({
+      type: inquiryData.type,
+      name: inquiryData.name,
+      phone: inquiryData.phone,
+      product: inquiryData.product ?? null,
+      message: inquiryData.message ?? null,
+      source: inquiryData.source ?? null,
+    })
+
+    if (error) {
+      return { success: false, error: 'Не вдалося зберегти заявку. Спробуйте ще раз або зв\'яжіться з нами.' }
+    }
+  } catch {
+    return { success: false, error: 'Не вдалося зберегти заявку. Спробуйте ще раз або зв\'яжіться з нами.' }
+  }
+
+  sendTelegramNotification(inquiryData).catch(() => {})
+  sendEmailNotification(inquiryData).catch(() => {})
+
+  return { success: true }
+}
+
 export async function updateInquiryStatus(
   id: string,
   status: 'new' | 'contacted' | 'completed' | 'cancelled'

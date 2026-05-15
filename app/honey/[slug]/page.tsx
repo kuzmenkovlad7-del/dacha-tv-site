@@ -7,6 +7,7 @@ import { join } from 'path'
 import { HoneyOrderForm } from '@/components/forms/HoneyOrderForm'
 import { HoneyCard } from '@/components/honey/HoneyCard'
 import { StructuredData } from '@/components/shared/StructuredData'
+import { YouTubeFacade } from '@/components/shared/YouTubeFacade'
 import { STATIC_HONEY, STATIC_HONEY_BY_SLUG, STATIC_HONEY_SLUGS } from '@/lib/static-catalog'
 import {
   getHoneyProductBySlug,
@@ -104,6 +105,12 @@ function resolveLocalImage(imageUrl: string | null): string | null {
   return existsSync(join(process.cwd(), 'public', imageUrl)) ? imageUrl : null
 }
 
+function extractYouTubeId(url: string | null): string | null {
+  if (!url) return null
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+
 export default async function HoneyProductPage({ params }: Props) {
   const { slug } = await params
 
@@ -119,6 +126,7 @@ export default async function HoneyProductPage({ params }: Props) {
   const allProducts = allDbProducts.length > 0 ? allDbProducts : STATIC_HONEY
   const details = VARIETY_DETAILS[product.variety]
   const heroImage = resolveLocalImage(product.image_url)
+  const youtubeId = extractYouTubeId(product.youtube_video_link)
 
   const related = allProducts
     .filter((p) => p.id !== product.id && p.in_stock)
@@ -292,18 +300,16 @@ export default async function HoneyProductPage({ params }: Props) {
               </div>
             )}
 
-            {product.youtube_video_link && (
-              <a
-                href={product.youtube_video_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700 mb-6"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                </svg>
-                Дивіться як ми збираємо {product.variety.toLowerCase()} мед →
-              </a>
+            {youtubeId && (
+              <div className="mb-6">
+                <p className="text-xs font-semibold text-bark/50 uppercase tracking-widest mb-2">
+                  Відео про цей мед
+                </p>
+                <YouTubeFacade
+                  videoId={youtubeId}
+                  title={`Дивіться як ми збираємо ${product.variety.toLowerCase()} мед`}
+                />
+              </div>
             )}
 
             {/* Order form */}

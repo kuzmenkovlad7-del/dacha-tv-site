@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import type { SiteSettings, HoneyProduct, ApiaryProduct, BeekeeperProduct, Review, FaqItem } from '@/types'
+import type { SiteSettings, HoneyProduct, ApiaryProduct, BeekeeperProduct, Review, FaqItem, FlowerProduct } from '@/types'
 
 function getClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -105,4 +105,28 @@ export async function getAllFaqItems(): Promise<FaqItem[]> {
     .order('category', { ascending: true })
     .order('display_order', { ascending: true })
   return data ?? []
+}
+
+export async function getAllFlowerProducts(): Promise<FlowerProduct[]> {
+  const client = getClient()
+  if (!client) return []
+  const { data } = await client
+    .from('flower_products')
+    .select('*')
+    .order('display_order', { ascending: true })
+  return data ?? []
+}
+
+export async function getFlowerProductBySlug(slug: string): Promise<FlowerProduct | null> {
+  const client = getClient()
+  if (!client) return null
+  const { data } = await client.from('flower_products').select('*').eq('slug', slug).single()
+  return data ?? null
+}
+
+export async function getAllFlowerSlugs(): Promise<string[]> {
+  const client = getClient()
+  if (!client) return []
+  const { data } = await client.from('flower_products').select('slug')
+  return (data ?? []).map((r: { slug: string }) => r.slug)
 }

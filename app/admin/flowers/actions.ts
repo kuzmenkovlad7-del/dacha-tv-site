@@ -7,7 +7,7 @@ async function uploadImage(file: File, slug: string): Promise<string | null> {
   if (!file || file.size === 0) return null
   const client = getAdminClient()
   const ext = file.name.split('.').pop() || 'jpg'
-  const path = `apiary/${slug}/${Date.now()}.${ext}`
+  const path = `flowers/${slug}/${Date.now()}.${ext}`
   const buffer = Buffer.from(await file.arrayBuffer())
   const { error } = await client.storage
     .from('site-media')
@@ -17,7 +17,7 @@ async function uploadImage(file: File, slug: string): Promise<string | null> {
   return data.publicUrl
 }
 
-export async function createApiaryProduct(formData: FormData) {
+export async function createFlowerProduct(formData: FormData) {
   const client = getAdminClient()
   const slug = (formData.get('slug') as string).trim()
   const imageFile = formData.get('image') as File | null
@@ -26,34 +26,33 @@ export async function createApiaryProduct(formData: FormData) {
   if (imageFile && imageFile.size > 0) {
     image_url = await uploadImage(imageFile, slug)
   }
-  const packagingRaw = formData.get('packaging') as string
-  const packaging = packagingRaw ? packagingRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
 
-  await client.from('apiary_products').insert({
+  await client.from('flower_products').insert({
     name: formData.get('name') as string,
     slug,
-    description: formData.get('description') as string || null,
+    category: formData.get('category') as string || 'chrysanthemum',
+    variety: formData.get('variety') as string || null,
     short_description: formData.get('short_description') as string || null,
     full_description: formData.get('full_description') as string || null,
-    composition: formData.get('composition') as string || null,
-    usage_notes: formData.get('usage_notes') as string || null,
-    storage_info: formData.get('storage_info') as string || null,
-    packaging,
     price_uah: formData.get('price_uah') ? parseFloat(formData.get('price_uah') as string) : null,
-    weight_g: formData.get('weight_g') ? parseInt(formData.get('weight_g') as string) : null,
+    color: formData.get('color') as string || null,
+    bloom_season: formData.get('bloom_season') as string || null,
+    height_cm: formData.get('height_cm') ? parseInt(formData.get('height_cm') as string) : null,
+    lighting: formData.get('lighting') as string || null,
+    packaging_note: formData.get('packaging_note') as string || null,
     display_order: parseInt(formData.get('display_order') as string) || 10,
-    in_stock: formData.get('in_stock') === 'on',
     is_featured: formData.get('is_featured') === 'on',
+    in_stock: formData.get('in_stock') === 'on',
     youtube_video_url: formData.get('youtube_video_url') as string || null,
     image_url,
     image_alt: formData.get('image_alt') as string || null,
   })
 
-  revalidatePath('/products', 'layout')
-  redirect('/admin/apiary')
+  revalidatePath('/flowers', 'layout')
+  redirect('/admin/flowers')
 }
 
-export async function updateApiaryProduct(id: string, formData: FormData) {
+export async function updateFlowerProduct(id: string, formData: FormData) {
   const client = getAdminClient()
   const slug = (formData.get('slug') as string).trim()
   const imageFile = formData.get('image') as File | null
@@ -65,39 +64,38 @@ export async function updateApiaryProduct(id: string, formData: FormData) {
   } else if (imagePath) {
     image_url = imagePath
   }
-  const packagingRaw = formData.get('packaging') as string
-  const packaging = packagingRaw ? packagingRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
 
   const updates: Record<string, unknown> = {
     name: formData.get('name') as string,
     slug,
-    description: formData.get('description') as string || null,
+    category: formData.get('category') as string || 'chrysanthemum',
+    variety: formData.get('variety') as string || null,
     short_description: formData.get('short_description') as string || null,
     full_description: formData.get('full_description') as string || null,
-    composition: formData.get('composition') as string || null,
-    usage_notes: formData.get('usage_notes') as string || null,
-    storage_info: formData.get('storage_info') as string || null,
-    packaging,
     price_uah: formData.get('price_uah') ? parseFloat(formData.get('price_uah') as string) : null,
-    weight_g: formData.get('weight_g') ? parseInt(formData.get('weight_g') as string) : null,
+    color: formData.get('color') as string || null,
+    bloom_season: formData.get('bloom_season') as string || null,
+    height_cm: formData.get('height_cm') ? parseInt(formData.get('height_cm') as string) : null,
+    lighting: formData.get('lighting') as string || null,
+    packaging_note: formData.get('packaging_note') as string || null,
     display_order: parseInt(formData.get('display_order') as string) || 10,
-    in_stock: formData.get('in_stock') === 'on',
     is_featured: formData.get('is_featured') === 'on',
+    in_stock: formData.get('in_stock') === 'on',
     youtube_video_url: formData.get('youtube_video_url') as string || null,
     image_alt: formData.get('image_alt') as string || null,
     updated_at: new Date().toISOString(),
   }
   if (image_url !== undefined) updates.image_url = image_url
 
-  await client.from('apiary_products').update(updates).eq('id', id)
+  await client.from('flower_products').update(updates).eq('id', id)
 
-  revalidatePath('/products', 'layout')
-  redirect('/admin/apiary')
+  revalidatePath('/flowers', 'layout')
+  redirect('/admin/flowers')
 }
 
-export async function deleteApiaryProduct(id: string) {
+export async function deleteFlowerProduct(id: string) {
   const client = getAdminClient()
-  await client.from('apiary_products').delete().eq('id', id)
-  revalidatePath('/products', 'layout')
-  redirect('/admin/apiary')
+  await client.from('flower_products').delete().eq('id', id)
+  revalidatePath('/flowers', 'layout')
+  redirect('/admin/flowers')
 }

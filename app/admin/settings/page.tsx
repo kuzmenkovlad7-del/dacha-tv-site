@@ -78,7 +78,7 @@ export default async function AdminSettingsPage() {
           </div>
 
           <div>
-            <label htmlFor="youtube_url" className="block text-sm font-semibold text-bark mb-1">YouTube URL</label>
+            <label htmlFor="youtube_url" className="block text-sm font-semibold text-bark mb-1">YouTube канал URL</label>
             <input
               id="youtube_url"
               name="youtube_url"
@@ -86,6 +86,21 @@ export default async function AdminSettingsPage() {
               defaultValue={settings?.youtube_url ?? ''}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400"
               placeholder="https://youtube.com/@..."
+            />
+          </div>
+
+          <div>
+            <label htmlFor="featured_youtube_video_url" className="block text-sm font-semibold text-bark mb-1">
+              YouTube відео на головній{' '}
+              <span className="font-normal text-gray-400">— конкретне посилання на відео</span>
+            </label>
+            <input
+              id="featured_youtube_video_url"
+              name="featured_youtube_video_url"
+              type="url"
+              defaultValue={settings?.featured_youtube_video_url ?? ''}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400"
+              placeholder="https://youtube.com/watch?v=..."
             />
           </div>
 
