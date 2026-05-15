@@ -4,7 +4,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { GeneralContactForm } from '@/components/forms/GeneralContactForm'
 import { StructuredData } from '@/components/shared/StructuredData'
+import { YouTubeFacade } from '@/components/shared/YouTubeFacade'
 import { getApiaryProductBySlug, getAllApiaryProductSlugs } from '@/lib/supabase/queries'
+
+function extractYouTubeId(url: string | null): string | null {
+  if (!url) return null
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/)
+  return m ? m[1] : null
+}
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -50,6 +57,7 @@ export default async function ApiaryProductPage({ params }: Props) {
     ...(product.image_url ? [{ src: product.image_url, alt: product.image_alt || product.name }] : []),
     ...(product.gallery_images || []).map((src) => ({ src, alt: product.name })),
   ]
+  const youtubeId = extractYouTubeId(product.youtube_video_url)
 
   const productSchema = {
     '@context': 'https://schema.org',
@@ -207,6 +215,16 @@ export default async function ApiaryProductPage({ params }: Props) {
               <div className="mb-8">
                 <h2 className="font-semibold text-bark text-sm uppercase tracking-wide mb-1.5">Зберігання</h2>
                 <p className="text-bark/70 text-sm leading-relaxed">{product.storage_info}</p>
+              </div>
+            )}
+
+            {/* YouTube video */}
+            {youtubeId && (
+              <div className="mb-6">
+                <p className="text-xs font-semibold text-bark/50 uppercase tracking-widest mb-2">
+                  Відео про цей продукт
+                </p>
+                <YouTubeFacade videoId={youtubeId} title={`Відео про ${product.name}`} />
               </div>
             )}
 

@@ -12,6 +12,7 @@ export async function saveSiteSettings(formData: FormData) {
     address_display: formData.get('address_display') as string || null,
     telegram_url: formData.get('telegram_url') as string || null,
     youtube_url: formData.get('youtube_url') as string || null,
+    featured_youtube_video_url: formData.get('featured_youtube_video_url') as string || null,
     instagram_url: formData.get('instagram_url') as string || null,
     facebook_url: formData.get('facebook_url') as string || null,
     tiktok_url: formData.get('tiktok_url') as string || null,

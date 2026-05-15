@@ -27,6 +27,7 @@ const STATIC_PRODUCTS: ApiaryProduct[] = [
     display_order: 1,
     image_url: '/images/dacha-tv/products/swarm-lure-01.jpg',
     image_alt: 'Приманка для роїв Dacha TV',
+    youtube_video_url: null,
   },
   {
     id: 'static-pollen',
@@ -48,6 +49,7 @@ const STATIC_PRODUCTS: ApiaryProduct[] = [
     display_order: 2,
     image_url: null,
     image_alt: null,
+    youtube_video_url: null,
   },
   {
     id: 'static-propolis',
@@ -69,6 +71,7 @@ const STATIC_PRODUCTS: ApiaryProduct[] = [
     display_order: 3,
     image_url: null,
     image_alt: null,
+    youtube_video_url: null,
   },
   {
     id: 'static-nuts',
@@ -90,6 +93,7 @@ const STATIC_PRODUCTS: ApiaryProduct[] = [
     display_order: 4,
     image_url: null,
     image_alt: null,
+    youtube_video_url: null,
   },
 ]
 
