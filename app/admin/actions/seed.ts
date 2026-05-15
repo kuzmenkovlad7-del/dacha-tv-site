@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { STATIC_HONEY } from '@/lib/static-catalog'
 import { STATIC_FLOWERS } from '@/lib/flowers-static'
@@ -96,77 +97,55 @@ const LAUNCH_SITE_SETTINGS = {
   hero_subtext: 'Натуральний мед із сімейної пасіки на Харківщині. Збираємо, фасуємо та відправляємо особисто.',
 }
 
-export async function seedLaunchDataAction(): Promise<void> {
-  await seedLaunchData()
+// Full idempotent upsert of all catalog data — safe to run multiple times
+export async function syncCatalogAction(): Promise<void> {
+  await syncCatalog()
+  revalidatePath('/admin/honey')
+  revalidatePath('/admin/apiary')
+  revalidatePath('/admin/flowers')
+  revalidatePath('/admin/beekeeper')
 }
 
-export async function seedLaunchData(): Promise<{ ok: boolean; message: string }> {
+export async function syncCatalog(): Promise<{ ok: boolean; message: string }> {
   try {
     const client = getAdminClient()
     const results: string[] = []
 
-    // Seed honey products
-    const { count: honeyCount } = await client
+    // Honey — upsert by slug
+    const honeyRows = STATIC_HONEY.map(({ id: _id, created_at: _ca, updated_at: _ua, ...rest }) => rest)
+    const { error: he } = await client
       .from('honey_products')
-      .select('id', { count: 'exact', head: true })
-    if ((honeyCount ?? 0) === 0) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const honeyRows = STATIC_HONEY.map(({ id: _id, created_at: _ca, updated_at: _ua, ...rest }) => rest)
-      const { error } = await client.from('honey_products').insert(honeyRows)
-      if (error) results.push(`Мед: помилка — ${error.message}`)
-      else results.push(`Мед: додано ${honeyRows.length} записів`)
-    } else {
-      results.push(`Мед: вже є ${honeyCount} записів`)
-    }
+      .upsert(honeyRows, { onConflict: 'slug', ignoreDuplicates: true })
+    results.push(he ? `Мед: помилка — ${he.message}` : `Мед: синхронізовано ${honeyRows.length} записів`)
 
-    // Seed apiary products
-    const { count: apiaryCount } = await client
+    // Apiary — upsert by slug
+    const { error: ae } = await client
       .from('apiary_products')
-      .select('id', { count: 'exact', head: true })
-    if ((apiaryCount ?? 0) === 0) {
-      const { error } = await client.from('apiary_products').insert(STATIC_APIARY)
-      if (error) results.push(`Продукти пасіки: помилка — ${error.message}`)
-      else results.push(`Продукти пасіки: додано ${STATIC_APIARY.length} записів`)
-    } else {
-      results.push(`Продукти пасіки: вже є ${apiaryCount} записів`)
-    }
+      .upsert(STATIC_APIARY, { onConflict: 'slug', ignoreDuplicates: true })
+    results.push(ae ? `Продукти пасіки: помилка — ${ae.message}` : `Продукти пасіки: синхронізовано ${STATIC_APIARY.length} записів`)
 
-    // Seed flower products
-    const { count: flowerCount } = await client
+    // Flowers — upsert by slug (50 entries)
+    const flowerRows = STATIC_FLOWERS.map(({ id: _id, created_at: _ca, updated_at: _ua, ...rest }) => rest)
+    const { error: fe } = await client
       .from('flower_products')
-      .select('id', { count: 'exact', head: true })
-    if ((flowerCount ?? 0) === 0) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const flowerRows = STATIC_FLOWERS.map(({ id: _id, created_at: _ca, updated_at: _ua, ...rest }) => rest)
-      const { error } = await client.from('flower_products').insert(flowerRows)
-      if (error) results.push(`Квіти: помилка — ${error.message}`)
-      else results.push(`Квіти: додано ${flowerRows.length} записів`)
-    } else {
-      results.push(`Квіти: вже є ${flowerCount} записів`)
-    }
+      .upsert(flowerRows, { onConflict: 'slug', ignoreDuplicates: true })
+    results.push(fe ? `Квіти: помилка — ${fe.message}` : `Квіти: синхронізовано ${flowerRows.length} записів`)
 
-    // Seed FAQ
+    // Site settings — upsert by id
+    const { error: se } = await client
+      .from('site_settings')
+      .upsert(LAUNCH_SITE_SETTINGS, { onConflict: 'id', ignoreDuplicates: true })
+    results.push(se ? `Налаштування: помилка — ${se.message}` : 'Налаштування: синхронізовано')
+
+    // FAQ — only if empty
     const { count: faqCount } = await client
       .from('faq_items')
       .select('id', { count: 'exact', head: true })
     if ((faqCount ?? 0) === 0) {
-      const { error } = await client.from('faq_items').insert(STATIC_FAQ)
-      if (error) results.push(`FAQ: помилка — ${error.message}`)
-      else results.push(`FAQ: додано ${STATIC_FAQ.length} записів`)
+      const { error: faqe } = await client.from('faq_items').insert(STATIC_FAQ)
+      results.push(faqe ? `FAQ: помилка — ${faqe.message}` : `FAQ: додано ${STATIC_FAQ.length} записів`)
     } else {
       results.push(`FAQ: вже є ${faqCount} записів`)
-    }
-
-    // Seed site settings
-    const { count: settingsCount } = await client
-      .from('site_settings')
-      .select('id', { count: 'exact', head: true })
-    if ((settingsCount ?? 0) === 0) {
-      const { error } = await client.from('site_settings').insert(LAUNCH_SITE_SETTINGS)
-      if (error) results.push(`Налаштування: помилка — ${error.message}`)
-      else results.push('Налаштування: встановлено стартові значення')
-    } else {
-      results.push('Налаштування: вже налаштовано')
     }
 
     return { ok: true, message: results.join('; ') }
@@ -174,4 +153,13 @@ export async function seedLaunchData(): Promise<{ ok: boolean; message: string }
     const msg = e instanceof Error ? e.message : String(e)
     return { ok: false, message: msg }
   }
+}
+
+// Legacy alias used by existing pages
+export async function seedLaunchDataAction(): Promise<void> {
+  await syncCatalogAction()
+}
+
+export async function seedLaunchData(): Promise<{ ok: boolean; message: string }> {
+  return syncCatalog()
 }

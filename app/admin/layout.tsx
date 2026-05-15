@@ -14,38 +14,43 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-cream min-h-screen overflow-x-hidden">
-      {/* Admin top bar */}
-      <div className="bg-bark text-cream px-4 py-3 flex items-center justify-between">
-        <span className="font-serif font-bold text-base">Дача TV — Адмін</span>
+    <div className="min-h-screen bg-gray-50">
+      {/* Top bar */}
+      <div className="bg-gray-900 text-white px-4 sm:px-6 h-12 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="font-serif font-bold text-sm text-white">Дача TV</span>
+          <span className="text-gray-500 text-xs">Адміністрування</span>
+        </div>
         <a
           href="/api/admin/logout"
-          className="text-sm text-cream/60 hover:text-cream transition-colors min-h-[44px] flex items-center"
+          className="text-xs text-gray-400 hover:text-white transition-colors h-8 px-3 flex items-center rounded-md hover:bg-gray-800"
         >
           Вийти
         </a>
       </div>
 
-      {/* Admin nav — horizontally scrollable on mobile */}
-      <nav
-        className="bg-white border-b border-gray-200 overflow-x-auto"
-        aria-label="Адмін навігація"
-        style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}
-      >
-        <div className="flex gap-0.5 px-2 min-w-max">
-          {NAV_LINKS.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className="px-3 py-3.5 text-sm font-medium text-bark/70 hover:text-bark hover:bg-honey-50 whitespace-nowrap transition-colors border-b-2 border-transparent hover:border-honey-600 min-h-[48px] flex items-center"
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
-      </nav>
+      {/* Nav */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <nav
+          className="overflow-x-auto"
+          aria-label="Адмін навігація"
+          style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}
+        >
+          <div className="flex px-4 sm:px-6 min-w-max">
+            {NAV_LINKS.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="px-4 py-3.5 text-sm font-medium text-gray-500 hover:text-gray-900 whitespace-nowrap transition-colors border-b-2 border-transparent hover:border-gray-400 min-h-[48px] flex items-center"
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      </div>
 
-      <div className="max-w-4xl mx-auto w-full">
+      <div className="max-w-5xl mx-auto w-full">
         {children}
       </div>
     </div>
