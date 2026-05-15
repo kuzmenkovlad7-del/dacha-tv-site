@@ -38,7 +38,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const siteSettings = await getSiteSettings().catch(() => null)
 
   return (
-    <html lang="uk" className={`${inter.variable} ${lora.variable} h-full antialiased`}>
+    <html lang="uk" className={`${inter.variable} ${lora.variable} h-full antialiased overflow-x-hidden`}>
       <head>
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
           <>
@@ -54,7 +54,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </>
         )}
       </head>
-      <body className="min-h-full flex flex-col bg-cream text-bark">
+      <body className="min-h-full flex flex-col bg-cream text-bark overflow-x-hidden">
         <Header siteSettings={siteSettings} />
         <main className="flex-1">{children}</main>
         <Footer siteSettings={siteSettings} />
