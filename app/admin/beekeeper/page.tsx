@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getAllBeekeeperProducts } from '@/lib/supabase/queries'
+import { getAdminClient } from '@/lib/supabase/admin'
 import { deleteBeekeeperProduct, createBeekeeperProduct } from './actions'
 import { seedLaunchDataAction } from '@/app/admin/actions/seed'
 
@@ -17,8 +17,20 @@ const PRODUCT_TYPES = [
   { value: 'hives_with_bees', label: 'Вулики з бджолами' },
 ]
 
+interface BKProduct { id: string; name: string; product_type: string; display_order: number }
+
 export default async function AdminBeekeeperPage() {
-  const products = await getAllBeekeeperProducts().catch(() => [])
+  let products: BKProduct[] = []
+  try {
+    const client = getAdminClient()
+    const { data } = await client.from('beekeeper_products').select('*').order('display_order', { ascending: true })
+    products = (data ?? []).map((r: Record<string, unknown>) => ({
+      id: String(r.id ?? ''),
+      name: String(r.name ?? ''),
+      product_type: String(r.product_type ?? ''),
+      display_order: Number(r.display_order ?? 0),
+    }))
+  } catch { /* env not set — show empty list */ }
 
   return (
     <div className="px-4 sm:px-6 py-8">
