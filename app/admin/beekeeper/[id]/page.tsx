@@ -34,7 +34,7 @@ export default async function AdminBeekeeperEditPage({ params }: Props) {
     <div className="px-4 sm:px-6 py-8 max-w-2xl">
       <h1 className="font-serif text-2xl font-bold text-bark mb-6">Редагувати: {product.name}</h1>
 
-      <form action={updateWithId} encType="multipart/form-data" className="space-y-5 bg-white rounded-2xl p-6 border border-honey-100">
+      <form action={updateWithId} className="space-y-5 bg-white rounded-2xl p-6 border border-honey-100">
         <div>
           <label className="block text-sm font-semibold text-bark mb-1">Назва</label>
           <input name="name" type="text" required defaultValue={product.name}
@@ -81,18 +81,26 @@ export default async function AdminBeekeeperEditPage({ params }: Props) {
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Зображення (залиште порожнім щоб не змінювати)</label>
-          {product.image_url && (
-            <p className="text-xs text-gray-500 mb-1">Поточне: <a href={product.image_url} target="_blank" rel="noopener" className="underline">{product.image_url}</a></p>
-          )}
-          <input name="image" type="file" accept="image/*" className="w-full text-sm text-bark/70" />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Alt-текст зображення</label>
-          <input name="image_alt" type="text" defaultValue={product.image_alt ?? ''}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+        {/* Media */}
+        <div className="space-y-3 border-t border-gray-100 pt-4">
+          <h3 className="text-sm font-semibold text-bark">Медіа</h3>
+          <div>
+            <label className="block text-sm font-medium text-bark/70 mb-1">Головне зображення (URL або /images/...)</label>
+            <input name="image_url" type="text" defaultValue={product.image_url ?? ''}
+              placeholder="https://example.com/image.jpg або /images/beekeeper/..."
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-bark/70 mb-1">YouTube відео (URL)</label>
+            <input name="youtube_url" type="text" defaultValue={product.youtube_video_url ?? ''}
+              placeholder="https://youtube.com/watch?v=..."
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-bark/70 mb-1">Alt-текст зображення</label>
+            <input name="image_alt" type="text" defaultValue={product.image_alt ?? ''}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          </div>
         </div>
 
         <button type="submit"
