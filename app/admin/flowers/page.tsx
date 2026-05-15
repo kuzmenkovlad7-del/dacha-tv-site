@@ -10,14 +10,30 @@ export const metadata: Metadata = {
   robots: 'noindex, nofollow',
 }
 
+const MIGRATION_SQL_PATH = 'supabase/migrations/016_flower_products_table.sql'
+
 export default async function AdminFlowersPage() {
   let products: FlowerProduct[] = []
+  let tablesMissing = false
   let dbError: string | null = null
+
   try {
     const client = getAdminClient()
-    const { data, error } = await client.from('flower_products').select('*').order('display_order', { ascending: true })
-    if (error) dbError = error.message
-    else products = (data ?? []) as FlowerProduct[]
+    const { data, error } = await client
+      .from('flower_products')
+      .select('*')
+      .order('display_order', { ascending: true })
+
+    if (error) {
+      const isMissing = error.message.includes('does not exist') || error.message.includes('schema cache')
+      if (isMissing) {
+        tablesMissing = true
+      } else {
+        dbError = error.message
+      }
+    } else {
+      products = (data ?? []) as FlowerProduct[]
+    }
   } catch (e) {
     dbError = e instanceof Error ? e.message : 'Помилка підключення'
   }
@@ -33,50 +49,74 @@ export default async function AdminFlowersPage() {
           )}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Sync button — always visible */}
           <form action={syncCatalogAction}>
             <button type="submit"
               className="inline-flex items-center gap-1.5 h-9 px-4 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
-              <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Синхронізувати каталог
+              Синхронізувати
             </button>
           </form>
-          <Link
-            href="/admin/flowers/new"
-            className="inline-flex items-center gap-1.5 h-9 px-4 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors shadow-sm"
-          >
-            + Додати
-          </Link>
+          {!tablesMissing && (
+            <Link
+              href="/admin/flowers/new"
+              className="inline-flex items-center h-9 px-4 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors shadow-sm"
+            >
+              + Додати
+            </Link>
+          )}
         </div>
       </div>
 
-      {/* Error state */}
-      {dbError && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-          <p className="text-sm text-red-700 font-medium">Помилка БД</p>
-          <p className="text-xs text-red-600 mt-1 font-mono">{dbError}</p>
+      {/* BLOCKING: table missing */}
+      {tablesMissing && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <div className="flex-1">
+              <p className="font-semibold text-amber-900 text-sm">Таблиця flower_products відсутня в базі даних</p>
+              <p className="text-amber-800 text-sm mt-1">
+                Квіти потребують окремої міграції. Відкрийте{' '}
+                <span className="font-mono bg-amber-100 px-1 rounded text-xs">SQL Editor</span>{' '}
+                у вашому Supabase проєкті та виконайте вміст файлу:
+              </p>
+              <code className="block bg-amber-100 text-amber-900 text-xs px-3 py-2 rounded mt-2 font-mono">
+                {MIGRATION_SQL_PATH}
+              </code>
+              <p className="text-amber-700 text-xs mt-2">
+                Після виконання міграції поверніться сюди і натисніть{' '}
+                <strong>Синхронізувати</strong> — усі 50 позицій хризантем буде імпортовано автоматично.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Empty state */}
-      {!dbError && products.length === 0 && (
+      {/* Generic DB error */}
+      {dbError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <p className="text-sm font-semibold text-red-700">Помилка бази даних</p>
+          <p className="text-xs text-red-600 mt-1 font-mono break-all">{dbError}</p>
+        </div>
+      )}
+
+      {/* Empty state (table exists but no rows) */}
+      {!tablesMissing && !dbError && products.length === 0 && (
         <div className="bg-white border border-gray-100 rounded-xl shadow-sm">
           <div className="text-center py-16 px-6">
             <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
               <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
               </svg>
             </div>
             <p className="text-gray-900 font-semibold mb-1">Квітів ще немає в базі</p>
-            <p className="text-sm text-gray-500 mb-6">Натисніть «Синхронізувати каталог» щоб імпортувати всі 50 сортів хризантем</p>
+            <p className="text-sm text-gray-500 mb-6">Натисніть «Синхронізувати» щоб імпортувати всі 50 сортів</p>
             <form action={syncCatalogAction}>
               <button type="submit"
                 className="inline-flex items-center gap-2 h-10 px-5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
                 Синхронізувати каталог
               </button>
             </form>
@@ -93,26 +133,24 @@ export default async function AdminFlowersPage() {
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Назва</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Сорт</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">Колір</th>
-                <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Порядок</th>
+                <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">№</th>
                 <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Наявн.</th>
-                <th className="px-5 py-3 w-20"></th>
+                <th className="px-5 py-3 w-16"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50/70 transition-colors">
-                  <td className="px-5 py-3.5 font-medium text-gray-900">{product.name}</td>
-                  <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">{product.variety ?? '—'}</td>
-                  <td className="px-5 py-3.5 text-gray-500 hidden md:table-cell">{product.color ?? '—'}</td>
-                  <td className="px-5 py-3.5 text-center text-gray-500">{product.display_order}</td>
-                  <td className="px-5 py-3.5 text-center">
+                  <td className="px-5 py-3 font-medium text-gray-900">{product.name}</td>
+                  <td className="px-5 py-3 text-gray-500 hidden sm:table-cell">{product.variety ?? '—'}</td>
+                  <td className="px-5 py-3 text-gray-500 hidden md:table-cell">{product.color ?? '—'}</td>
+                  <td className="px-5 py-3 text-center text-gray-400 text-xs">{product.display_order}</td>
+                  <td className="px-5 py-3 text-center">
                     <span className={`inline-block w-2 h-2 rounded-full ${product.in_stock ? 'bg-green-500' : 'bg-gray-300'}`} />
                   </td>
-                  <td className="px-5 py-3.5 text-right">
-                    <Link
-                      href={`/admin/flowers/${product.id}`}
-                      className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                    >
+                  <td className="px-5 py-3 text-right">
+                    <Link href={`/admin/flowers/${product.id}`}
+                      className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
                       Змін.
                     </Link>
                   </td>

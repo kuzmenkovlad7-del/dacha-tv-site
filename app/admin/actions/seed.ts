@@ -5,20 +5,27 @@ import { getAdminClient } from '@/lib/supabase/admin'
 import { STATIC_HONEY } from '@/lib/static-catalog'
 import { STATIC_FLOWERS } from '@/lib/flowers-static'
 
-const STATIC_FAQ = [
-  { question: 'Як замовити мед?', answer: 'Ви можете залишити заявку на сайті або зателефонувати нам напряму. Ми уточнимо сорт, упаковку та спосіб доставки.', category: 'ordering', display_order: 1 },
-  { question: 'Які сорти меду у вас є?', answer: "Наявність залежить від сезону. Основні сорти: акація, липа, сонях, різнотрав'я, садовий та лісовий мед.", category: 'products', display_order: 1 },
-  { question: 'У якій упаковці доступний мед?', answer: '1 л пластик та 1 л скло.', category: 'products', display_order: 2 },
-  { question: 'Чи є доставка по Україні?', answer: 'Так, ми відправляємо замовлення по Україні службами доставки.', category: 'delivery', display_order: 1 },
-  { question: 'Чи можна замовити самовивіз?', answer: 'Так, деталі самовивозу узгоджуються під час оформлення.', category: 'delivery', display_order: 2 },
-  { question: 'Як швидко ви відповідаєте?', answer: 'Зазвичай відповідаємо протягом кількох годин.', category: 'ordering', display_order: 2 },
-  { question: 'Чи є у вас продукція для пасічників?', answer: 'Так, окрім меду, ми маємо продукцію для пасічників, зокрема приманку для роїв.', category: 'beekeeping', display_order: 1 },
-  { question: 'Чи весь мед натуральний?', answer: 'Так, ми продаємо натуральний мед із власної сімейної пасіки.', category: 'products', display_order: 3 },
-  { question: 'Чому деяких сортів може тимчасово не бути?', answer: 'Мед є сезонним продуктом, тому окремі сорти можуть бути недоступні в окремі періоди.', category: 'products', display_order: 4 },
-  { question: 'Чи можна уточнити деталі перед замовленням?', answer: 'Так, ми завжди можемо проконсультувати перед оформленням заявки.', category: 'ordering', display_order: 3 },
-]
-
-const STATIC_APIARY = [
+// Canonical apiary products including swarm-lure (Приманка для роїв)
+const CANONICAL_APIARY = [
+  {
+    name: 'Приманка для роїв',
+    slug: 'swarm-lure',
+    short_description: 'Готова приманка для приваблення бджолиних роїв у компактній зручній банці.',
+    description: 'Приманка для роїв використовується в сезон роїння для підвищення шансів заселення пастки або підготовленого вулика.',
+    full_description: 'Приманка для роїв використовується в сезон роїння для підвищення шансів заселення пастки або підготовленого вулика. Зручний формат банки дозволяє легко використовувати продукт у практичній роботі на пасіці.',
+    usage_notes: 'Нанесіть невелику кількість на внутрішні стінки вулика-пастки за 1–2 дні до очікуваного роїння. Також обробіть льоток. Повторіть через тиждень за потреби.',
+    storage_info: 'Зберігати в прохолодному темному місці при температурі до +20°C. Термін придатності — 2 роки.',
+    packaging_note: 'Банка 35 г.',
+    packaging: ['35 г'],
+    weight_g: 35,
+    price_uah: 180,
+    image_url: '/images/dacha-tv/products/swarm-lure-01.jpg',
+    image_alt: 'Приманка для роїв Dacha TV',
+    is_featured: true,
+    in_stock: true,
+    display_order: 1,
+    youtube_video_url: null,
+  },
   {
     name: 'Бджолиний пилок',
     slug: 'bee-pollen',
@@ -32,9 +39,9 @@ const STATIC_APIARY = [
     packaging: ['50 г', '100 г'],
     price_uah: 180,
     weight_g: 100,
-    is_featured: true,
+    is_featured: false,
     in_stock: true,
-    display_order: 1,
+    display_order: 2,
     image_url: null,
     image_alt: 'Бджолиний пилок Dacha TV',
     youtube_video_url: null,
@@ -45,38 +52,60 @@ const STATIC_APIARY = [
     description: 'Натуральний прополіс із нашої пасіки.',
     short_description: 'Натуральний прополіс — природний антисептик та імуностимулятор.',
     full_description: 'Прополіс має сильні антибактеріальні та антивірусні властивості. Використовується як природний антисептик і для підтримки імунної системи.',
-    composition: 'Натуральний прополіс',
     usage_notes: 'Вживати у вигляді настоянки або додавати до меду.',
     storage_info: 'Зберігати в прохолодному темному місці.',
     packaging_note: '20 г',
     packaging: ['20 г'],
     price_uah: 120,
     weight_g: 20,
-    is_featured: true,
-    in_stock: true,
-    display_order: 2,
-    image_url: null,
-    image_alt: 'Прополіс Dacha TV',
-    youtube_video_url: null,
-  },
-  {
-    name: 'Горіхи в меду',
-    slug: 'nuts-in-honey',
-    description: 'Натуральні горіхи заправлені медом із нашої пасіки.',
-    short_description: 'Суміш горіхів у натуральному меду.',
-    full_description: 'Горіхи в меду — смачний і корисний продукт. Ідеальний для сніданку або як поживний перекус.',
-    composition: 'Волоський горіх, мигдаль, натуральний мед',
-    usage_notes: 'Їсти по 1–2 столові ложки на день.',
-    storage_info: 'Зберігати при кімнатній температурі в темному місці.',
-    packaging_note: '200 г, 500 г',
-    packaging: ['200 г', '500 г'],
-    price_uah: 250,
-    weight_g: 200,
     is_featured: false,
     in_stock: true,
     display_order: 3,
     image_url: null,
-    image_alt: 'Горіхи в меду Dacha TV',
+    image_alt: 'Прополіс Dacha TV',
+    youtube_video_url: null,
+  },
+]
+
+// Default beekeeper products to bootstrap the section
+const CANONICAL_BEEKEEPER = [
+  {
+    name: 'Бджолопакет Buckfast',
+    slug: 'bee-package-buckfast',
+    product_type: 'bee_packages',
+    description: 'Бджолопакет породи Buckfast — спокійна, продуктивна порода. Доступні з квітня по червень.',
+    breeds: ['Buckfast'],
+    season_note: 'Доступні з квітня по червень',
+    display_order: 1,
+    in_stock: true,
+    image_url: null,
+    image_alt: null,
+    youtube_video_url: null,
+  },
+  {
+    name: 'Бджолопакет Карніка',
+    slug: 'bee-package-carnica',
+    product_type: 'bee_packages',
+    description: 'Бджолопакет породи Карніка — миролюбна, зимостійка порода.',
+    breeds: ['Карніка'],
+    season_note: 'Доступні з квітня по червень',
+    display_order: 2,
+    in_stock: true,
+    image_url: null,
+    image_alt: null,
+    youtube_video_url: null,
+  },
+  {
+    name: 'Бджолосімя',
+    slug: 'bee-colony',
+    product_type: 'bee_colonies',
+    description: 'Повноцінна бджолосімя у вулику. Уточнюйте наявність.',
+    breeds: ['Buckfast', 'Карніка'],
+    season_note: 'Доступні з квітня по серпень',
+    display_order: 3,
+    in_stock: true,
+    image_url: null,
+    image_alt: null,
     youtube_video_url: null,
   },
 ]
@@ -97,6 +126,13 @@ const LAUNCH_SITE_SETTINGS = {
   hero_subtext: 'Натуральний мед із сімейної пасіки на Харківщині. Збираємо, фасуємо та відправляємо особисто.',
 }
 
+export interface SyncResult {
+  ok: boolean
+  message: string
+  details: Record<string, string>
+  missingTables: string[]
+}
+
 // Full idempotent upsert of all catalog data — safe to run multiple times
 export async function syncCatalogAction(): Promise<void> {
   await syncCatalog()
@@ -106,60 +142,74 @@ export async function syncCatalogAction(): Promise<void> {
   revalidatePath('/admin/beekeeper')
 }
 
-export async function syncCatalog(): Promise<{ ok: boolean; message: string }> {
+export async function syncCatalog(): Promise<SyncResult> {
+  const details: Record<string, string> = {}
+  const missingTables: string[] = []
+
   try {
     const client = getAdminClient()
-    const results: string[] = []
 
-    // Honey — upsert by slug
+    // Honey — upsert by slug (6 products)
     const honeyRows = STATIC_HONEY.map(({ id: _id, created_at: _ca, updated_at: _ua, ...rest }) => rest)
     const { error: he } = await client
       .from('honey_products')
       .upsert(honeyRows, { onConflict: 'slug', ignoreDuplicates: true })
-    results.push(he ? `Мед: помилка — ${he.message}` : `Мед: синхронізовано ${honeyRows.length} записів`)
+    details.honey = he ? `Помилка: ${he.message}` : `Синхронізовано ${honeyRows.length} продуктів`
 
-    // Apiary — upsert by slug
+    // Apiary — upsert by slug (includes swarm-lure)
     const { error: ae } = await client
       .from('apiary_products')
-      .upsert(STATIC_APIARY, { onConflict: 'slug', ignoreDuplicates: true })
-    results.push(ae ? `Продукти пасіки: помилка — ${ae.message}` : `Продукти пасіки: синхронізовано ${STATIC_APIARY.length} записів`)
+      .upsert(CANONICAL_APIARY, { onConflict: 'slug', ignoreDuplicates: true })
+    details.apiary = ae ? `Помилка: ${ae.message}` : `Синхронізовано ${CANONICAL_APIARY.length} продуктів`
 
-    // Flowers — upsert by slug (50 entries)
+    // Beekeeper — upsert by slug
+    const { error: bke } = await client
+      .from('beekeeper_products')
+      .upsert(CANONICAL_BEEKEEPER, { onConflict: 'slug', ignoreDuplicates: true })
+    details.beekeeper = bke ? `Помилка: ${bke.message}` : `Синхронізовано ${CANONICAL_BEEKEEPER.length} продуктів`
+
+    // Flowers — upsert by slug (50 entries from STATIC_FLOWERS)
     const flowerRows = STATIC_FLOWERS.map(({ id: _id, created_at: _ca, updated_at: _ua, ...rest }) => rest)
     const { error: fe } = await client
       .from('flower_products')
       .upsert(flowerRows, { onConflict: 'slug', ignoreDuplicates: true })
-    results.push(fe ? `Квіти: помилка — ${fe.message}` : `Квіти: синхронізовано ${flowerRows.length} записів`)
+    if (fe) {
+      const isMissing = fe.message.includes('does not exist') || fe.message.includes('schema cache')
+      if (isMissing) {
+        missingTables.push('flower_products')
+        details.flowers = 'ТАБЛИЦЯ ВІДСУТНЯ — потрібна міграція 016'
+      } else {
+        details.flowers = `Помилка: ${fe.message}`
+      }
+    } else {
+      details.flowers = `Синхронізовано ${flowerRows.length} позицій`
+    }
 
-    // Site settings — upsert by id
+    // Site settings — upsert
     const { error: se } = await client
       .from('site_settings')
       .upsert(LAUNCH_SITE_SETTINGS, { onConflict: 'id', ignoreDuplicates: true })
-    results.push(se ? `Налаштування: помилка — ${se.message}` : 'Налаштування: синхронізовано')
+    details.settings = se ? `Помилка: ${se.message}` : 'Синхронізовано'
 
-    // FAQ — only if empty
-    const { count: faqCount } = await client
-      .from('faq_items')
-      .select('id', { count: 'exact', head: true })
-    if ((faqCount ?? 0) === 0) {
-      const { error: faqe } = await client.from('faq_items').insert(STATIC_FAQ)
-      results.push(faqe ? `FAQ: помилка — ${faqe.message}` : `FAQ: додано ${STATIC_FAQ.length} записів`)
-    } else {
-      results.push(`FAQ: вже є ${faqCount} записів`)
+    const allOk = Object.values(details).every((v) => !v.startsWith('Помилка'))
+    return {
+      ok: allOk,
+      message: Object.entries(details).map(([k, v]) => `${k}: ${v}`).join(' | '),
+      details,
+      missingTables,
     }
-
-    return { ok: true, message: results.join('; ') }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
-    return { ok: false, message: msg }
+    return { ok: false, message: msg, details: { error: msg }, missingTables: [] }
   }
 }
 
-// Legacy alias used by existing pages
+// Legacy alias
 export async function seedLaunchDataAction(): Promise<void> {
   await syncCatalogAction()
 }
 
 export async function seedLaunchData(): Promise<{ ok: boolean; message: string }> {
-  return syncCatalog()
+  const r = await syncCatalog()
+  return { ok: r.ok, message: r.message }
 }
