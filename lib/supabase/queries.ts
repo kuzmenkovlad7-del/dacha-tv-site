@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { SiteSettings, HoneyProduct, ApiaryProduct, BeekeeperProduct, Review, FaqItem, FlowerProduct } from '@/types'
+import { STATIC_FLOWERS } from '@/lib/flowers-static'
 
 function getClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -109,24 +110,27 @@ export async function getAllFaqItems(): Promise<FaqItem[]> {
 
 export async function getAllFlowerProducts(): Promise<FlowerProduct[]> {
   const client = getClient()
-  if (!client) return []
+  if (!client) return STATIC_FLOWERS
   const { data } = await client
     .from('flower_products')
     .select('*')
     .order('display_order', { ascending: true })
-  return data ?? []
+  return (data && data.length > 0) ? data : STATIC_FLOWERS
 }
 
 export async function getFlowerProductBySlug(slug: string): Promise<FlowerProduct | null> {
   const client = getClient()
-  if (!client) return null
+  if (!client) return STATIC_FLOWERS.find((f) => f.slug === slug) ?? null
   const { data } = await client.from('flower_products').select('*').eq('slug', slug).single()
-  return data ?? null
+  if (data) return data
+  return STATIC_FLOWERS.find((f) => f.slug === slug) ?? null
 }
 
 export async function getAllFlowerSlugs(): Promise<string[]> {
   const client = getClient()
-  if (!client) return []
+  if (!client) return STATIC_FLOWERS.map((f) => f.slug)
   const { data } = await client.from('flower_products').select('slug')
-  return (data ?? []).map((r: { slug: string }) => r.slug)
+  const dbSlugs = (data ?? []).map((r: { slug: string }) => r.slug)
+  if (dbSlugs.length > 0) return dbSlugs
+  return STATIC_FLOWERS.map((f) => f.slug)
 }
