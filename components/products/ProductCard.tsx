@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { existsSync } from 'fs'
+import { join } from 'path'
 import type { ApiaryProduct } from '@/types'
 
 const BLUR_DATA_URL =
@@ -9,8 +11,14 @@ interface ProductCardProps {
   product: ApiaryProduct
 }
 
+function resolveLocalImage(imageUrl: string | null): string | null {
+  if (!imageUrl) return null
+  if (imageUrl.startsWith('http')) return imageUrl
+  return existsSync(join(process.cwd(), 'public', imageUrl)) ? imageUrl : null
+}
+
 export function ProductCard({ product }: ProductCardProps) {
-  const imageUrl = product.image_url || null
+  const imageUrl = resolveLocalImage(product.image_url)
   const blurb = product.short_description || product.description || null
 
   return (
@@ -68,7 +76,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {product.price_uah && (
           <p className="text-sm font-semibold text-bark mb-3">
-            {product.price_uah} грн
+            від {product.price_uah} грн
           </p>
         )}
 
