@@ -77,6 +77,7 @@ export interface BeekeeperProduct {
   season_note: string | null
   image_url: string | null
   image_alt: string | null
+  youtube_video_url: string | null
   display_order: number
   created_at?: string
   updated_at?: string

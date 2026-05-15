@@ -106,13 +106,6 @@ export default async function AdminApiaryEditPage({ params }: Props) {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-bark mb-1">YouTube відео (посилання)</label>
-          <input name="youtube_video_url" type="url" defaultValue={product.youtube_video_url ?? ''}
-            placeholder="https://youtube.com/watch?v=..."
-            className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
-        </div>
-
         <div className="flex flex-wrap gap-5">
           <label className="flex items-center gap-2 cursor-pointer min-h-[44px]">
             <input type="checkbox" name="in_stock" defaultChecked={product.in_stock} className="w-5 h-5 accent-honey-600" />
@@ -124,17 +117,26 @@ export default async function AdminApiaryEditPage({ params }: Props) {
           </label>
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Зображення (URL або шлях)</label>
-          <input name="image_url" type="text" defaultValue={product.image_url ?? ''}
-            placeholder="https://... або /images/dacha-tv/products/..."
-            className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Alt-текст зображення</label>
-          <input name="image_alt" type="text" defaultValue={product.image_alt ?? ''}
-            className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
+        {/* Media */}
+        <div className="space-y-3 border-t border-gray-100 pt-4">
+          <h3 className="text-sm font-semibold text-bark">Медіа</h3>
+          <div>
+            <label className="block text-sm font-medium text-bark/70 mb-1">Головне зображення (URL або /images/...)</label>
+            <input name="image_url" type="text" defaultValue={product.image_url ?? ''}
+              placeholder="https://example.com/image.jpg або /images/honey/acacia.jpg"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-bark/70 mb-1">YouTube відео (URL)</label>
+            <input name="youtube_video_url" type="text" defaultValue={product.youtube_video_url ?? ''}
+              placeholder="https://youtube.com/watch?v=..."
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-bark/70 mb-1">Alt-текст зображення</label>
+            <input name="image_alt" type="text" defaultValue={product.image_alt ?? ''}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          </div>
         </div>
 
         <button type="submit"

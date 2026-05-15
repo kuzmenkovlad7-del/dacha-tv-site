@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAllBeekeeperProducts } from '@/lib/supabase/queries'
 import { deleteBeekeeperProduct, createBeekeeperProduct } from './actions'
+import { seedLaunchDataAction } from '@/app/admin/actions/seed'
 
 export const metadata: Metadata = {
   title: 'Адмін — Для пасічників',
@@ -26,6 +27,17 @@ export default async function AdminBeekeeperPage() {
       </div>
 
       {/* Products list */}
+      {products.length === 0 && (
+        <div className="text-center py-16 text-bark/50">
+          <p className="mb-4">Немає продуктів</p>
+          <form action={seedLaunchDataAction}>
+            <button type="submit"
+              className="bg-honey-700 hover:bg-honey-800 text-white font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors min-h-[44px]">
+              Заповнити стартовими даними
+            </button>
+          </form>
+        </div>
+      )}
       {products.length > 0 && (
         <div className="bg-white rounded-2xl border border-honey-100 overflow-hidden mb-8">
           <table className="w-full text-sm">
@@ -67,7 +79,7 @@ export default async function AdminBeekeeperPage() {
       {/* Add form */}
       <div className="bg-white rounded-2xl border border-honey-100 p-6 max-w-2xl">
         <h2 className="font-serif text-lg font-bold text-bark mb-4">Додати продукт</h2>
-        <form action={createBeekeeperProduct} encType="multipart/form-data" className="space-y-4">
+        <form action={createBeekeeperProduct} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-bark mb-1">Назва</label>
@@ -117,9 +129,21 @@ export default async function AdminBeekeeperPage() {
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-bark mb-1">Зображення</label>
-            <input name="image" type="file" accept="image/*" className="w-full text-sm text-bark/70" />
+          {/* Media */}
+          <div className="space-y-3 border-t border-gray-100 pt-4">
+            <h3 className="text-sm font-semibold text-bark">Медіа</h3>
+            <div>
+              <label className="block text-sm font-medium text-bark/70 mb-1">Головне зображення (URL або /images/...)</label>
+              <input name="image_url" type="text"
+                placeholder="https://example.com/image.jpg або /images/beekeeper/..."
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-bark/70 mb-1">YouTube відео (URL)</label>
+              <input name="youtube_url" type="text"
+                placeholder="https://youtube.com/watch?v=..."
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+            </div>
           </div>
 
           <button type="submit"

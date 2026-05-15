@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getHoneyProductBySlug, getAllHoneyProducts } from '@/lib/supabase/queries'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { updateHoneyProduct, deleteHoneyProduct } from '../actions'
 
@@ -127,12 +126,6 @@ export default async function AdminHoneyEditPage({ params }: Props) {
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
         </div>
 
-        <div>
-          <label htmlFor="youtube_video_link" className="block text-sm font-semibold text-bark mb-1">Посилання на YouTube відео</label>
-          <input id="youtube_video_link" name="youtube_video_link" type="url" defaultValue={product.youtube_video_link ?? ''}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
-        </div>
-
         <div className="flex gap-6">
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" name="in_stock" defaultChecked={product.in_stock} className="w-4 h-4 accent-honey-600" />
@@ -144,17 +137,26 @@ export default async function AdminHoneyEditPage({ params }: Props) {
           </label>
         </div>
 
-        <div>
-          <label htmlFor="image_url" className="block text-sm font-semibold text-bark mb-1">Зображення (URL або шлях)</label>
-          <input id="image_url" name="image_url" type="text" defaultValue={product.image_url ?? ''}
-            placeholder="https://... або /images/dacha-tv/honey/..."
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
-        </div>
-
-        <div>
-          <label htmlFor="image_alt" className="block text-sm font-semibold text-bark mb-1">Alt-текст зображення</label>
-          <input id="image_alt" name="image_alt" type="text" defaultValue={product.image_alt ?? ''}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+        {/* Media */}
+        <div className="space-y-3 border-t border-gray-100 pt-4">
+          <h3 className="text-sm font-semibold text-bark">Медіа</h3>
+          <div>
+            <label className="block text-sm font-medium text-bark/70 mb-1">Головне зображення (URL або /images/...)</label>
+            <input name="image_url" type="text" defaultValue={product.image_url ?? ''}
+              placeholder="https://example.com/image.jpg або /images/honey/acacia.jpg"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-bark/70 mb-1">YouTube відео (URL)</label>
+            <input name="youtube_video_link" type="text" defaultValue={product.youtube_video_link ?? ''}
+              placeholder="https://youtube.com/watch?v=..."
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-bark/70 mb-1">Alt-текст зображення</label>
+            <input name="image_alt" type="text" defaultValue={product.image_alt ?? ''}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          </div>
         </div>
 
         <button type="submit"
