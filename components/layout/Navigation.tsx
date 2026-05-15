@@ -19,6 +19,7 @@ import type { SiteSettings } from '@/types'
 const NAV_ITEMS = [
   { href: '/honey', label: 'Мед' },
   { href: '/products', label: 'Продукти' },
+  { href: '/flowers', label: 'Квіти' },
   { href: '/beekeeper', label: 'Пасічникам' },
   { href: '/about', label: 'Про нас' },
   { href: '/contact', label: 'Контакти' },
@@ -166,19 +167,19 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
         </svg>
       </button>
 
-      {/* Overlay */}
+      {/* Backdrop overlay — sits below drawer, above page content */}
       {drawerOpen && (
         <div
-          className="fixed inset-0 z-50 bg-bark/40 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-[55] bg-bark/50 md:hidden"
           onClick={() => setDrawerOpen(false)}
           aria-hidden="true"
         />
       )}
 
-      {/* Slide-in drawer */}
+      {/* Slide-in drawer — fixed overlay, never affects page width */}
       <div
         className={cn(
-          'fixed top-0 right-0 bottom-0 z-50 w-80 max-w-[85vw] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out md:hidden flex flex-col',
+          'fixed top-0 right-0 bottom-0 z-[60] w-[min(88vw,360px)] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out md:hidden flex flex-col overflow-hidden',
           drawerOpen ? 'translate-x-0' : 'translate-x-full'
         )}
         aria-label="Мобільна навігація"
@@ -236,7 +237,7 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
         </nav>
 
         {/* Drawer footer — phone(s) + social + CTA */}
-        <div className="px-6 py-6 border-t border-gray-100 space-y-3">
+        <div className="px-4 py-5 border-t border-gray-100 space-y-3 overflow-hidden">
           <MobilePhoneLink phone={resolvedPhone} />
           <MobilePhoneLink phone={resolvedPhoneSecondary} />
           <DrawerSocialIcons siteSettings={siteSettings} />

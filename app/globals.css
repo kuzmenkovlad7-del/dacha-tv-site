@@ -70,6 +70,12 @@ h6 {
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+/* Prevent horizontal scroll caused by off-canvas drawer transform */
+body {
+  overflow-x: hidden;
 }
 
 /* FAQ accordion — native details/summary */

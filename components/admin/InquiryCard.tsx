@@ -1,3 +1,6 @@
+'use client'
+
+import { useState, useRef } from 'react'
 import { formatDate } from '@/lib/utils'
 import { formatPhoneTel, formatPhoneDisplay } from '@/lib/utils'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -9,6 +12,25 @@ interface InquiryCardProps {
 }
 
 export function InquiryCard({ inquiry }: InquiryCardProps) {
+  const [notes, setNotes] = useState(inquiry.notes ?? '')
+  const [saving, setSaving] = useState(false)
+  const lastSaved = useRef(inquiry.notes ?? '')
+
+  async function saveNotes() {
+    if (notes === lastSaved.current) return
+    setSaving(true)
+    try {
+      await fetch('/api/inquiries', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: inquiry.id, notes }),
+      })
+      lastSaved.current = notes
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <article className="bg-white rounded-2xl border border-honey-100 shadow-sm p-5 space-y-4">
       {/* Header row */}
@@ -60,6 +82,22 @@ export function InquiryCard({ inquiry }: InquiryCardProps) {
             <p className="mt-1 text-bark/80">{inquiry.message}</p>
           </div>
         )}
+      </div>
+
+      {/* Internal notes */}
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-bark/50 flex items-center justify-between">
+          <span>Нотатки</span>
+          {saving && <span className="text-honey-600">збереження…</span>}
+        </label>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          onBlur={saveNotes}
+          rows={3}
+          placeholder="Результат дзвінка, домовленості, деталі…"
+          className="w-full text-sm rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-bark placeholder:text-bark/30 focus:outline-none focus:ring-2 focus:ring-honey-300 focus:border-honey-300 resize-none"
+        />
       </div>
 
       {/* Status toggle */}

@@ -109,6 +109,7 @@ export interface Inquiry {
   message: string | null
   source: string | null
   status: string
+  notes: string | null
   created_at: string
 }
 

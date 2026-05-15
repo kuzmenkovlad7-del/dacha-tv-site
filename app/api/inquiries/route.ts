@@ -45,17 +45,32 @@ export async function PATCH(request: Request) {
   }
 
   try {
-    const { id, status } = await request.json()
+    const { id, status, notes } = await request.json()
 
     const validStatuses = ['new', 'contacted', 'completed', 'cancelled']
-    if (!id || !validStatuses.includes(status)) {
+    if (!id) {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+    }
+
+    const update: Record<string, unknown> = {}
+    if (status !== undefined) {
+      if (!validStatuses.includes(status)) {
+        return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+      }
+      update.status = status
+    }
+    if (notes !== undefined) {
+      update.notes = notes
+    }
+
+    if (Object.keys(update).length === 0) {
+      return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
     }
 
     const supabase = getSupabaseClient()
     const { error } = await supabase
       .from('inquiries')
-      .update({ status })
+      .update(update)
       .eq('id', id)
 
     if (error) {
