@@ -26,12 +26,15 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
   let inquiries: Inquiry[] = []
   let error: string | null = null
+  let errorDetail: string | null = null
+  let missingEnv = false
 
   try {
     const supabase = getSupabaseClient()
+    // Select explicit safe columns — notes column may not exist if migration 015 not yet applied
     let query = supabase
       .from('inquiries')
-      .select('*')
+      .select('id,name,phone,product,message,source,status,created_at,notes')
       .order('created_at', { ascending: false })
 
     if (status !== 'all') {
@@ -41,12 +44,35 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     const { data, error: dbError } = await query
 
     if (dbError) {
-      error = 'Не вдалося завантажити заявки'
+      // notes column missing — retry without it
+      if (dbError.message?.includes('notes')) {
+        const { data: data2, error: dbError2 } = await supabase
+          .from('inquiries')
+          .select('id,name,phone,product,message,source,status,created_at')
+          .order('created_at', { ascending: false })
+        if (dbError2) {
+          error = 'Помилка бази даних'
+          errorDetail = dbError2.message
+        } else {
+          inquiries = (data2 ?? []).map((r) => ({ ...r, notes: null })) as Inquiry[]
+        }
+      } else {
+        error = 'Не вдалося завантажити заявки'
+        errorDetail = dbError.message
+      }
     } else {
-      inquiries = data as Inquiry[]
+      inquiries = (data ?? []) as Inquiry[]
     }
-  } catch {
-    error = 'Помилка з\'єднання з базою даних'
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    if (msg.includes('Missing Supabase')) {
+      missingEnv = true
+      error = 'Supabase не налаштовано'
+      errorDetail = 'Встановіть NEXT_PUBLIC_SUPABASE_URL та SUPABASE_SERVICE_ROLE_KEY у змінних середовища Vercel.'
+    } else {
+      error = 'Помилка з\'єднання з базою даних'
+      errorDetail = msg
+    }
   }
 
   const newCount = inquiries.filter((i) => i.status === 'new').length
@@ -84,11 +110,29 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
       {/* Error state */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-5 mb-6">
-          <p className="text-red-700 font-medium">{error}</p>
-          <p className="text-red-600 text-sm mt-1">
-            Перевірте налаштування Supabase у змінних оточення.
-          </p>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-5 mb-6 space-y-2">
+          <p className="text-red-700 font-semibold">{error}</p>
+          {errorDetail && (
+            <p className="text-red-600 text-sm font-mono break-all">{errorDetail}</p>
+          )}
+          {missingEnv && (
+            <p className="text-red-600 text-sm">
+              Потрібні змінні:{' '}
+              <code className="bg-red-100 px-1 rounded">NEXT_PUBLIC_SUPABASE_URL</code>,{' '}
+              <code className="bg-red-100 px-1 rounded">SUPABASE_SERVICE_ROLE_KEY</code>
+            </p>
+          )}
+          {errorDetail?.includes('does not exist') && (
+            <p className="text-red-600 text-sm">
+              Таблиця відсутня. Виконайте початкову міграцію у Supabase SQL editor.
+            </p>
+          )}
+          {errorDetail?.includes('notes') && (
+            <p className="text-amber-700 text-sm bg-amber-50 border border-amber-200 rounded p-2">
+              Потрібна міграція: <code className="font-mono">supabase/migrations/015_inquiry_notes.sql</code>
+              {' '}— виконайте в Supabase SQL editor.
+            </p>
+          )}
         </div>
       )}
 

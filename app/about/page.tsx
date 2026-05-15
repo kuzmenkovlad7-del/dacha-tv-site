@@ -4,6 +4,7 @@ import { join } from 'path'
 import Image from 'next/image'
 import { SocialIcons } from '@/components/shared/SocialIcons'
 import { CTAButton } from '@/components/shared/CTAButton'
+import { ApiaryTrust } from '@/components/shared/ApiaryTrust'
 import { getSiteSettings } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
@@ -152,6 +153,14 @@ export default async function AboutPage() {
               iconClassName="text-bark/50 hover:text-honey-700 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
             />
           </div>
+        </section>
+
+        {/* Apiary trust / passport */}
+        <section aria-labelledby="trust-section-heading">
+          <h2 id="trust-section-heading" className="font-serif text-3xl font-bold text-bark mb-6">
+            Довіра та прозорість
+          </h2>
+          <ApiaryTrust />
         </section>
 
         {/* CTA */}

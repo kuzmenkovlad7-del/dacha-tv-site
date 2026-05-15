@@ -127,11 +127,15 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
 
   useEffect(() => {
     if (drawerOpen) {
-      document.body.style.overflow = 'hidden'
+      // position:fixed is the only reliable cross-browser (Android Chrome) scroll lock
+      const y = window.scrollY
+      document.body.style.cssText = `position:fixed;top:-${y}px;left:0;right:0;overflow-y:scroll;`
     } else {
-      document.body.style.overflow = ''
+      const top = document.body.style.top
+      document.body.style.cssText = ''
+      if (top) window.scrollTo(0, -parseInt(top, 10))
     }
-    return () => { document.body.style.overflow = '' }
+    return () => { document.body.style.cssText = '' }
   }, [drawerOpen])
 
   return (
@@ -176,15 +180,16 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
         />
       )}
 
-      {/* Slide-in drawer — fixed overlay, never affects page width */}
+      {/* Slide-in drawer — fixed, right-anchored, never wider than viewport */}
       <div
         className={cn(
-          'fixed top-0 right-0 bottom-0 z-[60] w-[min(88vw,360px)] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out md:hidden flex flex-col overflow-hidden',
+          'fixed inset-y-0 right-0 z-[60] w-[min(88vw,360px)] max-w-full bg-white shadow-2xl will-change-transform transition-transform duration-300 ease-in-out md:hidden flex flex-col',
           drawerOpen ? 'translate-x-0' : 'translate-x-full'
         )}
         aria-label="Мобільна навігація"
         role="dialog"
         aria-modal="true"
+        aria-hidden={!drawerOpen}
       >
         {/* Drawer header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">

@@ -8,6 +8,7 @@ import { Reviews } from '@/components/home/Reviews'
 import { BeekeeperTeaser } from '@/components/home/BeekeeperTeaser'
 import { DeliveryTeaser } from '@/components/home/DeliveryTeaser'
 import { StructuredData } from '@/components/shared/StructuredData'
+import { ApiaryTrustStrip } from '@/components/home/ApiaryTrustStrip'
 import {
   getFeaturedHoneyProducts,
   getVisibleReviews,
@@ -74,6 +75,8 @@ export default async function HomePage() {
       <HowToOrder siteSettings={siteSettings} />
 
       {reviews.length > 0 && <Reviews reviews={reviews} />}
+
+      <ApiaryTrustStrip />
 
       <BeekeeperTeaser />
 
