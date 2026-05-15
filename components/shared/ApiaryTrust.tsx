@@ -58,14 +58,33 @@ export function ApiaryTrust() {
         </ul>
 
         {hasPassportImage && (
-          <div className="relative aspect-[16/10] rounded-xl overflow-hidden border border-gray-100 bg-gray-50 mb-5">
-            <Image
-              src={PASSPORT_IMAGE}
-              alt="Ветеринарно-санітарний паспорт пасіки Дача TV"
-              fill
-              className="object-contain object-center"
-              sizes="(max-width: 768px) 100vw, 700px"
-            />
+          <div className="mb-5">
+            <a
+              href={PASSPORT_IMAGE}
+              target="_blank"
+              rel="noopener"
+              className="block relative aspect-[16/10] rounded-xl overflow-hidden border border-gray-100 hover:border-gray-300 transition-colors bg-gray-50"
+              aria-label="Відкрити ветеринарно-санітарний паспорт пасіки у повному розмірі"
+            >
+              <Image
+                src={PASSPORT_IMAGE}
+                alt="Ветеринарно-санітарний паспорт пасіки Дача TV"
+                fill
+                className="object-contain object-center"
+                sizes="(max-width: 768px) 100vw, 700px"
+              />
+            </a>
+            <a
+              href={PASSPORT_IMAGE}
+              target="_blank"
+              rel="noopener"
+              className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 mt-2 transition-colors"
+            >
+              Відкрити документ
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
           </div>
         )}
 

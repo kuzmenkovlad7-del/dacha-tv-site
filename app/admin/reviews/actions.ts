@@ -4,12 +4,14 @@ import { revalidatePath } from 'next/cache'
 
 export async function createReview(formData: FormData) {
   const client = getAdminClient()
+  const photo_url = (formData.get('photo_url') as string)?.trim() || null
   await client.from('reviews').insert({
     reviewer_name: formData.get('reviewer_name') as string,
     city: formData.get('city') as string,
     quote: formData.get('quote') as string,
     rating: parseInt(formData.get('rating') as string) || 5,
     is_visible: formData.get('is_visible') === 'on',
+    ...(photo_url ? { photo_url } : {}),
   })
   revalidatePath('/admin/reviews')
 }

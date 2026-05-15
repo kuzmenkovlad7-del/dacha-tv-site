@@ -145,7 +145,14 @@ export default async function AdminHoneyEditPage({ params }: Props) {
         </div>
 
         <div>
-          <label htmlFor="image" className="block text-sm font-semibold text-bark mb-1">Зображення (залиште порожнім щоб не змінювати)</label>
+          <label htmlFor="image_url" className="block text-sm font-semibold text-bark mb-1">URL зображення (прямий шлях)</label>
+          <input id="image_url" name="image_url_manual" type="text" defaultValue={product.image_url ?? ''}
+            placeholder="/images/dacha-tv/honey/назва.jpg"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400 mb-2" />
+        </div>
+
+        <div>
+          <label htmlFor="image" className="block text-sm font-semibold text-bark mb-1">Або завантажити нове зображення</label>
           {product.image_url && (
             <p className="text-xs text-gray-500 mb-1">Поточне: <a href={product.image_url} target="_blank" rel="noopener" className="underline">{product.image_url}</a></p>
           )}

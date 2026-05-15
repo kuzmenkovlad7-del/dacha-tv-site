@@ -89,6 +89,7 @@ export interface Review {
   quote: string
   rating: number
   is_visible: boolean
+  photo_url?: string | null
   created_at?: string
 }
 

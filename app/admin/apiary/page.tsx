@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { createApiaryProduct } from './actions'
+import { seedLaunchDataAction } from '@/app/admin/actions/seed'
 import type { ApiaryProduct } from '@/types'
 
 export const metadata: Metadata = {
@@ -27,7 +28,15 @@ export default async function AdminApiaryPage() {
 
       {/* Products list */}
       {products.length === 0 ? (
-        <div className="text-center py-8 text-bark/50 text-sm">Немає продуктів</div>
+        <div className="text-center py-8 text-bark/50 text-sm">
+          <p className="mb-4">Немає продуктів</p>
+          <form action={seedLaunchDataAction}>
+            <button type="submit"
+              className="bg-honey-700 hover:bg-honey-800 text-white font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors min-h-[44px]">
+              Заповнити стартовими даними
+            </button>
+          </form>
+        </div>
       ) : (
         <div className="bg-white rounded-2xl border border-honey-100 overflow-hidden mb-8">
           <table className="w-full text-sm">
