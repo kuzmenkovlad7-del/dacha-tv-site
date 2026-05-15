@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { existsSync } from 'fs'
+import { join } from 'path'
 import type { HoneyProduct } from '@/types'
 
 interface HoneyCardProps {
@@ -18,12 +20,19 @@ const VARIETY_FALLBACK: Record<string, string> = {
   Ліс: 'Темний, комплексний, мінеральні нотки',
 }
 
+function resolveLocalImage(imageUrl: string | null): string | null {
+  if (!imageUrl) return null
+  if (imageUrl.startsWith('http')) return imageUrl
+  const filePath = join(process.cwd(), 'public', imageUrl)
+  return existsSync(filePath) ? imageUrl : null
+}
+
 export function HoneyCard({ product }: HoneyCardProps) {
   const shortDesc =
     product.short_description ||
     VARIETY_FALLBACK[product.variety] ||
     `Натуральний мед ${product.variety.toLowerCase()}`
-  const imageUrl = product.image_url || null
+  const imageUrl = resolveLocalImage(product.image_url)
 
   const hasPrice = product.price_plastic_uah || product.price_glass_uah
 
@@ -37,7 +46,7 @@ export function HoneyCard({ product }: HoneyCardProps) {
             alt={product.image_alt || `${product.name} — мед від пасіки Дача TV`}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             placeholder="blur"
             blurDataURL={BLUR_DATA_URL}
           />
