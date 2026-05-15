@@ -1,5 +1,6 @@
 import { CTAButton } from '@/components/shared/CTAButton'
 import { PhoneLink } from '@/components/shared/PhoneLink'
+import { LAUNCH_PHONE } from '@/lib/launch-defaults'
 import type { SiteSettings } from '@/types'
 
 interface HowToOrderProps {
@@ -80,13 +81,11 @@ export function HowToOrder({ siteSettings }: HowToOrderProps) {
             Перейти до каталогу
           </CTAButton>
 
-          {siteSettings?.phone && (
-            <PhoneLink
-              phone={siteSettings.phone}
-              showIcon
-              className="text-xl font-bold text-honey-300 hover:text-honey-200 transition-colors"
-            />
-          )}
+          <PhoneLink
+            phone={siteSettings?.phone || LAUNCH_PHONE}
+            showIcon
+            className="text-xl font-bold text-honey-300 hover:text-honey-200 transition-colors"
+          />
         </div>
       </div>
     </section>

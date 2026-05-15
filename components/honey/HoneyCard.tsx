@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { existsSync } from 'fs'
+import { join } from 'path'
 import type { HoneyProduct } from '@/types'
 
 interface HoneyCardProps {
@@ -9,18 +11,30 @@ interface HoneyCardProps {
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmJiZjI0Ii8+PC9zdmc+'
 
-const VARIETY_NOTES: Record<string, string> = {
+const VARIETY_FALLBACK: Record<string, string> = {
   Акація: 'Ніжний смак, кристалізується повільно',
-  Липа: 'Класичний аромат, традиційно цілющий',
-  Сонях: 'Насичений, золотий, кристалізується міцно',
+  Липа: 'Класичний аромат, традиційний',
+  Сонях: 'Насичений, золотий, кристалізується швидко',
   "Різнотрав'я": 'Складний характер, кожна партія унікальна',
   Сади: 'Ніжний квітковий мед із садових культур',
-  Ліс: 'Темний, комплексний, з мінеральними нотками',
+  Ліс: 'Темний, комплексний, мінеральні нотки',
+}
+
+function resolveLocalImage(imageUrl: string | null): string | null {
+  if (!imageUrl) return null
+  if (imageUrl.startsWith('http')) return imageUrl
+  const filePath = join(process.cwd(), 'public', imageUrl)
+  return existsSync(filePath) ? imageUrl : null
 }
 
 export function HoneyCard({ product }: HoneyCardProps) {
-  const note = VARIETY_NOTES[product.variety] || `Натуральний мед ${product.variety.toLowerCase()}`
-  const imageUrl = product.image_url || null
+  const shortDesc =
+    product.short_description ||
+    VARIETY_FALLBACK[product.variety] ||
+    `Натуральний мед ${product.variety.toLowerCase()}`
+  const imageUrl = resolveLocalImage(product.image_url)
+
+  const hasPrice = product.price_plastic_uah || product.price_glass_uah
 
   return (
     <article className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-bark/20 hover:shadow-xl transition-all duration-300 flex flex-col">
@@ -32,7 +46,7 @@ export function HoneyCard({ product }: HoneyCardProps) {
             alt={product.image_alt || `${product.name} — мед від пасіки Дача TV`}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             placeholder="blur"
             blurDataURL={BLUR_DATA_URL}
           />
@@ -44,7 +58,6 @@ export function HoneyCard({ product }: HoneyCardProps) {
           </div>
         )}
 
-        {/* Featured badge */}
         {product.is_featured && (
           <div className="absolute top-3 left-3">
             <span className="bg-honey-700 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">
@@ -53,7 +66,6 @@ export function HoneyCard({ product }: HoneyCardProps) {
           </div>
         )}
 
-        {/* Out of stock overlay */}
         {!product.in_stock && (
           <div className="absolute inset-0 bg-white/75 backdrop-blur-[1px] flex items-center justify-center">
             <span className="bg-bark text-white text-sm font-semibold px-4 py-2 rounded-full">
@@ -69,13 +81,13 @@ export function HoneyCard({ product }: HoneyCardProps) {
           {product.name}
         </h3>
 
-        <p className="text-sm text-gray-500 mb-4 leading-relaxed flex-1">
-          {note}
+        <p className="text-sm text-gray-500 mb-3 leading-relaxed flex-1">
+          {shortDesc}
         </p>
 
-        {/* Packaging */}
+        {/* Packaging chips */}
         {product.packaging && product.packaging.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
+          <div className="flex flex-wrap gap-1.5 mb-3">
             {product.packaging.map((pack) => (
               <span
                 key={pack}
@@ -84,6 +96,22 @@ export function HoneyCard({ product }: HoneyCardProps) {
                 {pack}
               </span>
             ))}
+          </div>
+        )}
+
+        {/* Price line */}
+        {hasPrice && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-4 text-sm">
+            {product.price_plastic_uah && (
+              <span className="text-bark font-semibold">
+                Пластик — {product.price_plastic_uah} грн
+              </span>
+            )}
+            {product.price_glass_uah && (
+              <span className="text-bark/60">
+                Скло — {product.price_glass_uah} грн
+              </span>
+            )}
           </div>
         )}
 

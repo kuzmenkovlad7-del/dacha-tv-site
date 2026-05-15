@@ -39,9 +39,58 @@ export default function AdminHoneyNewPage() {
         </div>
 
         <div>
+          <label htmlFor="short_description" className="block text-sm font-semibold text-bark mb-1">Короткий опис</label>
+          <textarea id="short_description" name="short_description" rows={2}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+        </div>
+
+        <div>
           <label htmlFor="description" className="block text-sm font-semibold text-bark mb-1">Опис</label>
           <textarea id="description" name="description" rows={4}
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+        </div>
+
+        <div>
+          <label htmlFor="aroma_notes" className="block text-sm font-semibold text-bark mb-1">Аромат</label>
+          <input id="aroma_notes" name="aroma_notes" type="text"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+        </div>
+
+        <div>
+          <label htmlFor="taste_notes" className="block text-sm font-semibold text-bark mb-1">Смак</label>
+          <input id="taste_notes" name="taste_notes" type="text"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+        </div>
+
+        <div>
+          <label htmlFor="color_note" className="block text-sm font-semibold text-bark mb-1">Колір</label>
+          <input id="color_note" name="color_note" type="text"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+        </div>
+
+        <div>
+          <label htmlFor="crystallization_note" className="block text-sm font-semibold text-bark mb-1">Кристалізація</label>
+          <input id="crystallization_note" name="crystallization_note" type="text"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+        </div>
+
+        <div>
+          <label htmlFor="recommended_use" className="block text-sm font-semibold text-bark mb-1">Рекомендовано для</label>
+          <input id="recommended_use" name="recommended_use" type="text"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="price_plastic_uah" className="block text-sm font-semibold text-bark mb-1">Ціна пластик (грн)</label>
+            <input id="price_plastic_uah" name="price_plastic_uah" type="number"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          </div>
+          <div>
+            <label htmlFor="price_glass_uah" className="block text-sm font-semibold text-bark mb-1">Ціна скло (грн)</label>
+            <input id="price_glass_uah" name="price_glass_uah" type="number"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          </div>
         </div>
 
         <div>

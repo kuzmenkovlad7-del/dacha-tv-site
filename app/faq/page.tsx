@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
+import type { FaqItem } from '@/types'
 import { getAllFaqItems } from '@/lib/supabase/queries'
 import { StructuredData } from '@/components/shared/StructuredData'
+
 export const metadata: Metadata = {
   title: 'Часті запитання',
   description:
@@ -22,24 +24,33 @@ const CATEGORY_LABELS: Record<FaqCategory, string> = {
 
 const CATEGORIES: FaqCategory[] = ['products', 'ordering', 'delivery', 'beekeeping']
 
-export default async function FaqPage() {
-  const items = await getAllFaqItems().catch(() => [])
+const STATIC_FAQ: FaqItem[] = [
+  { id: 's1', question: 'Як замовити мед?', answer: 'Ви можете залишити заявку на сайті або зателефонувати нам напряму. Ми уточнимо сорт, упаковку та спосіб доставки.', category: 'ordering', display_order: 1 },
+  { id: 's2', question: 'Які сорти меду у вас є?', answer: 'Наявність залежить від сезону. Основні сорти: акація, липа, сонях, різнотрав\'я, садовий та лісовий мед.', category: 'products', display_order: 1 },
+  { id: 's3', question: 'У якій упаковці доступний мед?', answer: 'Основні варіанти: 1 л пластик та 1 л скло.', category: 'products', display_order: 2 },
+  { id: 's4', question: 'Чи є доставка по Україні?', answer: 'Так, ми відправляємо замовлення по Україні службами доставки.', category: 'delivery', display_order: 1 },
+  { id: 's5', question: 'Чи можна замовити самовивіз?', answer: 'Так, деталі самовивозу узгоджуються під час оформлення.', category: 'delivery', display_order: 2 },
+  { id: 's6', question: 'Як швидко ви відповідаєте?', answer: 'Зазвичай відповідаємо протягом кількох годин.', category: 'ordering', display_order: 2 },
+  { id: 's7', question: 'Чи є у вас продукція для пасічників?', answer: 'Так, окрім меду, ми маємо продукцію для пасічників, зокрема приманку для роїв.', category: 'beekeeping', display_order: 1 },
+  { id: 's8', question: 'Чи весь мед натуральний?', answer: 'Так, ми продаємо натуральний мед із власної сімейної пасіки.', category: 'products', display_order: 3 },
+  { id: 's9', question: 'Чому деяких сортів може тимчасово не бути?', answer: 'Мед є сезонним продуктом, тому окремі сорти можуть бути недоступні в окремі періоди.', category: 'products', display_order: 4 },
+  { id: 's10', question: 'Чи можна уточнити деталі перед замовленням?', answer: 'Так, ми завжди можемо проконсультувати перед оформленням заявки.', category: 'ordering', display_order: 3 },
+]
 
-  // Build structured data
+export default async function FaqPage() {
+  const dbItems = await getAllFaqItems().catch(() => [])
+  const items = dbItems.length > 0 ? dbItems : STATIC_FAQ
+
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     mainEntity: items.map((item) => ({
       '@type': 'Question',
       name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.answer,
-      },
+      acceptedAnswer: { '@type': 'Answer', text: item.answer },
     })),
   }
 
-  // Group by category
   const grouped = CATEGORIES.reduce<Record<FaqCategory, typeof items>>(
     (acc, cat) => {
       acc[cat] = items.filter((item) => item.category === cat)
@@ -84,10 +95,7 @@ export default async function FaqPage() {
                       <span>{item.question}</span>
                       <svg
                         className="w-5 h-5 flex-shrink-0 text-bark/40 group-open:rotate-180 transition-transform"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                         aria-hidden="true"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -103,14 +111,9 @@ export default async function FaqPage() {
           )
         })}
 
-        {/* Still have questions? */}
         <div className="bg-honey-50 rounded-2xl p-6 border border-honey-200 text-center">
-          <h2 className="font-serif text-xl font-bold text-bark mb-3">
-            Не знайшли відповіді?
-          </h2>
-          <p className="text-bark/70 mb-4">
-            Зателефонуйте або напишіть — відповімо на будь-яке питання
-          </p>
+          <h2 className="font-serif text-xl font-bold text-bark mb-3">Не знайшли відповіді?</h2>
+          <p className="text-bark/70 mb-4">Зателефонуйте або напишіть — відповімо на будь-яке питання</p>
           <a
             href="/contact"
             className="inline-flex items-center gap-2 bg-honey-700 hover:bg-honey-800 text-white font-semibold px-6 py-3 rounded-lg transition-colors min-h-[48px]"

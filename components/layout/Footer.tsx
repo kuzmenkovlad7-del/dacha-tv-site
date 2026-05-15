@@ -1,6 +1,21 @@
 import Link from 'next/link'
+import Image from 'next/image'
+import { existsSync } from 'fs'
+import { join } from 'path'
 import { PhoneLink } from '@/components/shared/PhoneLink'
+import {
+  LAUNCH_PHONE,
+  LAUNCH_PHONE_SECONDARY,
+  LAUNCH_ADDRESS,
+  LAUNCH_YOUTUBE_URL,
+  LAUNCH_FACEBOOK_URL,
+  LAUNCH_INSTAGRAM_URL,
+  LAUNCH_TIKTOK_URL,
+  LAUNCH_LOGO_PATH,
+} from '@/lib/launch-defaults'
 import type { SiteSettings } from '@/types'
+
+const LOGO_PATH = LAUNCH_LOGO_PATH
 
 interface FooterProps {
   siteSettings: SiteSettings | null
@@ -59,18 +74,19 @@ function TelegramIcon() {
 }
 
 export function Footer({ siteSettings }: FooterProps) {
-  const phone = siteSettings?.phone || null
-  const phoneSecondary = siteSettings?.phone_secondary || null
-  const address = siteSettings?.address_full || FALLBACK_ADDRESS
+  const phone = siteSettings?.phone || LAUNCH_PHONE
+  const phoneSecondary = siteSettings?.phone_secondary || LAUNCH_PHONE_SECONDARY
+  const address = siteSettings?.address_full || LAUNCH_ADDRESS
   const currentYear = new Date().getFullYear()
+  const hasLogo = existsSync(join(process.cwd(), 'public', LOGO_PATH))
 
   const socials = [
-    { url: siteSettings?.youtube_url, Icon: YouTubeIcon, label: 'YouTube' },
-    { url: siteSettings?.facebook_url, Icon: FacebookIcon, label: 'Facebook' },
-    { url: siteSettings?.instagram_url, Icon: InstagramIcon, label: 'Instagram' },
-    { url: siteSettings?.tiktok_url, Icon: TikTokIcon, label: 'TikTok' },
-    { url: siteSettings?.telegram_url, Icon: TelegramIcon, label: 'Telegram' },
-  ].filter((s) => Boolean(s.url))
+    { url: siteSettings?.youtube_url || LAUNCH_YOUTUBE_URL, Icon: YouTubeIcon, label: 'YouTube' },
+    { url: siteSettings?.facebook_url || LAUNCH_FACEBOOK_URL, Icon: FacebookIcon, label: 'Facebook' },
+    { url: siteSettings?.instagram_url || LAUNCH_INSTAGRAM_URL, Icon: InstagramIcon, label: 'Instagram' },
+    { url: siteSettings?.tiktok_url || LAUNCH_TIKTOK_URL, Icon: TikTokIcon, label: 'TikTok' },
+    ...(siteSettings?.telegram_url ? [{ url: siteSettings.telegram_url, Icon: TelegramIcon, label: 'Telegram' }] : []),
+  ]
 
   return (
     <footer className="bg-white border-t border-gray-200 mt-auto">
@@ -80,31 +96,38 @@ export function Footer({ siteSettings }: FooterProps) {
           <div className="md:col-span-1">
             <Link
               href="/"
-              className="font-serif font-bold text-2xl text-bark hover:text-honey-700 transition-colors block mb-3"
+              className="inline-flex items-center gap-2.5 hover:opacity-80 transition-opacity mb-3"
             >
-              Дача TV
+              {hasLogo && (
+                <Image
+                  src={LOGO_PATH}
+                  alt="Дача TV"
+                  width={36}
+                  height={36}
+                  className="w-9 h-9 object-contain"
+                />
+              )}
+              <span className="font-serif font-bold text-2xl text-bark">Дача TV</span>
             </Link>
             <p className="text-sm text-gray-500 leading-relaxed mb-5">
               Натуральний мед від сімейної пасіки на Харківщині. Напряму від виробника.
             </p>
 
             {/* Social icons — circular border style */}
-            {socials.length > 0 && (
-              <div className="flex items-center gap-2 flex-wrap">
-                {socials.map(({ url, Icon, label }) => (
-                  <a
-                    key={label}
-                    href={url!}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={label}
-                    className="w-9 h-9 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:text-bark hover:border-bark transition-all"
-                  >
-                    <Icon />
-                  </a>
-                ))}
-              </div>
-            )}
+            <div className="flex items-center gap-2 flex-wrap">
+              {socials.map(({ url, Icon, label }) => (
+                <a
+                  key={label}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="w-9 h-9 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:text-bark hover:border-bark transition-all"
+                >
+                  <Icon />
+                </a>
+              ))}
+            </div>
           </div>
 
           {/* Navigation column */}
@@ -149,24 +172,20 @@ export function Footer({ siteSettings }: FooterProps) {
               Контакти
             </h3>
             <div className="space-y-4">
-              {phone && (
-                <div>
-                  <PhoneLink
-                    phone={phone}
-                    showIcon
-                    className="text-bark font-semibold text-base hover:text-honey-700 transition-colors"
-                  />
-                </div>
-              )}
-              {phoneSecondary && (
-                <div>
-                  <PhoneLink
-                    phone={phoneSecondary}
-                    showIcon
-                    className="text-bark font-semibold text-base hover:text-honey-700 transition-colors"
-                  />
-                </div>
-              )}
+              <div>
+                <PhoneLink
+                  phone={phone}
+                  showIcon
+                  className="text-bark font-semibold text-base hover:text-honey-700 transition-colors"
+                />
+              </div>
+              <div>
+                <PhoneLink
+                  phone={phoneSecondary}
+                  showIcon
+                  className="text-bark font-semibold text-base hover:text-honey-700 transition-colors"
+                />
+              </div>
               <address className="text-sm text-gray-500 not-italic leading-relaxed">
                 {address}
               </address>

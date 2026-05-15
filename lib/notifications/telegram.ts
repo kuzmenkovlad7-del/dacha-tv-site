@@ -30,6 +30,7 @@ function formatTelegramMessage(inquiry: InquiryData): string {
   if (inquiry.quantity) lines.push(`Кількість: ${inquiry.quantity}`)
   if (inquiry.timing) lines.push(`Час: ${inquiry.timing}`)
   if (inquiry.message) lines.push(`Повідомлення: ${inquiry.message}`)
+  if (inquiry.source) lines.push(`Сторінка: ${inquiry.source}`)
 
   lines.push(`⏰ ${timestamp}`)
 

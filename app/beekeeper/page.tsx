@@ -136,7 +136,7 @@ export default async function BeekeeperPage() {
                 <p className="text-bark/60 text-sm mb-6">
                   Щоб дізнатись наявність та вартість — залиште заявку або зателефонуйте
                 </p>
-                <BeekeeperInquiryForm />
+                <BeekeeperInquiryForm source="/beekeeper" />
               </div>
             </div>
           </div>

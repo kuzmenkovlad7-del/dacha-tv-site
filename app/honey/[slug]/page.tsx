@@ -2,9 +2,12 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import { existsSync } from 'fs'
+import { join } from 'path'
 import { HoneyOrderForm } from '@/components/forms/HoneyOrderForm'
 import { HoneyCard } from '@/components/honey/HoneyCard'
 import { StructuredData } from '@/components/shared/StructuredData'
+import { STATIC_HONEY, STATIC_HONEY_BY_SLUG, STATIC_HONEY_SLUGS } from '@/lib/static-catalog'
 import {
   getHoneyProductBySlug,
   getAllHoneySlugs,
@@ -15,18 +18,20 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
+// Always include all 6 production slugs so detail pages are pre-built regardless
+// of whether the DB migration has run. DB slugs are merged in at build time.
 export async function generateStaticParams() {
-  const slugs = await getAllHoneySlugs().catch(() => [])
-  return slugs.map((slug) => ({ slug }))
+  const dbSlugs = await getAllHoneySlugs().catch(() => [])
+  const allSlugs = [...new Set([...STATIC_HONEY_SLUGS, ...dbSlugs])]
+  return allSlugs.map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const product = await getHoneyProductBySlug(slug).catch(() => null)
+  const dbProduct = await getHoneyProductBySlug(slug).catch(() => null)
+  const product = dbProduct ?? STATIC_HONEY_BY_SLUG[slug] ?? null
 
-  if (!product) {
-    return { title: 'Продукт не знайдено' }
-  }
+  if (!product) return { title: 'Продукт не знайдено' }
 
   return {
     title: product.name,
@@ -39,16 +44,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-const VARIETY_DETAILS: Record<
-  string,
-  {
-    season: string
-    taste: string
-    crystallisation: string
-    storage: string
-    uses: string
-  }
-> = {
+const VARIETY_DETAILS: Record<string, {
+  season: string
+  taste: string
+  crystallisation: string
+  storage: string
+  uses: string
+}> = {
   Акація: {
     season: 'Кінець травня — початок червня',
     taste: 'Ніжний, квітковий, злегка вершковий. Один з найсвітліших сортів.',
@@ -79,33 +81,44 @@ const VARIETY_DETAILS: Record<
   },
   Сади: {
     season: 'Квітень — травень',
-    taste: 'Ніжний, квітковий, з легким яблуневим або грушевим нотками залежно від садів.',
-    crystallisation: 'Кристалізується за 2–3 місяці. Кристали м\'які та дрібні.',
+    taste: "Ніжний, квітковий, з легким яблуневим або грушевим нотками залежно від садів.",
+    crystallisation: "Кристалізується за 2–3 місяці. Кристали м'які та дрібні.",
     storage: 'Зберігати в прохолодному темному місці.',
     uses: 'Ідеально в чай, з сиром, як добавка до десертів.',
   },
   Ліс: {
     season: 'Червень — серпень',
-    taste: 'Темний, комплексний, з мінеральними та деревними нотками. Яскраво виражений характер.',
+    taste: "Темний, комплексний, з мінеральними та деревними нотками. Яскраво виражений характер.",
     crystallisation: 'Кристалізується повільно. Може зберігатися рідким тривалий час.',
     storage: 'Зберігати в прохолодному темному місці.',
-    uses: 'Для цінителів — самостійно або в блюдах з м\'ясом та сирами.',
+    uses: "Для цінителів — самостійно або в блюдах з м'ясом та сирами.",
   },
 }
 
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmJiZjI0Ii8+PC9zdmc+'
 
+function resolveLocalImage(imageUrl: string | null): string | null {
+  if (!imageUrl) return null
+  if (imageUrl.startsWith('http')) return imageUrl
+  return existsSync(join(process.cwd(), 'public', imageUrl)) ? imageUrl : null
+}
+
 export default async function HoneyProductPage({ params }: Props) {
   const { slug } = await params
-  const [product, allProducts] = await Promise.all([
+
+  const [dbProduct, allDbProducts] = await Promise.all([
     getHoneyProductBySlug(slug).catch(() => null),
     getAllHoneyProducts().catch(() => []),
   ])
 
+  // Fall back to static catalog if DB doesn't have the slug yet
+  const product = dbProduct ?? STATIC_HONEY_BY_SLUG[slug] ?? null
   if (!product) notFound()
 
+  const allProducts = allDbProducts.length > 0 ? allDbProducts : STATIC_HONEY
   const details = VARIETY_DETAILS[product.variety]
+  const heroImage = resolveLocalImage(product.image_url)
 
   const related = allProducts
     .filter((p) => p.id !== product.id && p.in_stock)
@@ -115,7 +128,7 @@ export default async function HoneyProductPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    description: details?.taste || `Натуральний ${product.name} від пасіки на Харківщині`,
+    description: product.short_description || details?.taste || `Натуральний ${product.name} від пасіки на Харківщині`,
     brand: { '@type': 'Brand', name: 'Дача TV' },
     offers: {
       '@type': 'Offer',
@@ -147,9 +160,9 @@ export default async function HoneyProductPage({ params }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           {/* Image */}
           <div className="relative aspect-square rounded-2xl overflow-hidden bg-honey-50">
-            {product.image_url ? (
+            {heroImage ? (
               <Image
-                src={product.image_url}
+                src={heroImage}
                 alt={product.image_alt || `${product.name} від пасіки Дача TV`}
                 fill
                 priority
@@ -180,6 +193,12 @@ export default async function HoneyProductPage({ params }: Props) {
               {product.name}
             </h1>
 
+            {(product.short_description || details?.taste) && (
+              <p className="text-bark/70 text-base leading-relaxed mb-4">
+                {product.short_description || details?.taste}
+              </p>
+            )}
+
             {!product.in_stock && (
               <div className="bg-gray-100 text-gray-700 rounded-lg px-4 py-3 mb-4 text-sm font-medium">
                 Наразі немає в наявності. Залиште заявку — ми повідомимо, коли з&apos;явиться.
@@ -188,45 +207,91 @@ export default async function HoneyProductPage({ params }: Props) {
 
             {/* Packaging */}
             {product.packaging && product.packaging.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-6">
+              <div className="flex flex-wrap gap-2 mb-4">
                 {product.packaging.map((pack) => (
-                  <span
-                    key={pack}
-                    className="text-sm bg-honey-50 text-honey-700 border border-honey-200 px-3 py-1 rounded-full font-medium"
-                  >
+                  <span key={pack} className="text-sm bg-honey-50 text-honey-700 border border-honey-200 px-3 py-1 rounded-full font-medium">
                     {pack}
                   </span>
                 ))}
               </div>
             )}
 
+            {/* Price block */}
+            {(product.price_plastic_uah || product.price_glass_uah) && (
+              <div className="flex flex-wrap gap-4 mb-6 py-3 border-t border-b border-honey-100">
+                {product.price_plastic_uah && (
+                  <div>
+                    <span className="text-xs text-bark/50 block mb-0.5">Пластик</span>
+                    <span className="text-xl font-bold text-bark">{product.price_plastic_uah} грн</span>
+                  </div>
+                )}
+                {product.price_glass_uah && (
+                  <div>
+                    <span className="text-xs text-bark/50 block mb-0.5">Скло</span>
+                    <span className="text-xl font-bold text-bark">{product.price_glass_uah} грн</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Details table */}
-            {details && (
-              <dl className="space-y-4 mb-8">
+            <dl className="space-y-3 mb-6">
+              {details?.season && (
                 <div className="grid grid-cols-3 gap-2">
                   <dt className="text-sm font-medium text-bark/60">Сезон</dt>
                   <dd className="col-span-2 text-sm text-bark">{details.season}</dd>
                 </div>
+              )}
+              {product.aroma_notes && (
+                <div className="grid grid-cols-3 gap-2">
+                  <dt className="text-sm font-medium text-bark/60">Аромат</dt>
+                  <dd className="col-span-2 text-sm text-bark">{product.aroma_notes}</dd>
+                </div>
+              )}
+              {(product.taste_notes || details?.taste) && (
                 <div className="grid grid-cols-3 gap-2">
                   <dt className="text-sm font-medium text-bark/60">Смак</dt>
-                  <dd className="col-span-2 text-sm text-bark">{details.taste}</dd>
+                  <dd className="col-span-2 text-sm text-bark">{product.taste_notes || details?.taste}</dd>
                 </div>
+              )}
+              {product.color_note && (
+                <div className="grid grid-cols-3 gap-2">
+                  <dt className="text-sm font-medium text-bark/60">Колір</dt>
+                  <dd className="col-span-2 text-sm text-bark">{product.color_note}</dd>
+                </div>
+              )}
+              {(product.crystallization_note || details?.crystallisation) && (
                 <div className="grid grid-cols-3 gap-2">
                   <dt className="text-sm font-medium text-bark/60">Кристалізація</dt>
-                  <dd className="col-span-2 text-sm text-bark">{details.crystallisation}</dd>
+                  <dd className="col-span-2 text-sm text-bark">{product.crystallization_note || details?.crystallisation}</dd>
                 </div>
+              )}
+              {details?.storage && (
                 <div className="grid grid-cols-3 gap-2">
                   <dt className="text-sm font-medium text-bark/60">Зберігання</dt>
                   <dd className="col-span-2 text-sm text-bark">{details.storage}</dd>
                 </div>
+              )}
+              {(product.recommended_use || details?.uses) && (
                 <div className="grid grid-cols-3 gap-2">
-                  <dt className="text-sm font-medium text-bark/60">Для чого</dt>
-                  <dd className="col-span-2 text-sm text-bark">{details.uses}</dd>
+                  <dt className="text-sm font-medium text-bark/60">Рекомендовано</dt>
+                  <dd className="col-span-2 text-sm text-bark">{product.recommended_use || details?.uses}</dd>
                 </div>
-              </dl>
+              )}
+              {product.packaging_note && (
+                <div className="grid grid-cols-3 gap-2">
+                  <dt className="text-sm font-medium text-bark/60">Упаковка</dt>
+                  <dd className="col-span-2 text-sm text-bark">{product.packaging_note}</dd>
+                </div>
+              )}
+            </dl>
+
+            {product.full_description && (
+              <div className="prose prose-sm text-bark/80 mb-6 leading-relaxed">
+                <p>{product.full_description}</p>
+              </div>
             )}
 
-            {/* YouTube link */}
             {product.youtube_video_link && (
               <a
                 href={product.youtube_video_link}
@@ -243,15 +308,14 @@ export default async function HoneyProductPage({ params }: Props) {
 
             {/* Order form */}
             <div id="order-form" className="bg-honey-50 rounded-2xl p-6 border border-honey-200">
-              <h2 className="font-serif text-2xl font-bold text-bark mb-1">
-                Замовити
-              </h2>
+              <h2 className="font-serif text-2xl font-bold text-bark mb-1">Замовити</h2>
               <p className="text-bark/60 text-sm mb-5">
                 Залиште заявку — ми зв&apos;яжемося з вами найближчим часом
               </p>
               <HoneyOrderForm
                 preselectedProduct={product.name}
                 packagingOptions={product.packaging || []}
+                source={`/honey/${slug}`}
               />
             </div>
           </div>

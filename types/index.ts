@@ -20,7 +20,17 @@ export interface HoneyProduct {
   slug: string
   variety: string
   description: string | null
+  short_description: string | null
+  full_description: string | null
+  aroma_notes: string | null
+  taste_notes: string | null
+  color_note: string | null
+  crystallization_note: string | null
+  recommended_use: string | null
   packaging: string[] | null
+  packaging_note: string | null
+  price_plastic_uah: number | null
+  price_glass_uah: number | null
   is_featured: boolean
   in_stock: boolean
   display_order: number
@@ -36,6 +46,16 @@ export interface ApiaryProduct {
   name: string
   slug: string
   description: string | null
+  short_description: string | null
+  full_description: string | null
+  composition: string | null
+  usage_notes: string | null
+  storage_info: string | null
+  packaging_note: string | null
+  weight_g: number | null
+  price_uah: number | null
+  is_featured: boolean
+  gallery_images: string[] | null
   packaging: string[] | null
   in_stock: boolean
   display_order: number
@@ -104,4 +124,5 @@ export interface InquiryData {
   quantity?: string
   timing?: string
   message?: string
+  source?: string
 }
