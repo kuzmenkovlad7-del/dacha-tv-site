@@ -9,6 +9,7 @@ import { BeekeeperTeaser } from '@/components/home/BeekeeperTeaser'
 import { DeliveryTeaser } from '@/components/home/DeliveryTeaser'
 import { StructuredData } from '@/components/shared/StructuredData'
 import { ApiaryTrustStrip } from '@/components/home/ApiaryTrustStrip'
+import { ApiaryTrust } from '@/components/shared/ApiaryTrust'
 import {
   getFeaturedHoneyProducts,
   getVisibleReviews,
@@ -77,6 +78,13 @@ export default async function HomePage() {
       {reviews.length > 0 && <Reviews reviews={reviews} />}
 
       <ApiaryTrustStrip />
+
+      {/* Apiary registration trust block */}
+      <section className="py-16 bg-white">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <ApiaryTrust />
+        </div>
+      </section>
 
       <BeekeeperTeaser />
 

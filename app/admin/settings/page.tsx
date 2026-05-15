@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
-import { getSiteSettings } from '@/lib/supabase/queries'
+import { getAdminClient } from '@/lib/supabase/admin'
+import type { SiteSettings } from '@/types'
 import { saveSiteSettings } from './actions'
 
 export const metadata: Metadata = {
@@ -9,7 +10,12 @@ export const metadata: Metadata = {
 }
 
 export default async function AdminSettingsPage() {
-  const settings = await getSiteSettings().catch(() => null)
+  let settings: SiteSettings | null = null
+  try {
+    const client = getAdminClient()
+    const { data } = await client.from('site_settings').select('*').eq('id', 1).single()
+    settings = data ?? null
+  } catch { /* env not configured */ }
 
   return (
     <div className="px-4 sm:px-6 py-8 max-w-2xl">

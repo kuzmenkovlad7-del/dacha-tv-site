@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
-import { getSupabaseClient } from '@/lib/supabase/client'
+import { getAdminClient } from '@/lib/supabase/admin'
 import { InquiryCard } from '@/components/admin/InquiryCard'
 import type { Inquiry, InquiryStatus } from '@/types'
 
@@ -47,8 +47,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   let missingEnv = false
 
   try {
-    const supabase = getSupabaseClient()
-    // Use select('*') — returns only columns that exist, no column-missing errors
+    const supabase = getAdminClient()
     let query = supabase
       .from('inquiries')
       .select('*')
@@ -68,7 +67,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
-    if (msg.includes('Missing Supabase') || msg.includes('credentials')) {
+    if (msg.includes('Missing Supabase') || msg.includes('credentials') || msg.includes('not configured')) {
       missingEnv = true
       error = 'Supabase не налаштовано'
       errorDetail = 'Встановіть NEXT_PUBLIC_SUPABASE_URL та SUPABASE_SERVICE_ROLE_KEY у Vercel.'
