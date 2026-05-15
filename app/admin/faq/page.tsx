@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
-import { getAllFaqItems } from '@/lib/supabase/queries'
+import { getAdminClient } from '@/lib/supabase/admin'
+import type { FaqItem } from '@/types'
 import { createFaqItem, deleteFaqItem } from './actions'
 
 export const metadata: Metadata = {
@@ -23,7 +24,12 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 export default async function AdminFaqPage() {
-  const items = await getAllFaqItems().catch(() => [])
+  let items: FaqItem[] = []
+  try {
+    const client = getAdminClient()
+    const { data } = await client.from('faq_items').select('*').order('display_order', { ascending: true })
+    items = (data ?? []) as FaqItem[]
+  } catch { /* env not set — show empty list */ }
 
   const grouped = ['products', 'ordering', 'delivery', 'beekeeping'].reduce<Record<string, typeof items>>(
     (acc, cat) => {

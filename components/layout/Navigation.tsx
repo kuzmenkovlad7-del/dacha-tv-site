@@ -126,16 +126,21 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
   }, [pathname])
 
   useEffect(() => {
+    const html = document.documentElement
     if (drawerOpen) {
-      // position:fixed is the only reliable cross-browser (Android Chrome) scroll lock
-      const y = window.scrollY
-      document.body.style.cssText = `position:fixed;top:-${y}px;left:0;right:0;overflow-y:scroll;`
+      // Store scroll position on the element so the cleanup can restore it
+      html.dataset.drawerScrollY = String(window.scrollY)
+      html.style.overflow = 'hidden'
     } else {
-      const top = document.body.style.top
-      document.body.style.cssText = ''
-      if (top) window.scrollTo(0, -parseInt(top, 10))
+      const y = Number(html.dataset.drawerScrollY ?? 0)
+      html.style.overflow = ''
+      delete html.dataset.drawerScrollY
+      // Only scroll if we had a stored position (i.e. we locked it)
+      if (y) window.scrollTo(0, y)
     }
-    return () => { document.body.style.cssText = '' }
+    return () => {
+      html.style.overflow = ''
+    }
   }, [drawerOpen])
 
   return (
@@ -171,20 +176,21 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
         </svg>
       </button>
 
-      {/* Backdrop overlay — sits below drawer, above page content */}
-      {drawerOpen && (
-        <div
-          className="fixed inset-0 z-[55] bg-bark/50 md:hidden"
-          onClick={() => setDrawerOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Slide-in drawer — fixed, right-anchored, never wider than viewport */}
+      {/* Backdrop overlay */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-[60] w-[min(88vw,360px)] max-w-full bg-white shadow-2xl will-change-transform transition-transform duration-300 ease-in-out md:hidden flex flex-col',
-          drawerOpen ? 'translate-x-0' : 'translate-x-full'
+          'fixed inset-0 z-[55] bg-bark/50 md:hidden transition-opacity duration-300',
+          drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none invisible'
+        )}
+        onClick={() => setDrawerOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Slide-in drawer — fixed right panel, never causes horizontal overflow */}
+      <div
+        className={cn(
+          'fixed inset-y-0 right-0 z-[60] w-[min(88vw,360px)] max-w-full bg-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden flex flex-col',
+          drawerOpen ? 'translate-x-0' : 'translate-x-full invisible'
         )}
         aria-label="Мобільна навігація"
         role="dialog"
