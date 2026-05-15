@@ -159,7 +159,7 @@ export default async function ApiaryProductPage({ params }: Props) {
 
             {/* Packaging tags */}
             {product.packaging && product.packaging.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-6">
+              <div className="flex flex-wrap gap-2 mb-4">
                 {product.packaging.map((pack) => (
                   <span
                     key={pack}
@@ -171,12 +171,19 @@ export default async function ApiaryProductPage({ params }: Props) {
               </div>
             )}
 
-            {/* Description */}
-            {product.description && !product.short_description && (
-              <p className="text-bark/70 leading-relaxed mb-6">{product.description}</p>
+            {/* Price */}
+            {product.price_uah && (
+              <div className="flex items-baseline gap-2 mb-6 py-3 border-t border-b border-honey-100">
+                <span className="text-2xl font-bold text-bark">{product.price_uah} грн</span>
+                <span className="text-sm text-bark/50">за одиницю</span>
+              </div>
             )}
-            {product.description && product.short_description && (
-              <p className="text-bark/70 leading-relaxed mb-6">{product.description}</p>
+
+            {/* Full description (preferred) or regular description */}
+            {(product.full_description || product.description) && (
+              <p className="text-bark/70 leading-relaxed mb-6">
+                {product.full_description || product.description}
+              </p>
             )}
 
             {/* Composition */}
