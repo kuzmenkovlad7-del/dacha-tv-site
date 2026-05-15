@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { getSupabaseClient } from '@/lib/supabase/client'
+import { getAdminClient } from '@/lib/supabase/admin'
 
 export async function GET(request: Request) {
   const cookieStore = await cookies()
@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   const validStatuses = ['new', 'contacted', 'completed', 'cancelled']
 
   try {
-    const supabase = getSupabaseClient()
+    const supabase = getAdminClient()
     let query = supabase.from('inquiries').select('*').order('created_at', { ascending: false })
     if (status && status !== 'all' && validStatuses.includes(status)) {
       query = query.eq('status', status)
@@ -22,7 +22,9 @@ export async function GET(request: Request) {
     const { data, error } = await query
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json(data)
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Server error'
+    if (msg.includes('not configured')) return NextResponse.json({ error: 'Supabase not configured' }, { status: 503 })
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
@@ -48,7 +50,7 @@ export async function PATCH(request: Request) {
     if (notes !== undefined) update.notes = notes
     if (Object.keys(update).length === 0) return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
 
-    const supabase = getSupabaseClient()
+    const supabase = getAdminClient()
     const { error } = await supabase.from('inquiries').update(update).eq('id', id)
     if (error) {
       // notes column missing — retry status-only
@@ -63,7 +65,9 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
     return NextResponse.json({ ok: true })
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Server error'
+    if (msg.includes('not configured')) return NextResponse.json({ error: 'Supabase not configured' }, { status: 503 })
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

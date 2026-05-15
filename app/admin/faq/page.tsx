@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { getAdminClient } from '@/lib/supabase/admin'
 import type { FaqItem } from '@/types'
 import { createFaqItem, deleteFaqItem } from './actions'
+import { seedLaunchDataAction } from '@/app/admin/actions/seed'
 
 export const metadata: Metadata = {
   title: 'Адмін — FAQ',
@@ -77,7 +78,15 @@ export default async function AdminFaqPage() {
       )}
 
       {items.length === 0 && (
-        <div className="text-center py-8 text-bark/50 text-sm mb-8">Немає питань</div>
+        <div className="text-center py-8 text-bark/50 text-sm mb-8">
+          <p className="mb-4">Немає питань</p>
+          <form action={seedLaunchDataAction}>
+            <button type="submit"
+              className="bg-honey-700 hover:bg-honey-800 text-white font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors min-h-[44px]">
+              Заповнити стартовими даними
+            </button>
+          </form>
+        </div>
       )}
 
       {/* Add form */}

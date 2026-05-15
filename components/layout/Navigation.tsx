@@ -176,21 +176,21 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
         </svg>
       </button>
 
-      {/* Backdrop overlay */}
+      {/* Full-screen dark translucent backdrop */}
       <div
         className={cn(
-          'fixed inset-0 z-[55] bg-bark/50 md:hidden transition-opacity duration-300',
-          drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none invisible'
+          'fixed inset-0 z-[55] bg-black/60 backdrop-blur-sm md:hidden transition-opacity duration-200',
+          drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         )}
         onClick={() => setDrawerOpen(false)}
         aria-hidden="true"
       />
 
-      {/* Slide-in drawer — fixed right panel, never causes horizontal overflow */}
+      {/* Slide-in drawer — fixed, right-anchored, never wider than viewport */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-[60] w-[min(88vw,360px)] max-w-full bg-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden flex flex-col',
-          drawerOpen ? 'translate-x-0' : 'translate-x-full invisible'
+          'fixed inset-y-0 right-0 z-[60] w-[min(88vw,360px)] max-w-full bg-[#FAFAF8] shadow-2xl will-change-transform transition-transform duration-300 ease-in-out md:hidden flex flex-col',
+          drawerOpen ? 'translate-x-0 visible' : 'translate-x-full invisible pointer-events-none'
         )}
         aria-label="Мобільна навігація"
         role="dialog"
@@ -198,7 +198,7 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
         aria-hidden={!drawerOpen}
       >
         {/* Drawer header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 flex-shrink-0">
           <Link
             href="/"
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -229,14 +229,14 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
         </div>
 
         {/* Drawer nav links */}
-        <nav className="flex flex-col flex-1 px-4 py-6 gap-1 overflow-y-auto">
+        <nav className="flex flex-col flex-1 overflow-y-auto">
           {NAV_ITEMS.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
               onClick={() => setDrawerOpen(false)}
               className={cn(
-                'px-4 py-4 rounded-xl text-base font-medium transition-colors min-h-[52px] flex items-center',
+                'py-4 px-5 text-base font-medium transition-colors min-h-[52px] flex items-center w-full border-b border-gray-50',
                 pathname.startsWith(href)
                   ? 'text-honey-800 bg-honey-50'
                   : 'text-bark hover:text-honey-800 hover:bg-honey-50'
@@ -248,9 +248,11 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
         </nav>
 
         {/* Drawer footer — phone(s) + social + CTA */}
-        <div className="px-4 py-5 border-t border-gray-100 space-y-3 overflow-hidden">
+        <div className="px-5 py-5 border-t border-gray-100 space-y-3 flex-shrink-0 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
           <MobilePhoneLink phone={resolvedPhone} />
-          <MobilePhoneLink phone={resolvedPhoneSecondary} />
+          {resolvedPhoneSecondary && resolvedPhoneSecondary !== resolvedPhone && (
+            <MobilePhoneLink phone={resolvedPhoneSecondary} />
+          )}
           <DrawerSocialIcons siteSettings={siteSettings} />
           <Link
             href="/honey"

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import type { Review } from '@/types'
 
 interface ReviewsProps {
@@ -60,6 +61,18 @@ export function Reviews({ reviews }: ReviewsProps) {
               <p className="text-gray-700 mt-5 mb-6 leading-relaxed flex-1 text-sm">
                 &ldquo;{review.quote}&rdquo;
               </p>
+
+              {review.photo_url && (
+                <div className="mb-4 relative w-full aspect-[4/3] rounded-lg overflow-hidden border border-gray-100">
+                  <Image
+                    src={review.photo_url}
+                    alt={review.reviewer_name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 350px"
+                  />
+                </div>
+              )}
 
               <footer className="flex items-center gap-3">
                 <ReviewerInitial name={review.reviewer_name} />

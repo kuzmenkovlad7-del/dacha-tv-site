@@ -98,6 +98,15 @@ export default async function AdminReviewsPage() {
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-semibold text-bark mb-1">
+              Фото відгуку <span className="font-normal text-gray-400">— необов&apos;язково (URL)</span>
+            </label>
+            <input name="photo_url" type="text"
+              placeholder="https://..."
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          </div>
+
           <button type="submit"
             className="bg-bark text-white font-semibold py-2.5 px-6 rounded-lg hover:bg-bark-light transition-colors text-sm min-h-[44px]">
             Додати відгук

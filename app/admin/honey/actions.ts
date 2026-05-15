@@ -60,10 +60,13 @@ export async function updateHoneyProduct(id: string, formData: FormData) {
   const client = getAdminClient()
   const slug = (formData.get('slug') as string).trim()
   const imageFile = formData.get('image') as File | null
+  const manualImageUrl = (formData.get('image_url_manual') as string)?.trim() || null
   let image_url: string | undefined = undefined
   if (imageFile && imageFile.size > 0) {
     const uploaded = await uploadImage(imageFile, slug)
     if (uploaded) image_url = uploaded
+  } else if (manualImageUrl) {
+    image_url = manualImageUrl
   }
   const packagingRaw = formData.get('packaging') as string
   const packaging = packagingRaw ? packagingRaw.split(',').map((s) => s.trim()).filter(Boolean) : null

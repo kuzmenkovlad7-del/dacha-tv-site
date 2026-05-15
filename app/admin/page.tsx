@@ -48,6 +48,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
   try {
     const supabase = getAdminClient()
+    // Use select('*') — returns only columns that exist, no column-missing errors
     let query = supabase
       .from('inquiries')
       .select('*')

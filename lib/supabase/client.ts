@@ -30,6 +30,15 @@ import type { Inquiry } from '@/types'
 // Expose row type for typed queries
 export type { Inquiry }
 
+function normalizeSupabaseUrl(raw: string): string {
+  try {
+    const u = new URL(raw.trim())
+    return `${u.protocol}//${u.host}`
+  } catch {
+    return raw.trim().replace(/\/+$/, '')
+  }
+}
+
 export function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -38,7 +47,7 @@ export function getSupabaseClient() {
     throw new Error('Missing Supabase environment variables')
   }
 
-  return createClient(url, key, {
+  return createClient(normalizeSupabaseUrl(url), key, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
