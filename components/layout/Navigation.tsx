@@ -107,28 +107,13 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
         </svg>
       </button>
 
-      {/* Full-screen mobile menu — solid white panel, slides down from top */}
-      {/* Backdrop: renders behind the panel, no transparency on the panel itself */}
+      {/* Full-screen mobile menu — instant solid white cover, no animation to avoid bleed-through */}
+      {menuOpen && (
       <div
-        className={cn('fixed inset-0 z-[90] bg-black/40 md:hidden transition-opacity duration-200',
-          menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none')}
-        onClick={() => setMenuOpen(false)}
-        aria-hidden="true"
-      />
-
-      {/* Solid white menu panel — slides in from top, fully opaque at all times */}
-      <div
-        className={cn(
-          'fixed inset-x-0 top-0 z-[100] bg-white md:hidden flex flex-col shadow-2xl',
-          'transition-transform duration-300 ease-out',
-          // Use min-h-screen so it always covers the full viewport height
-          'min-h-screen',
-          menuOpen ? 'translate-y-0' : '-translate-y-full'
-        )}
+        className="fixed inset-0 z-[200] bg-white md:hidden flex flex-col"
         role="dialog"
         aria-modal="true"
         aria-label="Мобільна навігація"
-        aria-hidden={!menuOpen}
       >
         {/* Top bar — mirrors the actual site header height */}
         <div className="flex items-center justify-between px-4 sm:px-6 h-16 border-b border-gray-100 flex-shrink-0">
@@ -200,6 +185,7 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
           </Link>
         </div>
       </div>
+      )}
     </>
   )
 }
