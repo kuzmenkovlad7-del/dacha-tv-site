@@ -29,7 +29,7 @@ export default async function AdminApiaryEditPage({ params }: Props) {
         Редагувати: {product.name}
       </h1>
 
-      <form action={updateWithId} encType="multipart/form-data" className="space-y-5 bg-white rounded-2xl p-6 border border-honey-100">
+      <form action={updateWithId} className="space-y-5 bg-white rounded-2xl p-6 border border-honey-100">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-bark mb-1">Назва</label>
@@ -125,24 +125,10 @@ export default async function AdminApiaryEditPage({ params }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-bark mb-1">
-            Зображення{' '}
-            <span className="font-normal text-gray-400">— або вкажіть шлях нижче</span>
-          </label>
-          {product.image_url && (
-            <p className="text-xs text-gray-500 mb-2">
-              Поточне:{' '}
-              <a href={product.image_url} target="_blank" rel="noopener" className="underline break-all">
-                {product.image_url}
-              </a>
-            </p>
-          )}
-          <input name="image" type="file" accept="image/*"
-            className="w-full text-sm text-bark/70 mb-2" />
-          <p className="text-xs text-bark/40 mb-1">Або вкажіть шлях до файлу з папки public:</p>
-          <input name="image_path" type="text" defaultValue=""
-            placeholder="/images/dacha-tv/products/назва-файлу.jpg"
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          <label className="block text-sm font-semibold text-bark mb-1">Зображення (URL або шлях)</label>
+          <input name="image_url" type="text" defaultValue={product.image_url ?? ''}
+            placeholder="https://... або /images/dacha-tv/products/..."
+            className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
         </div>
 
         <div>

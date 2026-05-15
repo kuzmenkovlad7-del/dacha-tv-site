@@ -2,13 +2,10 @@ import Link from 'next/link'
 
 const NAV_LINKS = [
   { href: '/admin', label: 'Заявки' },
-  { href: '/admin/settings', label: 'Налаштування' },
   { href: '/admin/honey', label: 'Мед' },
   { href: '/admin/apiary', label: 'Продукти пасіки' },
   { href: '/admin/flowers', label: 'Квіти' },
-  { href: '/admin/beekeeper', label: 'Пасічники' },
-  { href: '/admin/reviews', label: 'Відгуки' },
-  { href: '/admin/faq', label: 'FAQ' },
+  { href: '/admin/beekeeper', label: 'Пасічникам' },
 ]
 
 export default function AdminLayout({

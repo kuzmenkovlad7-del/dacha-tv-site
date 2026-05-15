@@ -14,7 +14,7 @@ export default function AdminHoneyNewPage() {
     <div className="px-4 sm:px-6 py-8 max-w-2xl">
       <h1 className="font-serif text-2xl font-bold text-bark mb-6">Новий продукт меду</h1>
 
-      <form action={createHoneyProduct} encType="multipart/form-data" className="space-y-5 bg-white rounded-2xl p-6 border border-honey-100">
+      <form action={createHoneyProduct} className="space-y-5 bg-white rounded-2xl p-6 border border-honey-100">
         <div>
           <label htmlFor="name" className="block text-sm font-semibold text-bark mb-1">Назва</label>
           <input id="name" name="name" type="text" required
@@ -124,9 +124,10 @@ export default function AdminHoneyNewPage() {
         </div>
 
         <div>
-          <label htmlFor="image" className="block text-sm font-semibold text-bark mb-1">Зображення</label>
-          <input id="image" name="image" type="file" accept="image/*"
-            className="w-full text-sm text-bark/70" />
+          <label htmlFor="image_url" className="block text-sm font-semibold text-bark mb-1">Зображення (URL або шлях)</label>
+          <input id="image_url" name="image_url" type="text"
+            placeholder="https://... або /images/dacha-tv/honey/..."
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
         </div>
 
         <div>

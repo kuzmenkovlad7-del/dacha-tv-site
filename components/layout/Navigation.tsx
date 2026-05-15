@@ -32,7 +32,7 @@ interface NavigationProps {
   logoPath?: string | null
 }
 
-function DrawerSocialIcons({ siteSettings }: { siteSettings: SiteSettings | null | undefined }) {
+function MobileMenuSocialIcons({ siteSettings }: { siteSettings: SiteSettings | null | undefined }) {
   const socials = [
     {
       url: siteSettings?.instagram_url || LAUNCH_INSTAGRAM_URL,
@@ -84,7 +84,7 @@ function DrawerSocialIcons({ siteSettings }: { siteSettings: SiteSettings | null
   if (socials.length === 0) return null
 
   return (
-    <div className="flex items-center gap-2 pt-1 flex-wrap">
+    <div className="flex items-center justify-center gap-3 flex-wrap">
       {socials.map(({ url, label, icon }) => (
         <a
           key={label}
@@ -92,7 +92,7 @@ function DrawerSocialIcons({ siteSettings }: { siteSettings: SiteSettings | null
           target="_blank"
           rel="noopener noreferrer"
           aria-label={label}
-          className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-bark/50 hover:text-bark hover:border-bark/30 transition-all"
+          className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:text-white hover:border-white/40 transition-all"
         >
           {icon}
         </a>
@@ -101,47 +101,43 @@ function DrawerSocialIcons({ siteSettings }: { siteSettings: SiteSettings | null
   )
 }
 
-function MobilePhoneLink({ phone }: { phone: string }) {
-  return (
-    <a
-      href={`tel:${formatPhoneTel(phone)}`}
-      className="flex items-center justify-center gap-2 w-full py-3.5 border-2 border-honey-200 text-bark font-semibold rounded-full transition-colors hover:border-honey-400 min-h-[52px]"
-    >
-      <svg className="w-4 h-4 text-honey-700 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-      </svg>
-      {formatPhoneDisplay(phone)}
-    </a>
-  )
-}
-
 export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: NavigationProps) {
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
   const resolvedPhone = phone || LAUNCH_PHONE
   const resolvedPhoneSecondary = phoneSecondary || LAUNCH_PHONE_SECONDARY
 
+  // Close menu on route change
   useEffect(() => {
-    setDrawerOpen(false)
+    setMenuOpen(false)
   }, [pathname])
 
+  // Scroll lock
   useEffect(() => {
     const html = document.documentElement
-    if (drawerOpen) {
-      // Store scroll position on the element so the cleanup can restore it
-      html.dataset.drawerScrollY = String(window.scrollY)
+    if (menuOpen) {
+      html.dataset.scrollY = String(window.scrollY)
       html.style.overflow = 'hidden'
     } else {
-      const y = Number(html.dataset.drawerScrollY ?? 0)
+      const y = Number(html.dataset.scrollY ?? 0)
       html.style.overflow = ''
-      delete html.dataset.drawerScrollY
-      // Only scroll if we had a stored position (i.e. we locked it)
+      delete html.dataset.scrollY
       if (y) window.scrollTo(0, y)
     }
     return () => {
       html.style.overflow = ''
     }
-  }, [drawerOpen])
+  }, [menuOpen])
+
+  // Escape key close
+  useEffect(() => {
+    if (!menuOpen) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [menuOpen])
 
   return (
     <>
@@ -167,42 +163,32 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
       <button
         type="button"
         className="md:hidden p-2 text-bark/70 hover:text-bark transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-        onClick={() => setDrawerOpen(true)}
+        onClick={() => setMenuOpen(true)}
         aria-label="Відкрити меню"
-        aria-expanded={drawerOpen}
+        aria-expanded={menuOpen}
       >
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
 
-      {/* Full-screen dark translucent backdrop */}
+      {/* Full-screen mobile menu overlay */}
       <div
         className={cn(
-          'fixed inset-0 z-[55] bg-black/60 backdrop-blur-sm md:hidden transition-opacity duration-200',
-          drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          'fixed inset-0 z-50 bg-[#1a1a18] md:hidden flex flex-col transition-opacity duration-300',
+          menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         )}
-        onClick={() => setDrawerOpen(false)}
-        aria-hidden="true"
-      />
-
-      {/* Slide-in drawer — fixed, right-anchored, never wider than viewport */}
-      <div
-        className={cn(
-          'fixed inset-y-0 right-0 z-[60] w-[min(88vw,360px)] max-w-full bg-[#FAFAF8] shadow-2xl will-change-transform transition-transform duration-300 ease-in-out md:hidden flex flex-col',
-          drawerOpen ? 'translate-x-0 visible' : 'translate-x-full invisible pointer-events-none'
-        )}
-        aria-label="Мобільна навігація"
         role="dialog"
         aria-modal="true"
-        aria-hidden={!drawerOpen}
+        aria-label="Мобільна навігація"
+        aria-hidden={!menuOpen}
       >
-        {/* Drawer header */}
-        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 flex-shrink-0">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-5 h-16 flex-shrink-0 border-b border-white/10">
           <Link
             href="/"
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-            onClick={() => setDrawerOpen(false)}
+            onClick={() => setMenuOpen(false)}
             aria-label="Дача TV — на головну"
           >
             {logoPath && (
@@ -211,53 +197,79 @@ export function Navigation({ phone, phoneSecondary, siteSettings, logoPath }: Na
                 alt=""
                 width={32}
                 height={32}
-                className="w-8 h-8 object-contain"
+                className="w-8 h-8 object-contain brightness-0 invert"
               />
             )}
-            <span className="font-serif font-bold text-xl text-bark">Дача TV</span>
+            <span className="font-serif font-bold text-xl text-white">Дача TV</span>
           </Link>
           <button
             type="button"
-            onClick={() => setDrawerOpen(false)}
-            className="p-2 text-bark/50 hover:text-bark transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            onClick={() => setMenuOpen(false)}
+            className="p-2 text-white/60 hover:text-white transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Закрити меню"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        {/* Drawer nav links */}
-        <nav className="flex flex-col flex-1 overflow-y-auto">
-          {NAV_ITEMS.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setDrawerOpen(false)}
-              className={cn(
-                'py-4 px-5 text-base font-medium transition-colors min-h-[52px] flex items-center w-full border-b border-gray-50',
-                pathname.startsWith(href)
-                  ? 'text-honey-800 bg-honey-50'
-                  : 'text-bark hover:text-honey-800 hover:bg-honey-50'
-              )}
-            >
-              {label}
-            </Link>
-          ))}
+        {/* Nav links */}
+        <nav className="flex-1 flex flex-col justify-center px-6 py-8 overflow-y-auto" aria-label="Мобільне меню">
+          <ul className="space-y-1">
+            {NAV_ITEMS.map(({ href, label }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  className={cn(
+                    'block px-4 py-4 text-2xl font-serif font-bold transition-colors rounded-xl',
+                    pathname.startsWith(href)
+                      ? 'text-amber-400'
+                      : 'text-white hover:text-amber-400'
+                  )}
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </nav>
 
-        {/* Drawer footer — phone(s) + social + CTA */}
-        <div className="px-5 py-5 border-t border-gray-100 space-y-3 flex-shrink-0 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-          <MobilePhoneLink phone={resolvedPhone} />
-          {resolvedPhoneSecondary && resolvedPhoneSecondary !== resolvedPhone && (
-            <MobilePhoneLink phone={resolvedPhoneSecondary} />
-          )}
-          <DrawerSocialIcons siteSettings={siteSettings} />
+        {/* Bottom section */}
+        <div className="px-6 py-6 border-t border-white/10 space-y-4 flex-shrink-0">
+          {/* Phone numbers */}
+          <div className="space-y-2">
+            <a
+              href={`tel:${formatPhoneTel(resolvedPhone)}`}
+              className="flex items-center justify-center gap-2 text-white font-semibold text-lg"
+            >
+              <svg className="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              {formatPhoneDisplay(resolvedPhone)}
+            </a>
+            {resolvedPhoneSecondary && resolvedPhoneSecondary !== resolvedPhone && (
+              <a
+                href={`tel:${formatPhoneTel(resolvedPhoneSecondary)}`}
+                className="flex items-center justify-center gap-2 text-white/70 font-medium"
+              >
+                <svg className="w-4 h-4 text-amber-400/60 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                {formatPhoneDisplay(resolvedPhoneSecondary)}
+              </a>
+            )}
+          </div>
+
+          {/* Social icons */}
+          <MobileMenuSocialIcons siteSettings={siteSettings} />
+
+          {/* CTA */}
           <Link
             href="/honey"
-            onClick={() => setDrawerOpen(false)}
-            className="flex items-center justify-center w-full py-3.5 bg-honey-700 hover:bg-honey-800 text-white font-semibold rounded-full transition-colors min-h-[52px]"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center justify-center w-full max-w-xs mx-auto py-3.5 bg-amber-700 hover:bg-amber-800 text-white font-semibold rounded-full transition-colors min-h-[52px]"
           >
             Замовити мед
           </Link>
