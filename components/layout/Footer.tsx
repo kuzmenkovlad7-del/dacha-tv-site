@@ -205,16 +205,23 @@ export function Footer({ siteSettings }: FooterProps) {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-gray-100 pt-8 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-xs text-gray-400">
-            © {currentYear} Дача TV. Всі права захищено.
+        <div className="border-t border-gray-100 pt-8 space-y-3">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <p className="text-xs text-gray-400">
+              © {currentYear} Дача TV. ФОП · Коротич, Харківська область, Україна
+            </p>
+            <div className="flex items-center gap-4">
+              <Link href="/delivery" className="text-xs text-gray-400 hover:text-bark transition-colors">
+                Оплата та доставка
+              </Link>
+              <Link href="/privacy" className="text-xs text-gray-400 hover:text-bark transition-colors">
+                Конфіденційність
+              </Link>
+            </div>
+          </div>
+          <p className="text-xs text-gray-300">
+            Оплата після підтвердження · Реквізити надаються при замовленні · Претензії за контактним номером
           </p>
-          <Link
-            href="/privacy"
-            className="text-xs text-gray-400 hover:text-bark transition-colors"
-          >
-            Політика конфіденційності
-          </Link>
         </div>
       </div>
     </footer>

@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getAllFlowerProducts } from '@/lib/supabase/queries'
+import { getAdminClient } from '@/lib/supabase/admin'
+import type { FlowerProduct } from '@/types'
 
 export const metadata: Metadata = {
   title: 'Адмін — Квіти',
@@ -9,7 +10,12 @@ export const metadata: Metadata = {
 }
 
 export default async function AdminFlowersPage() {
-  const products = await getAllFlowerProducts().catch(() => [])
+  let products: FlowerProduct[] = []
+  try {
+    const client = getAdminClient()
+    const { data } = await client.from('flower_products').select('*').order('display_order', { ascending: true })
+    products = (data ?? []) as FlowerProduct[]
+  } catch { /* env not set — show empty list */ }
 
   return (
     <div className="px-4 sm:px-6 py-8">

@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getAllHoneyProducts } from '@/lib/supabase/queries'
+import { getAdminClient } from '@/lib/supabase/admin'
+import type { HoneyProduct } from '@/types'
 
 export const metadata: Metadata = {
   title: 'Адмін — Мед',
@@ -9,7 +10,12 @@ export const metadata: Metadata = {
 }
 
 export default async function AdminHoneyPage() {
-  const products = await getAllHoneyProducts().catch(() => [])
+  let products: HoneyProduct[] = []
+  try {
+    const client = getAdminClient()
+    const { data } = await client.from('honey_products').select('*').order('display_order', { ascending: true })
+    products = (data ?? []) as HoneyProduct[]
+  } catch { /* env not set — show empty list */ }
 
   return (
     <div className="px-4 sm:px-6 py-8">

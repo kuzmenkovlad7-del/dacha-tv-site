@@ -1,8 +1,9 @@
 export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getAllApiaryProducts } from '@/lib/supabase/queries'
+import { getAdminClient } from '@/lib/supabase/admin'
 import { createApiaryProduct } from './actions'
+import type { ApiaryProduct } from '@/types'
 
 export const metadata: Metadata = {
   title: 'Адмін — Продукти пасіки',
@@ -10,7 +11,12 @@ export const metadata: Metadata = {
 }
 
 export default async function AdminApiaryPage() {
-  const products = await getAllApiaryProducts().catch(() => [])
+  let products: ApiaryProduct[] = []
+  try {
+    const client = getAdminClient()
+    const { data } = await client.from('apiary_products').select('*').order('display_order', { ascending: true })
+    products = (data ?? []) as ApiaryProduct[]
+  } catch { /* env not set — show empty list */ }
 
   return (
     <div className="px-4 sm:px-6 py-8">

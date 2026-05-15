@@ -2,255 +2,218 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAllFlowerProducts } from '@/lib/supabase/queries'
 import type { FlowerProduct } from '@/types'
+import { FlowerInquiryForm } from '@/components/forms/FlowerInquiryForm'
 
 export const metadata: Metadata = {
   title: 'Каталог хризантем — Дача TV',
-  description:
-    'Колекція хризантем від домашнього розсадника Дача TV. Помпонові, кущові, великоквіткові та рідкісні сорти на Харківщині.',
-  openGraph: {
-    title: 'Каталог хризантем | Дача TV',
-    description: 'Колекція хризантем — понад 50 сортів від домашнього розсадника.',
-  },
+  description: 'Колекція хризантем від домашнього розсадника. Понад 50 сортів: помпонові, кущові, великоквіткові, рідкісні.',
 }
 
-const VARIETY_ORDER = [
-  'Помпонова',
-  'Кущова',
-  'Великоквіткова',
-  'Дрібноквіткова',
-  'Компактна',
-  'Анемонова',
-  'Павукоподібна',
-]
+const VARIETY_ORDER = ['Помпонова', 'Кущова', 'Великоквіткова', 'Дрібноквіткова', 'Компактна', 'Анемонова', 'Павукоподібна']
 
-const VARIETY_DESCRIPTIONS: Record<string, string> = {
-  'Помпонова': 'Класичні кулясті суцвіття. Улюбленці флористів — щільні, симетричні, довговазні.',
-  'Кущова': 'Один стебель — безліч квіток. Природна пишність без зайвих зусиль.',
-  'Великоквіткова': 'Одна квітка на стеблі, діаметр до 25 см. Для виставок і розкішних букетів.',
-  'Дрібноквіткова': 'Легка хмарка з сотень крихітних суцвіть. Витонченість у масштабі.',
-  'Компактна': 'Низькорослі форми до 35 см. Ідеальні для вазонів і балконів.',
-  'Анемонова': 'Плоскі крайові пелюстки + пухнастий центр. Виглядає як дві квітки в одній.',
-  'Павукоподібна': 'Довгі трубчасті звивисті пелюстки. Екзотика у вашому саду.',
+const VARIETY_EN: Record<string, string> = {
+  'Помпонова': 'Pompon', 'Кущова': 'Spray', 'Великоквіткова': 'Exhibition',
+  'Дрібноквіткова': 'Micro', 'Компактна': 'Compact', 'Анемонова': 'Anemone', 'Павукоподібна': 'Spider',
 }
 
-function ColorDot({ color }: { color: string | null }) {
-  if (!color) return null
-  const normalized = color.toLowerCase()
-  let bg = 'bg-gray-300'
-  if (normalized.includes('біл')) bg = 'bg-white border border-gray-200'
-  else if (normalized.includes('жовт') || normalized.includes('золот')) bg = 'bg-yellow-300'
-  else if (normalized.includes('рожев') || normalized.includes('персик')) bg = 'bg-pink-300'
-  else if (normalized.includes('малин') || normalized.includes('бордо') || normalized.includes('бургун')) bg = 'bg-rose-700'
-  else if (normalized.includes('помаранч') || normalized.includes('оранж')) bg = 'bg-orange-400'
-  else if (normalized.includes('бронз') || normalized.includes('теракот') || normalized.includes('мідн')) bg = 'bg-amber-600'
-  else if (normalized.includes('лілов') || normalized.includes('фіолет') || normalized.includes('бузков')) bg = 'bg-purple-400'
-  else if (normalized.includes('лаванд')) bg = 'bg-violet-300'
-  else if (normalized.includes('зелен') || normalized.includes('салат') || normalized.includes('лайм')) bg = 'bg-green-400'
-  else if (normalized.includes('шоколад') || normalized.includes('коричн')) bg = 'bg-amber-900'
-  else if (normalized.includes('кремов') || normalized.includes('вершк')) bg = 'bg-amber-100 border border-gray-200'
-  else if (normalized.includes('темно-черв') || normalized.includes('оксамит')) bg = 'bg-red-900'
-  return <span className={`inline-block w-3 h-3 rounded-full flex-shrink-0 ${bg}`} aria-hidden="true" />
+const VARIETY_DESC: Record<string, string> = {
+  'Помпонова': 'Щільні кулясті суцвіття 3–6 см. Класика флористики.',
+  'Кущова': 'Один стебель — безліч квіток. Природна пишність.',
+  'Великоквіткова': 'Одна квітка до 25 см. Виставковий формат.',
+  'Дрібноквіткова': 'Хмарка з сотень крихітних суцвіть.',
+  'Компактна': 'До 35 см. Для вазонів і балконів.',
+  'Анемонова': 'Плоскі пелюстки + пухнастий центр.',
+  'Павукоподібна': 'Довгі звивисті пелюстки. Екзотика.',
 }
 
-function CatalogCard({ product }: { product: FlowerProduct }) {
-  return (
-    <Link
-      href={`/flowers/${product.slug}`}
-      className="group block border-b border-gray-100 py-5 hover:bg-gray-50 transition-colors px-1"
-    >
-      <div className="flex items-start gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <ColorDot color={product.color} />
-            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">
-              {product.color}
-            </span>
-            {product.is_featured && (
-              <span className="text-[10px] font-semibold text-white bg-gray-900 px-2 py-0.5 rounded-full">
-                Хіт
-              </span>
-            )}
-          </div>
-          <h3 className="font-serif text-base font-bold text-gray-900 group-hover:text-gray-600 transition-colors leading-snug">
-            {product.name}
-          </h3>
-          {product.short_description && (
-            <p className="text-sm text-gray-500 mt-1 leading-relaxed line-clamp-1">
-              {product.short_description}
-            </p>
-          )}
-        </div>
-        <div className="flex-shrink-0 text-right">
-          {product.price_uah && (
-            <p className="text-sm font-semibold text-gray-900">від {product.price_uah} грн</p>
-          )}
-          {product.bloom_season && (
-            <p className="text-xs text-gray-400 mt-0.5">{product.bloom_season}</p>
-          )}
-          <span className="inline-flex items-center gap-1 text-xs text-gray-400 group-hover:text-gray-700 transition-colors mt-1.5">
-            Детальніше
-            <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </span>
-        </div>
-      </div>
-    </Link>
-  )
+function colorClass(color: string | null): string {
+  if (!color) return 'bg-gray-200'
+  const c = color.toLowerCase()
+  if (c.includes('біл') || c.includes('кремов') || c.includes('вершк')) return 'bg-stone-100 ring-1 ring-stone-300'
+  if (c.includes('жовт') || c.includes('золот') || c.includes('лимон')) return 'bg-yellow-300'
+  if (c.includes('рожев') || c.includes('персик')) return 'bg-pink-300'
+  if (c.includes('малин') || c.includes('бордо') || c.includes('бургун') || c.includes('оксамит')) return 'bg-rose-700'
+  if (c.includes('помаранч') || c.includes('оранж')) return 'bg-orange-400'
+  if (c.includes('бронз') || c.includes('теракот') || c.includes('рудий') || c.includes('мідн')) return 'bg-amber-600'
+  if (c.includes('лілов') || c.includes('фіолет') || c.includes('бузков')) return 'bg-purple-400'
+  if (c.includes('лаванд')) return 'bg-violet-300'
+  if (c.includes('зелен') || c.includes('салат') || c.includes('лайм')) return 'bg-green-400'
+  if (c.includes('шоколад') || c.includes('коричн')) return 'bg-amber-900'
+  return 'bg-gray-300'
 }
 
 export default async function FlowersCatalogPage() {
   const allProducts = await getAllFlowerProducts().catch(() => [])
-
-  const featured = allProducts.filter((p) => p.is_featured && p.in_stock)
+  const available = allProducts.filter((p) => p.in_stock)
 
   const byVariety = VARIETY_ORDER.reduce<Record<string, FlowerProduct[]>>((acc, v) => {
-    const group = allProducts.filter((p) => p.variety === v && p.in_stock)
-    if (group.length) acc[v] = group
+    const g = available.filter((p) => p.variety === v)
+    if (g.length) acc[v] = g
     return acc
   }, {})
+  const extra = [...new Set(available.filter((p) => p.variety && !VARIETY_ORDER.includes(p.variety)).map((p) => p.variety!))]
+  for (const v of extra) byVariety[v] = available.filter((p) => p.variety === v)
 
-  const otherVarieties = [
-    ...new Set(allProducts.filter((p) => p.variety && !VARIETY_ORDER.includes(p.variety) && p.in_stock).map((p) => p.variety!)),
-  ]
-  for (const v of otherVarieties) {
-    byVariety[v] = allProducts.filter((p) => p.variety === v && p.in_stock)
-  }
-
-  const total = allProducts.filter((p) => p.in_stock).length
+  const featured = available.filter((p) => p.is_featured).slice(0, 6)
+  const total = available.length
 
   return (
     <div className="bg-white min-h-screen">
 
-      {/* Editorial header — dark, full-bleed */}
-      <div className="bg-gray-950 text-white">
-        <div className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-14 md:pt-24 md:pb-20">
-          <nav className="text-xs text-white/30 mb-10 flex items-center gap-2">
-            <Link href="/" className="hover:text-white/60 transition-colors">Головна</Link>
-            <span>›</span>
-            <Link href="/flowers" className="hover:text-white/60 transition-colors">Квіти</Link>
-            <span>›</span>
-            <span className="text-white/60">Каталог</span>
+      {/* ── HERO ── dark, full-bleed, typographic */}
+      <div className="bg-[#0c0c0c] text-white min-h-[60vh] flex flex-col justify-end">
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 pb-16 pt-24 w-full">
+          <nav className="text-[11px] text-white/25 mb-12 flex gap-2">
+            <Link href="/" className="hover:text-white/50 transition-colors">Головна</Link>
+            <span>/</span>
+            <Link href="/flowers" className="hover:text-white/50 transition-colors">Квіти</Link>
+            <span>/</span>
+            <span className="text-white/40">Каталог</span>
           </nav>
-
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-10 items-end">
             <div>
-              <p className="text-xs font-semibold text-white/30 uppercase tracking-[0.2em] mb-5">
+              <p className="text-[11px] font-semibold text-white/25 uppercase tracking-[0.25em] mb-6">
                 Домашній розсадник · Харківщина · Хризантеми
               </p>
-              <h1 className="font-serif text-5xl md:text-7xl font-bold leading-none tracking-tight mb-5">
+              <h1 className="font-serif text-6xl sm:text-7xl md:text-8xl font-bold leading-[0.9] tracking-tight mb-8">
                 Колекція
               </h1>
-              <p className="text-white/50 text-lg max-w-lg leading-relaxed">
-                {total} сортів хризантем. Від класичних помпонів до рідкісних spider. Вирощено вдома — для вас.
-              </p>
-            </div>
-            <div className="hidden md:block text-right">
-              <p className="text-6xl font-bold text-white/10 font-serif tabular-nums">{total}</p>
-              <p className="text-xs text-white/30 uppercase tracking-widest">сортів</p>
-            </div>
-          </div>
-
-          {/* Featured names strip */}
-          {featured.length > 0 && (
-            <div className="mt-12 pt-8 border-t border-white/10">
-              <p className="text-xs text-white/30 uppercase tracking-widest mb-4">Рекомендовані</p>
-              <div className="flex flex-wrap gap-2">
-                {featured.map((p) => (
-                  <Link
-                    key={p.id}
-                    href={`/flowers/${p.slug}`}
-                    className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white border border-white/20 hover:border-white/50 px-4 py-2 rounded-full transition-all"
-                  >
-                    <ColorDot color={p.color} />
-                    {p.name}
-                  </Link>
-                ))}
+              <div className="flex items-center gap-6">
+                <span className="font-serif text-5xl font-bold text-white/15 tabular-nums">{String(total).padStart(2,'0')}</span>
+                <div>
+                  <p className="text-sm text-white/60">сортів хризантем</p>
+                  <p className="text-xs text-white/30">{Object.keys(byVariety).length} різновидів</p>
+                </div>
               </div>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Catalog body */}
-      <div className="max-w-5xl mx-auto px-6 sm:px-8 py-12 md:py-16">
-
-        {/* Variety jump nav */}
-        {Object.keys(byVariety).length > 1 && (
-          <div className="mb-12 pb-8 border-b border-gray-100">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Різновиди</p>
-            <div className="flex flex-wrap gap-3">
-              {Object.entries(byVariety).map(([variety, products]) => (
-                <a
-                  key={variety}
-                  href={`#${encodeURIComponent(variety)}`}
-                  className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-200 hover:border-gray-400 px-4 py-2 rounded-full transition-all"
-                >
-                  {variety}
-                  <span className="text-xs text-gray-400">{products.length}</span>
+            {/* Variety pills */}
+            <div className="hidden md:flex flex-col gap-2">
+              {Object.keys(byVariety).map((v) => (
+                <a key={v} href={`#${encodeURIComponent(v)}`}
+                  className="flex items-center justify-between text-sm text-white/40 hover:text-white border-b border-white/10 hover:border-white/30 pb-2 transition-all group">
+                  <span>{v}</span>
+                  <span className="text-white/20 group-hover:text-white/50 tabular-nums">{byVariety[v].length}</span>
                 </a>
               ))}
             </div>
           </div>
-        )}
+        </div>
+      </div>
 
-        {/* Variety sections */}
-        <div className="space-y-16">
+      {/* ── FEATURED STRIP ── */}
+      {featured.length > 0 && (
+        <div className="bg-[#111] border-b border-white/5">
+          <div className="max-w-6xl mx-auto px-6 sm:px-10 py-8">
+            <p className="text-[10px] font-semibold text-white/25 uppercase tracking-[0.2em] mb-5">Рекомендовані</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {featured.map((p) => (
+                <Link key={p.id} href={`/flowers/${p.slug}`}
+                  className="group flex flex-col gap-2">
+                  <div className={`h-1.5 rounded-full ${colorClass(p.color)} transition-opacity group-hover:opacity-80`} />
+                  <p className="text-xs text-white/60 group-hover:text-white transition-colors leading-snug line-clamp-2">{p.name}</p>
+                  {p.price_uah && <p className="text-[10px] text-white/25">{p.price_uah} грн</p>}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── CATALOG BODY ── white, editorial */}
+      <div className="max-w-6xl mx-auto px-6 sm:px-10 py-16 md:py-24">
+
+        {/* Mobile variety nav */}
+        <div className="md:hidden flex overflow-x-auto gap-3 mb-12 pb-3 -mx-6 px-6 scrollbar-none">
+          {Object.keys(byVariety).map((v) => (
+            <a key={v} href={`#${encodeURIComponent(v)}`}
+              className="whitespace-nowrap text-xs font-semibold text-gray-500 border border-gray-200 hover:border-gray-800 hover:text-gray-900 px-4 py-2 rounded-full transition-all flex-shrink-0">
+              {v} <span className="text-gray-300 ml-1">{byVariety[v].length}</span>
+            </a>
+          ))}
+        </div>
+
+        <div className="space-y-24">
           {Object.entries(byVariety).map(([variety, products]) => (
             <section key={variety} id={encodeURIComponent(variety)}>
 
-              {/* Variety header — large editorial */}
-              <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 mb-8 pb-6 border-b-2 border-gray-900">
+              {/* Section header — large typographic */}
+              <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6 md:gap-12 items-start mb-10 pb-6 border-b-2 border-gray-900">
                 <div>
-                  <h2 className="font-serif text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                  <p className="text-[10px] font-semibold text-gray-300 uppercase tracking-[0.25em] mb-1">
+                    {VARIETY_EN[variety] ?? variety} · {String(products.length).padStart(2,'0')}
+                  </p>
+                  <h2 className="font-serif text-4xl md:text-5xl font-bold text-gray-900 leading-none">
                     {variety}
                   </h2>
-                  {VARIETY_DESCRIPTIONS[variety] && (
-                    <p className="text-gray-500 text-sm mt-2 leading-relaxed max-w-md">
-                      {VARIETY_DESCRIPTIONS[variety]}
-                    </p>
-                  )}
                 </div>
-                <div className="flex items-end justify-start md:justify-end">
-                  <span className="text-4xl font-bold text-gray-100 font-serif tabular-nums select-none">
-                    {String(products.length).padStart(2, '0')}
-                  </span>
+                <div className="md:pt-8">
+                  <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
+                    {VARIETY_DESC[variety] ?? ''}
+                  </p>
                 </div>
               </div>
 
-              {/* Products list */}
+              {/* Products — alternating dense list */}
               <div className="divide-y divide-gray-50">
-                {products.map((product) => (
-                  <CatalogCard key={product.id} product={product} />
+                {products.map((p, i) => (
+                  <Link key={p.id} href={`/flowers/${p.slug}`}
+                    className="group grid grid-cols-[auto_1fr_auto] gap-4 md:gap-8 items-center py-4 hover:bg-gray-50 transition-colors px-2 -mx-2 rounded-lg">
+                    {/* Color swatch */}
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs tabular-nums text-gray-200 w-5 text-right">{String(i + 1).padStart(2,'0')}</span>
+                      <span className={`w-4 h-4 rounded-full flex-shrink-0 ${colorClass(p.color)}`} aria-hidden="true" />
+                    </div>
+                    {/* Name + desc */}
+                    <div className="min-w-0">
+                      <div className="flex items-baseline gap-3 flex-wrap">
+                        <span className="font-serif text-base md:text-lg font-bold text-gray-900 group-hover:text-gray-600 transition-colors">
+                          {p.name}
+                        </span>
+                        {p.is_featured && (
+                          <span className="text-[9px] font-bold text-white bg-gray-800 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            Хіт
+                          </span>
+                        )}
+                      </div>
+                      <div className="hidden sm:flex items-center gap-3 mt-0.5">
+                        {p.color && <span className="text-xs text-gray-400">{p.color}</span>}
+                        {p.bloom_season && <span className="text-xs text-gray-300">{p.bloom_season}</span>}
+                      </div>
+                    </div>
+                    {/* Price + arrow */}
+                    <div className="text-right flex-shrink-0">
+                      {p.price_uah && (
+                        <span className="text-sm font-semibold text-gray-900">від {p.price_uah} грн</span>
+                      )}
+                      <span className="ml-2 text-gray-300 group-hover:text-gray-700 transition-colors text-lg leading-none">→</span>
+                    </div>
+                  </Link>
                 ))}
               </div>
             </section>
           ))}
         </div>
 
-        {/* Bottom CTA */}
-        <div className="mt-20 pt-12 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        {/* ── CTA ── */}
+        <div className="mt-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-start pt-16 border-t-2 border-gray-900">
           <div>
-            <h2 className="font-serif text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
               Не знаєте що обрати?
             </h2>
-            <p className="text-gray-500 text-sm leading-relaxed">
-              Залиште заявку — підберемо сорти під ваш запит, колір і бюджет.
+            <p className="text-gray-500 leading-relaxed mb-6">
+              Підберемо сорти за кольором, строком цвітіння і бюджетом.
+              Залиште заявку — зв&apos;яжемося протягом дня.
             </p>
+            <div className="flex gap-3 flex-wrap">
+              <Link href="/flowers"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 border border-gray-300 hover:border-gray-700 px-5 py-2.5 rounded-full transition-colors">
+                ← Фото каталог
+              </Link>
+            </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Link
-              href="/flowers#order-form"
-              className="inline-flex items-center justify-center px-6 py-3.5 bg-gray-900 text-white font-semibold rounded-full hover:bg-gray-800 transition-colors min-h-[48px] text-sm"
-            >
-              Залишити заявку
-            </Link>
-            <Link
-              href="/flowers"
-              className="inline-flex items-center justify-center px-6 py-3.5 border border-gray-300 text-gray-700 font-semibold rounded-full hover:border-gray-500 transition-colors min-h-[48px] text-sm"
-            >
-              Фото каталог
-            </Link>
+          <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+            <p className="text-sm font-semibold text-gray-900 mb-4">Замовити квіти</p>
+            <FlowerInquiryForm source="/flowers/catalog" />
           </div>
         </div>
       </div>

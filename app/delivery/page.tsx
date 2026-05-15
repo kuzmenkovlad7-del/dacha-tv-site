@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SellerInfo } from '@/components/shared/SellerInfo'
 
 export const metadata: Metadata = {
   title: 'Доставка',
@@ -59,6 +60,8 @@ export default function DeliveryPage() {
             </div>
           </article>
         ))}
+
+        <SellerInfo />
 
         {/* Questions CTA */}
         <div className="bg-honey-50 rounded-2xl p-6 border border-honey-200 text-center">
