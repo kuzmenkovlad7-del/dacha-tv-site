@@ -3,6 +3,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { syncCatalogAction } from '@/app/admin/actions/seed'
+import { createFlowerProduct } from './actions'
+import { MediaFields } from '@/components/admin/MediaFields'
 import type { FlowerProduct } from '@/types'
 
 export const metadata: Metadata = {
@@ -10,6 +12,8 @@ export const metadata: Metadata = {
   robots: 'noindex, nofollow',
 }
 
+const INPUT = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent'
+const LABEL = 'block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'
 const MIGRATION_SQL_PATH = 'supabase/migrations/016_flower_products_table.sql'
 
 export default async function AdminFlowersPage() {
@@ -26,11 +30,8 @@ export default async function AdminFlowersPage() {
 
     if (error) {
       const isMissing = error.message.includes('does not exist') || error.message.includes('schema cache')
-      if (isMissing) {
-        tablesMissing = true
-      } else {
-        dbError = error.message
-      }
+      if (isMissing) tablesMissing = true
+      else dbError = error.message
     } else {
       products = (data ?? []) as FlowerProduct[]
     }
@@ -40,7 +41,7 @@ export default async function AdminFlowersPage() {
 
   return (
     <div className="px-4 sm:px-6 py-8">
-      {/* Page header */}
+      {/* Header */}
       <div className="flex items-start justify-between mb-6 gap-4">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Квіти</h1>
@@ -52,24 +53,22 @@ export default async function AdminFlowersPage() {
           <form action={syncCatalogAction}>
             <button type="submit"
               className="inline-flex items-center gap-1.5 h-9 px-4 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
-              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Синхронізувати
+              Синхр.
             </button>
           </form>
           {!tablesMissing && (
-            <Link
-              href="/admin/flowers/new"
-              className="inline-flex items-center h-9 px-4 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors shadow-sm"
-            >
+            <a href="#create"
+              className="inline-flex items-center gap-1.5 h-9 px-4 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors shadow-sm">
               + Додати
-            </Link>
+            </a>
           )}
         </div>
       </div>
 
-      {/* BLOCKING: table missing */}
+      {/* Blocking: table missing */}
       {tablesMissing && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
           <div className="flex items-start gap-3">
@@ -79,16 +78,13 @@ export default async function AdminFlowersPage() {
             <div className="flex-1">
               <p className="font-semibold text-amber-900 text-sm">Таблиця flower_products відсутня в базі даних</p>
               <p className="text-amber-800 text-sm mt-1">
-                Квіти потребують окремої міграції. Відкрийте{' '}
-                <span className="font-mono bg-amber-100 px-1 rounded text-xs">SQL Editor</span>{' '}
-                у вашому Supabase проєкті та виконайте вміст файлу:
+                Відкрийте <span className="font-mono bg-amber-100 px-1 rounded text-xs">SQL Editor</span> у вашому Supabase проєкті та виконайте вміст файлу:
               </p>
               <code className="block bg-amber-100 text-amber-900 text-xs px-3 py-2 rounded mt-2 font-mono">
                 {MIGRATION_SQL_PATH}
               </code>
               <p className="text-amber-700 text-xs mt-2">
-                Після виконання міграції поверніться сюди і натисніть{' '}
-                <strong>Синхронізувати</strong> — усі 50 позицій хризантем буде імпортовано автоматично.
+                Після виконання міграції натисніть <strong>Синхр.</strong> — усі 50 позицій хризантем буде імпортовано автоматично.
               </p>
             </div>
           </div>
@@ -103,30 +99,23 @@ export default async function AdminFlowersPage() {
         </div>
       )}
 
-      {/* Empty state (table exists but no rows) */}
+      {/* Empty state */}
       {!tablesMissing && !dbError && products.length === 0 && (
-        <div className="bg-white border border-gray-100 rounded-xl shadow-sm">
-          <div className="text-center py-16 px-6">
-            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-              </svg>
-            </div>
-            <p className="text-gray-900 font-semibold mb-1">Квітів ще немає в базі</p>
-            <p className="text-sm text-gray-500 mb-6">Натисніть «Синхронізувати» щоб імпортувати всі 50 сортів</p>
-            <form action={syncCatalogAction}>
-              <button type="submit"
-                className="inline-flex items-center gap-2 h-10 px-5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
-                Синхронізувати каталог
-              </button>
-            </form>
-          </div>
+        <div className="bg-white border border-gray-100 rounded-xl shadow-sm text-center py-12 px-6 mb-8">
+          <p className="text-gray-900 font-semibold mb-1">Квітів ще немає в базі</p>
+          <p className="text-sm text-gray-500 mb-5">Натисніть «Синхр.» щоб імпортувати всі 50 сортів</p>
+          <form action={syncCatalogAction}>
+            <button type="submit"
+              className="inline-flex items-center gap-2 h-10 px-5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
+              Синхронізувати каталог
+            </button>
+          </form>
         </div>
       )}
 
       {/* Products table */}
       {products.length > 0 && (
-        <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden mb-8">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
@@ -135,22 +124,22 @@ export default async function AdminFlowersPage() {
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">Колір</th>
                 <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">№</th>
                 <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Наявн.</th>
-                <th className="px-5 py-3 w-16"></th>
+                <th className="px-5 py-3 w-20"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50/70 transition-colors">
-                  <td className="px-5 py-3 font-medium text-gray-900">{product.name}</td>
-                  <td className="px-5 py-3 text-gray-500 hidden sm:table-cell">{product.variety ?? '—'}</td>
-                  <td className="px-5 py-3 text-gray-500 hidden md:table-cell">{product.color ?? '—'}</td>
-                  <td className="px-5 py-3 text-center text-gray-400 text-xs">{product.display_order}</td>
-                  <td className="px-5 py-3 text-center">
+                  <td className="px-5 py-3.5 font-medium text-gray-900">{product.name}</td>
+                  <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">{product.variety ?? '—'}</td>
+                  <td className="px-5 py-3.5 text-gray-500 hidden md:table-cell">{product.color ?? '—'}</td>
+                  <td className="px-5 py-3.5 text-center text-gray-400 text-xs">{product.display_order}</td>
+                  <td className="px-5 py-3.5 text-center">
                     <span className={`inline-block w-2 h-2 rounded-full ${product.in_stock ? 'bg-green-500' : 'bg-gray-300'}`} />
                   </td>
-                  <td className="px-5 py-3 text-right">
+                  <td className="px-5 py-3.5 text-right">
                     <Link href={`/admin/flowers/${product.id}`}
-                      className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
+                      className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
                       Змін.
                     </Link>
                   </td>
@@ -158,6 +147,92 @@ export default async function AdminFlowersPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Inline create form */}
+      {!tablesMissing && (
+        <div id="create" className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 max-w-2xl">
+          <h2 className="text-base font-semibold text-gray-900 mb-5">Додати квітку</h2>
+          <form action={createFlowerProduct} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={LABEL}>Назва</label>
+                <input name="name" type="text" required className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Slug (URL)</label>
+                <input name="slug" type="text" required placeholder="chrysanthemum-bronze" className={INPUT} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={LABEL}>Категорія</label>
+                <select name="category" defaultValue="chrysanthemum" className={INPUT}>
+                  <option value="chrysanthemum">Хризантема</option>
+                  <option value="other">Інше</option>
+                </select>
+              </div>
+              <div>
+                <label className={LABEL}>Сорт</label>
+                <input name="variety" type="text" className={INPUT} />
+              </div>
+            </div>
+
+            <div>
+              <label className={LABEL}>Короткий опис</label>
+              <textarea name="short_description" rows={2} className={INPUT} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={LABEL}>Колір</label>
+                <input name="color" type="text" className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Сезон цвітіння</label>
+                <input name="bloom_season" type="text" className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Висота (см)</label>
+                <input name="height_cm" type="number" className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Ціна (грн)</label>
+                <input name="price_uah" type="number" className={INPUT} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={LABEL}>Освітлення</label>
+                <input name="lighting" type="text" className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Порядок</label>
+                <input name="display_order" type="number" defaultValue={10} className={INPUT} />
+              </div>
+            </div>
+
+            <div className="flex gap-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="in_stock" defaultChecked className="w-4 h-4 rounded accent-gray-900" />
+                <span className="text-sm font-medium text-gray-700">В наявності</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="is_featured" className="w-4 h-4 rounded accent-gray-900" />
+                <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
+              </label>
+            </div>
+
+            <MediaFields />
+
+            <button type="submit"
+              className="h-10 px-5 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors text-sm">
+              Додати
+            </button>
+          </form>
         </div>
       )}
     </div>

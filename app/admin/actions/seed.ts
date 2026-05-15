@@ -5,7 +5,7 @@ import { getAdminClient } from '@/lib/supabase/admin'
 import { STATIC_HONEY } from '@/lib/static-catalog'
 import { STATIC_FLOWERS } from '@/lib/flowers-static'
 
-// Canonical apiary products including swarm-lure (Приманка для роїв)
+// Canonical apiary products — slugs match production DB after migration 017
 const CANONICAL_APIARY = [
   {
     name: 'Приманка для роїв',
@@ -27,12 +27,12 @@ const CANONICAL_APIARY = [
     youtube_video_url: null,
   },
   {
-    name: 'Бджолиний пилок',
-    slug: 'bee-pollen',
-    description: 'Натуральний бджолиний пилок зібраний на нашій пасіці.',
-    short_description: 'Свіжий бджолиний пилок — джерело вітамінів, амінокислот та мікроелементів.',
-    full_description: 'Бджолиний пилок містить понад 250 біологічно активних речовин. Рекомендується для підтримки імунітету та загального оздоровлення організму.',
-    composition: 'Натуральний бджолиний пилок',
+    name: 'Квітковий пилок',
+    slug: 'flower-pollen',
+    description: 'Натуральний квітковий пилок зібраний на нашій пасіці.',
+    short_description: 'Свіжий квітковий пилок — джерело вітамінів, амінокислот та мікроелементів.',
+    full_description: 'Квітковий пилок містить понад 250 біологічно активних речовин. Рекомендується для підтримки імунітету та загального оздоровлення організму.',
+    composition: 'Натуральний квітковий пилок',
     usage_notes: 'Вживати по 1–2 чайні ложки на день, запиваючи водою або розчиняючи в меду.',
     storage_info: 'Зберігати в холодильнику або морозильній камері.',
     packaging_note: '50 г, 100 г',
@@ -43,7 +43,7 @@ const CANONICAL_APIARY = [
     in_stock: true,
     display_order: 2,
     image_url: null,
-    image_alt: 'Бджолиний пилок Dacha TV',
+    image_alt: 'Квітковий пилок Dacha TV',
     youtube_video_url: null,
   },
   {
@@ -63,6 +63,26 @@ const CANONICAL_APIARY = [
     display_order: 3,
     image_url: null,
     image_alt: 'Прополіс Dacha TV',
+    youtube_video_url: null,
+  },
+  {
+    name: 'Горіхи в меду',
+    slug: 'nuts-in-honey',
+    description: 'Суміш волоських горіхів і мигдалю в натуральному меду.',
+    short_description: 'Волоські горіхи та мигдаль у натуральному меді — корисне та смачне ласощі.',
+    full_description: 'Суміш відборних горіхів у натуральному меді. Енергетичний та поживний продукт, що поєднує корисні властивості меду та горіхів.',
+    composition: 'Натуральний мед, волоські горіхи, мигдаль',
+    usage_notes: 'Вживати по 1–2 столові ложки на день як самостійний десерт або з хлібом.',
+    storage_info: 'Зберігати в прохолодному темному місці. Термін придатності — 12 місяців.',
+    packaging_note: '200 г, 500 г',
+    packaging: ['200 г', '500 г'],
+    price_uah: 230,
+    weight_g: 200,
+    is_featured: false,
+    in_stock: true,
+    display_order: 4,
+    image_url: null,
+    image_alt: 'Горіхи в меду Dacha TV',
     youtube_video_url: null,
   },
 ]
