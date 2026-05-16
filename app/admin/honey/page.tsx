@@ -78,7 +78,7 @@ export default async function AdminHoneyPage() {
                   <td className="px-5 py-3.5 font-medium text-gray-900">{product.name}</td>
                   <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">{product.variety ?? '—'}</td>
                   <td className="px-5 py-3.5 text-center">
-                    <span className={`inline-block w-2 h-2 rounded-full ${product.in_stock ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    <span className={`inline-block w-2 h-2 rounded-full ${product.status === 'available' ? 'bg-green-500' : product.status === 'preorder' ? 'bg-amber-400' : 'bg-gray-300'}`} title={product.status} />
                   </td>
                   <td className="px-5 py-3.5 text-center hidden sm:table-cell">
                     <span className={`inline-block w-2 h-2 rounded-full ${product.is_featured ? 'bg-amber-400' : 'bg-gray-300'}`} />
@@ -121,10 +121,15 @@ export default async function AdminHoneyPage() {
             <input name="packaging" type="text" placeholder="1 л пластик, 1 л скло" className={INPUT} />
           </div>
 
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" name="in_stock" defaultChecked className="w-4 h-4 rounded accent-gray-900" />
-            <span className="text-sm font-medium text-gray-700">В наявності</span>
-          </label>
+          <div>
+            <label className={LABEL}>Статус</label>
+            <select name="status" defaultValue="available" className={INPUT}>
+              <option value="available">В наявності</option>
+              <option value="preorder">Передзамовлення</option>
+              <option value="out_of_stock">Немає в наявності</option>
+              <option value="archived">Архів</option>
+            </select>
+          </div>
 
           <MediaFields youtubeFieldName="youtube_video_link" />
 

@@ -28,8 +28,8 @@ const VARIETY_ORDER = [
 export default async function FlowersPage() {
   const allProducts = await getAllFlowerProducts().catch(() => [])
 
-  const featured = allProducts.filter((p) => p.is_featured && p.in_stock).slice(0, 3)
-  const available = allProducts.filter((p) => p.in_stock)
+  const featured = allProducts.filter((p) => p.is_featured && (p.status === 'available' || p.status === 'preorder')).slice(0, 3)
+  const available = allProducts.filter((p) => p.status === 'available' || p.status === 'preorder')
 
   // Group by variety for catalog sections
   const byVariety = VARIETY_ORDER.reduce<Record<string, typeof allProducts>>((acc, variety) => {

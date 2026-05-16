@@ -62,7 +62,7 @@ export default async function FlowerProductPage({ params }: Props) {
   const heroImage = resolveLocalImage(product.image_url)
   const youtubeId = extractYouTubeId(product.youtube_video_url)
   const related = allProducts
-    .filter((p) => p.id !== product.id && p.in_stock)
+    .filter((p) => p.id !== product.id && (p.status === 'available' || p.status === 'preorder'))
     .slice(0, 3)
 
   const productSchema = {
@@ -73,7 +73,7 @@ export default async function FlowerProductPage({ params }: Props) {
     brand: { '@type': 'Brand', name: 'Дача TV' },
     offers: {
       '@type': 'Offer',
-      availability: product.in_stock
+      availability: (product.status === 'available' || product.status === 'preorder')
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'Дача TV' },
@@ -127,7 +127,7 @@ export default async function FlowerProductPage({ params }: Props) {
               </div>
             )}
 
-            {!product.in_stock && (
+            {product.status !== 'available' && product.status !== 'preorder' && (
               <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
                 <span className="bg-gray-800 text-white text-sm font-semibold px-4 py-2 rounded-full">
                   Немає в наявності
@@ -154,7 +154,7 @@ export default async function FlowerProductPage({ params }: Props) {
               </p>
             )}
 
-            {!product.in_stock && (
+            {product.status !== 'available' && product.status !== 'preorder' && (
               <div className="bg-gray-100 text-gray-600 rounded-xl px-4 py-3 mb-5 text-sm">
                 Наразі немає в наявності. Залиште заявку — повідомимо, коли з&apos;явиться.
               </div>

@@ -50,7 +50,7 @@ export function FlowerCard({ product }: FlowerCardProps) {
           </div>
         )}
 
-        {!product.in_stock && (
+        {product.status !== 'available' && product.status !== 'preorder' && (
           <div className="absolute inset-0 bg-white/75 backdrop-blur-[1px] flex items-center justify-center">
             <span className="bg-gray-800 text-white text-sm font-semibold px-4 py-2 rounded-full">
               Немає в наявності

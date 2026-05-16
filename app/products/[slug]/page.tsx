@@ -67,7 +67,7 @@ export default async function ApiaryProductPage({ params }: Props) {
     brand: { '@type': 'Brand', name: 'Дача TV' },
     offers: {
       '@type': 'Offer',
-      availability: product.in_stock
+      availability: (product.status === 'available' || product.status === 'preorder')
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'Дача TV' },
@@ -114,7 +114,7 @@ export default async function ApiaryProductPage({ params }: Props) {
                   </span>
                 </div>
               )}
-              {!product.in_stock && (
+              {product.status !== 'available' && product.status !== 'preorder' && (
                 <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
                   <span className="bg-gray-800 text-white text-sm font-semibold px-4 py-2 rounded-full">
                     Немає в наявності
@@ -159,7 +159,7 @@ export default async function ApiaryProductPage({ params }: Props) {
               </p>
             )}
 
-            {!product.in_stock && (
+            {product.status !== 'available' && product.status !== 'preorder' && (
               <div className="bg-gray-100 text-gray-700 rounded-lg px-4 py-3 mb-4 text-sm font-medium">
                 Наразі немає в наявності. Залиште заявку — ми повідомимо, коли з&apos;явиться.
               </div>
