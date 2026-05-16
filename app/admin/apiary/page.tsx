@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { syncCatalogAction } from '@/app/admin/actions/seed'
 import { createApiaryProduct } from './actions'
-import { MediaFields } from '@/components/admin/MediaFields'
+import { MediaManager } from '@/components/admin/MediaManager'
 import type { ApiaryProduct } from '@/types'
 
 export const metadata: Metadata = {
@@ -120,7 +120,7 @@ export default async function AdminApiaryPage() {
             </select>
           </div>
 
-          <MediaFields />
+          <MediaManager initialMedia={[]} />
 
           <details className="border border-gray-100 rounded-lg">
             <summary className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none list-none flex items-center gap-2">

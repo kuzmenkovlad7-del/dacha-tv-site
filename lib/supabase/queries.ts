@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { SiteSettings, HoneyProduct, ApiaryProduct, BeekeeperProduct, Review, FaqItem, FlowerProduct } from '@/types'
+import type { ProductSection } from '@/lib/supabase/product-media'
 import { STATIC_FLOWERS } from '@/lib/flowers-static'
 import { STATIC_APIARY, STATIC_APIARY_BY_SLUG, STATIC_APIARY_SLUGS, STATIC_BEEKEEPER } from '@/lib/static-apiary'
 
@@ -8,6 +9,18 @@ function getClient() {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !key) return null
   return createClient(url, key)
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchMedia(section: ProductSection, productId: string, client: any) {
+  const { data } = await client
+    .from('product_media')
+    .select('*')
+    .eq('product_section', section)
+    .eq('product_id', productId)
+    .order('media_type', { ascending: true })
+    .order('position', { ascending: true })
+  return (data ?? [])
 }
 
 export async function getSiteSettings(): Promise<SiteSettings | null> {
@@ -31,7 +44,9 @@ export async function getHoneyProductBySlug(slug: string): Promise<HoneyProduct 
   const client = getClient()
   if (!client) return null
   const { data } = await client.from('honey_products').select('*').eq('slug', slug).single()
-  return data ?? null
+  if (!data) return null
+  const media = await fetchMedia('honey', data.id, client).catch(() => [])
+  return { ...data, media }
 }
 
 export async function getFeaturedHoneyProducts(): Promise<HoneyProduct[]> {
@@ -67,8 +82,9 @@ export async function getApiaryProductBySlug(slug: string): Promise<ApiaryProduc
   const client = getClient()
   if (!client) return STATIC_APIARY_BY_SLUG[slug] ?? null
   const { data } = await client.from('apiary_products').select('*').eq('slug', slug).single()
-  if (data) return data
-  return STATIC_APIARY_BY_SLUG[slug] ?? null
+  if (!data) return STATIC_APIARY_BY_SLUG[slug] ?? null
+  const media = await fetchMedia('apiary', data.id, client).catch(() => [])
+  return { ...data, media }
 }
 
 export async function getAllApiaryProductSlugs(): Promise<string[]> {
@@ -125,8 +141,9 @@ export async function getFlowerProductBySlug(slug: string): Promise<FlowerProduc
   const client = getClient()
   if (!client) return STATIC_FLOWERS.find((f) => f.slug === slug) ?? null
   const { data } = await client.from('flower_products').select('*').eq('slug', slug).single()
-  if (data) return data
-  return STATIC_FLOWERS.find((f) => f.slug === slug) ?? null
+  if (!data) return STATIC_FLOWERS.find((f) => f.slug === slug) ?? null
+  const media = await fetchMedia('flowers', data.id, client).catch(() => [])
+  return { ...data, media }
 }
 
 export async function getAllFlowerSlugs(): Promise<string[]> {

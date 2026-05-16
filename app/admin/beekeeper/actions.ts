@@ -1,6 +1,6 @@
 'use server'
 import { getAdminClient } from '@/lib/supabase/admin'
-import { uploadProductFile } from '@/lib/supabase/storage'
+import { parseMediaFromForm, saveProductMedia, mediaToBackwardCompat } from '@/lib/supabase/product-media'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -15,54 +15,16 @@ function autoSlug(name: string): string {
   return slug || `beekeeper-${Date.now()}`
 }
 
-async function resolveImageUrl(formData: FormData): Promise<string | null> {
-  const file = formData.get('image_file') as File | null
-  if (file && file.size > 0) {
-    const result = await uploadProductFile(file)
-    if ('url' in result) return result.url
-  }
-  return (formData.get('image_url') as string)?.trim() || null
-}
-
-async function resolveVideoUrl(formData: FormData): Promise<string | null> {
-  const file = formData.get('video_file') as File | null
-  if (file && file.size > 0) {
-    const result = await uploadProductFile(file)
-    if ('url' in result) return result.url
-  }
-  return (formData.get('video_url') as string)?.trim() || null
-}
-
-async function resolveGalleryImages(formData: FormData): Promise<string[]> {
-  const count = Math.min(parseInt((formData.get('gallery_slot_count') as string) || '0', 10), 20)
-  const result: string[] = []
-  for (let i = 0; i < count; i++) {
-    const file = formData.get(`gallery_file_${i}`) as File | null
-    if (file && file.size > 0) {
-      const res = await uploadProductFile(file)
-      if ('url' in res) { result.push(res.url); continue }
-    }
-    const url = (formData.get(`gallery_url_${i}`) as string)?.trim()
-    if (url) result.push(url)
-  }
-  return result
-}
-
-function parseTextArray(formData: FormData, key: string): string[] {
-  return (formData.getAll(key) as string[]).map((s) => s.trim()).filter(Boolean)
-}
-
 export async function createBeekeeperProduct(formData: FormData) {
   const client = getAdminClient()
-  const image_url = await resolveImageUrl(formData)
-  const video_url = await resolveVideoUrl(formData)
-  const gallery_images = await resolveGalleryImages(formData)
+  const mediaItems = await parseMediaFromForm(formData)
+  const compat = mediaToBackwardCompat(mediaItems, 'youtube_video_url')
   const breedsRaw = formData.get('breeds') as string
   const breeds = breedsRaw ? breedsRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
   const name = formData.get('name') as string
   const slugRaw = (formData.get('slug') as string)?.trim()
 
-  await client.from('beekeeper_products').insert({
+  const { data, error } = await client.from('beekeeper_products').insert({
     name,
     slug: slugRaw || autoSlug(name),
     product_type: formData.get('product_type') as string,
@@ -73,13 +35,12 @@ export async function createBeekeeperProduct(formData: FormData) {
     display_order: parseInt(formData.get('display_order') as string) || 10,
     status: (formData.get('status') as string) || 'available',
     is_featured: formData.get('is_featured') === 'on',
-    youtube_video_url: (formData.get('youtube_video_url') as string) || null,
-    youtube_video_urls: parseTextArray(formData, 'youtube_video_urls'),
-    image_url,
-    image_alt: (formData.get('image_alt') as string) || null,
-    gallery_images,
-    video_url,
-  })
+    ...compat,
+  }).select('id').single()
+
+  if (!error && data) {
+    await saveProductMedia('beekeeper', data.id, mediaItems, client)
+  }
 
   revalidatePath('/beekeeper', 'layout')
   redirect('/admin/beekeeper')
@@ -87,9 +48,8 @@ export async function createBeekeeperProduct(formData: FormData) {
 
 export async function updateBeekeeperProduct(id: string, formData: FormData) {
   const client = getAdminClient()
-  const image_url = await resolveImageUrl(formData)
-  const video_url = await resolveVideoUrl(formData)
-  const gallery_images = await resolveGalleryImages(formData)
+  const mediaItems = await parseMediaFromForm(formData)
+  const compat = mediaToBackwardCompat(mediaItems, 'youtube_video_url')
   const breedsRaw = formData.get('breeds') as string
   const breeds = breedsRaw ? breedsRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
   const name = formData.get('name') as string
@@ -106,14 +66,11 @@ export async function updateBeekeeperProduct(id: string, formData: FormData) {
     display_order: parseInt(formData.get('display_order') as string) || 10,
     status: (formData.get('status') as string) || 'available',
     is_featured: formData.get('is_featured') === 'on',
-    youtube_video_url: (formData.get('youtube_video_url') as string) || null,
-    youtube_video_urls: parseTextArray(formData, 'youtube_video_urls'),
-    image_url,
-    image_alt: (formData.get('image_alt') as string) || null,
-    gallery_images,
-    video_url,
     updated_at: new Date().toISOString(),
+    ...compat,
   }).eq('id', id)
+
+  await saveProductMedia('beekeeper', id, mediaItems, client)
 
   revalidatePath('/beekeeper', 'layout')
   redirect('/admin/beekeeper')
@@ -121,6 +78,7 @@ export async function updateBeekeeperProduct(id: string, formData: FormData) {
 
 export async function deleteBeekeeperProduct(id: string) {
   const client = getAdminClient()
+  await saveProductMedia('beekeeper', id, [], client)
   await client.from('beekeeper_products').delete().eq('id', id)
   revalidatePath('/beekeeper', 'layout')
   redirect('/admin/beekeeper')

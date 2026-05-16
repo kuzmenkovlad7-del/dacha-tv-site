@@ -53,11 +53,26 @@ export default async function ApiaryProductPage({ params }: Props) {
 
   if (!product) notFound()
 
-  const allImages = [
-    ...(product.image_url ? [{ src: product.image_url, alt: product.image_alt || product.name }] : []),
-    ...(product.gallery_images || []).map((src) => ({ src, alt: product.name })),
-  ]
-  const youtubeId = extractYouTubeId(product.youtube_video_url)
+  const media = product.media ?? []
+  const primaryImg = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image') ?? null
+  const galleryImgs = media.filter((m) => m.media_type === 'image' && m !== primaryImg)
+  const localVideo = media.find((m) => m.media_type === 'video') ?? null
+  const ytItems = media.filter((m) => m.media_type === 'youtube')
+  // Fall back to legacy columns when media table is empty
+  const allImages = media.length > 0
+    ? [
+        ...(primaryImg ? [{ src: primaryImg.url, alt: primaryImg.alt ?? product.name }] : []),
+        ...galleryImgs.map((m) => ({ src: m.url, alt: m.alt ?? product.name })),
+      ]
+    : [
+        ...(product.image_url ? [{ src: product.image_url, alt: product.image_alt || product.name }] : []),
+        ...(product.gallery_images || []).map((src) => ({ src, alt: product.name })),
+      ]
+  const videoUrl = localVideo?.url ?? product.video_url ?? null
+  const youtubeId = ytItems[0] ? extractYouTubeId(ytItems[0].url) : extractYouTubeId(product.youtube_video_url)
+  const extraYoutubeIds = ytItems.length > 1
+    ? ytItems.slice(1).map((m) => extractYouTubeId(m.url)).filter(Boolean) as string[]
+    : (product.youtube_video_urls ?? []).map(extractYouTubeId).filter(Boolean) as string[]
 
   const productSchema = {
     '@context': 'https://schema.org',
@@ -218,32 +233,29 @@ export default async function ApiaryProductPage({ params }: Props) {
               </div>
             )}
 
-            {product.video_url && (
+            {videoUrl && (
               <div className="mb-6">
                 <p className="text-xs font-semibold text-bark/50 uppercase tracking-widest mb-2">
                   Відео про цей продукт
                 </p>
-                <video src={product.video_url} controls className="w-full rounded-xl" />
+                <video src={videoUrl} controls className="w-full rounded-xl" />
               </div>
             )}
 
             {youtubeId && (
               <div className="mb-6">
                 <p className="text-xs font-semibold text-bark/50 uppercase tracking-widest mb-2">
-                  {product.video_url ? 'Також на YouTube' : 'Відео про цей продукт'}
+                  {videoUrl ? 'Також на YouTube' : 'Відео про цей продукт'}
                 </p>
                 <YouTubeFacade videoId={youtubeId} title={`Відео про ${product.name}`} />
               </div>
             )}
 
-            {(product.youtube_video_urls ?? []).filter(Boolean).map((url, i) => {
-              const vid = extractYouTubeId(url)
-              return vid ? (
-                <div key={i} className="mb-4">
-                  <YouTubeFacade videoId={vid} title={`Відео ${i + 2} про ${product.name}`} />
-                </div>
-              ) : null
-            })}
+            {extraYoutubeIds.map((vid, i) => (
+              <div key={i} className="mb-4">
+                <YouTubeFacade videoId={vid} title={`Відео ${i + 2} про ${product.name}`} />
+              </div>
+            ))}
 
             {/* Order form */}
             <div id="order-form" className="bg-forest-50 rounded-2xl p-6 border border-forest-200">

@@ -3,7 +3,8 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getAdminClient } from '@/lib/supabase/admin'
-import { MediaFields } from '@/components/admin/MediaFields'
+import { getProductMedia } from '@/lib/supabase/product-media'
+import { MediaManager } from '@/components/admin/MediaManager'
 import { updateHoneyProduct, deleteHoneyProduct } from '../actions'
 
 interface Props {
@@ -24,12 +25,16 @@ export default async function AdminHoneyEditPage({ params }: Props) {
 
   let product: Record<string, unknown> | null = null
   let loadError: string | null = null
+  let productMedia: Awaited<ReturnType<typeof getProductMedia>> = []
 
   try {
     const client = getAdminClient()
     const { data, error } = await client.from('honey_products').select('*').eq('id', id).single()
     if (error) loadError = error.message
-    else product = data as Record<string, unknown>
+    else {
+      product = data as Record<string, unknown>
+      productMedia = await getProductMedia('honey', id, client).catch(() => [])
+    }
   } catch (e) {
     loadError = e instanceof Error ? e.message : 'Помилка підключення'
   }
@@ -94,16 +99,7 @@ export default async function AdminHoneyEditPage({ params }: Props) {
           </select>
         </div>
 
-        <MediaFields
-          imageUrl={p.image_url as string | null}
-          imageAlt={p.image_alt as string | null}
-          galleryImages={Array.isArray(p.gallery_images) ? p.gallery_images as string[] : []}
-          videoUrl={p.video_url as string | null}
-          youtubeUrl={p.youtube_video_link as string | null}
-          youtubeFieldName="youtube_video_link"
-          youtubeUrls={Array.isArray(p.youtube_video_urls) ? p.youtube_video_urls as string[] : []}
-          productName={String(p.name ?? '')}
-        />
+        <MediaManager initialMedia={productMedia} productName={String(p.name ?? '')} />
 
         <details className="border border-gray-100 rounded-lg">
           <summary className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none list-none flex items-center gap-2">
