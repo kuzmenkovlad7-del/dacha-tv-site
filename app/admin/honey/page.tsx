@@ -34,17 +34,15 @@ export default async function AdminHoneyPage() {
             <p className="text-sm text-gray-500 mt-0.5">{products.length} позицій</p>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <form action={syncCatalogAction}>
-            <button type="submit"
-              className="inline-flex items-center gap-1.5 h-9 px-4 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
-              <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Синхр.
-            </button>
-          </form>
-        </div>
+        <form action={syncCatalogAction}>
+          <button type="submit"
+            className="inline-flex items-center gap-1.5 h-9 px-4 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+            <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Синхр.
+          </button>
+        </form>
       </div>
 
       {/* Empty state */}
@@ -69,7 +67,6 @@ export default async function AdminHoneyPage() {
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Назва</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Сорт</th>
-                <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">№</th>
                 <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Наявн.</th>
                 <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Топ</th>
                 <th className="px-5 py-3 w-20"></th>
@@ -80,7 +77,6 @@ export default async function AdminHoneyPage() {
                 <tr key={product.id} className="hover:bg-gray-50/70 transition-colors">
                   <td className="px-5 py-3.5 font-medium text-gray-900">{product.name}</td>
                   <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">{product.variety ?? '—'}</td>
-                  <td className="px-5 py-3.5 text-center text-gray-400 text-xs">{product.display_order}</td>
                   <td className="px-5 py-3.5 text-center">
                     <span className={`inline-block w-2 h-2 rounded-full ${product.in_stock ? 'bg-green-500' : 'bg-gray-300'}`} />
                   </td>
@@ -104,32 +100,9 @@ export default async function AdminHoneyPage() {
       <div id="create" className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 max-w-2xl">
         <h2 className="text-base font-semibold text-gray-900 mb-5">Додати мед</h2>
         <form action={createHoneyProduct} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={LABEL}>Назва</label>
-              <input name="name" type="text" required className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Slug (URL)</label>
-              <input name="slug" type="text" required placeholder="acacia-honey" className={INPUT} />
-            </div>
-          </div>
-
           <div>
-            <label className={LABEL}>Сорт</label>
-            <select name="variety" required className={INPUT}>
-              {VARIETIES.map((v) => <option key={v} value={v}>{v}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <label className={LABEL}>Короткий опис</label>
-            <textarea name="short_description" rows={2} className={INPUT} />
-          </div>
-
-          <div>
-            <label className={LABEL}>Основний опис</label>
-            <textarea name="description" rows={3} className={INPUT} />
+            <label className={LABEL}>Назва</label>
+            <input name="name" type="text" required className={INPUT} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -165,9 +138,29 @@ export default async function AdminHoneyPage() {
             <summary className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none list-none flex items-center gap-2">
               <span>▸</span> Додатково
             </summary>
-            <div className="px-4 pb-4 pt-2">
-              <label className={LABEL}>Порядок відображення</label>
-              <input name="display_order" type="number" defaultValue={10} className={INPUT} />
+            <div className="px-4 pb-4 pt-2 space-y-3">
+              <div>
+                <label className={LABEL}>Slug (URL)</label>
+                <input name="slug" type="text" placeholder="acacia-honey (авто якщо порожньо)" className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Сорт</label>
+                <select name="variety" className={INPUT}>
+                  {VARIETIES.map((v) => <option key={v} value={v}>{v}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className={LABEL}>Короткий опис</label>
+                <textarea name="short_description" rows={2} className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Основний опис</label>
+                <textarea name="description" rows={3} className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Порядок відображення</label>
+                <input name="display_order" type="number" defaultValue={10} className={INPUT} />
+              </div>
             </div>
           </details>
 

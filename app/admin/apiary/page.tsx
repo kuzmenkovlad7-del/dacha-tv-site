@@ -33,17 +33,15 @@ export default async function AdminApiaryPage() {
             <p className="text-sm text-gray-500 mt-0.5">{products.length} позицій</p>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <form action={syncCatalogAction}>
-            <button type="submit"
-              className="inline-flex items-center gap-1.5 h-9 px-4 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
-              <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Синхр.
-            </button>
-          </form>
-        </div>
+        <form action={syncCatalogAction}>
+          <button type="submit"
+            className="inline-flex items-center gap-1.5 h-9 px-4 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+            <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Синхр.
+          </button>
+        </form>
       </div>
 
       {/* Empty state */}
@@ -68,7 +66,6 @@ export default async function AdminApiaryPage() {
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Назва</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Slug</th>
-                <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">№</th>
                 <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Наявн.</th>
                 <th className="px-5 py-3 w-20"></th>
               </tr>
@@ -78,7 +75,6 @@ export default async function AdminApiaryPage() {
                 <tr key={product.id} className="hover:bg-gray-50/70 transition-colors">
                   <td className="px-5 py-3.5 font-medium text-gray-900">{product.name}</td>
                   <td className="px-5 py-3.5 text-gray-400 text-xs font-mono hidden sm:table-cell">{product.slug}</td>
-                  <td className="px-5 py-3.5 text-center text-gray-400 text-xs">{product.display_order}</td>
                   <td className="px-5 py-3.5 text-center">
                     <span className={`inline-block w-2 h-2 rounded-full ${product.in_stock ? 'bg-green-500' : 'bg-gray-300'}`} />
                   </td>
@@ -99,36 +95,14 @@ export default async function AdminApiaryPage() {
       <div id="create" className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 max-w-2xl">
         <h2 className="text-base font-semibold text-gray-900 mb-5">Додати продукт</h2>
         <form action={createApiaryProduct} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={LABEL}>Назва</label>
-              <input name="name" type="text" required className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Slug</label>
-              <input name="slug" type="text" required className={INPUT} />
-            </div>
+          <div>
+            <label className={LABEL}>Назва</label>
+            <input name="name" type="text" required className={INPUT} />
           </div>
 
           <div>
-            <label className={LABEL}>Короткий опис</label>
-            <textarea name="short_description" rows={2} className={INPUT} />
-          </div>
-
-          <div>
-            <label className={LABEL}>Опис</label>
-            <textarea name="description" rows={3} className={INPUT} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={LABEL}>Ціна (грн)</label>
-              <input name="price_uah" type="number" className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Вага (г)</label>
-              <input name="weight_g" type="number" className={INPUT} />
-            </div>
+            <label className={LABEL}>Ціна (грн)</label>
+            <input name="price_uah" type="number" className={INPUT} />
           </div>
 
           <div>
@@ -136,16 +110,10 @@ export default async function AdminApiaryPage() {
             <input name="packaging" type="text" placeholder="35 г, 70 г" className={INPUT} />
           </div>
 
-          <div className="flex gap-6">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" name="in_stock" defaultChecked className="w-4 h-4 rounded accent-gray-900" />
-              <span className="text-sm font-medium text-gray-700">В наявності</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" name="is_featured" className="w-4 h-4 rounded accent-gray-900" />
-              <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
-            </label>
-          </div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="in_stock" defaultChecked className="w-4 h-4 rounded accent-gray-900" />
+            <span className="text-sm font-medium text-gray-700">В наявності</span>
+          </label>
 
           <MediaFields />
 
@@ -153,9 +121,31 @@ export default async function AdminApiaryPage() {
             <summary className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none list-none flex items-center gap-2">
               <span>▸</span> Додатково
             </summary>
-            <div className="px-4 pb-4 pt-2">
-              <label className={LABEL}>Порядок відображення</label>
-              <input name="display_order" type="number" defaultValue={10} className={INPUT} />
+            <div className="px-4 pb-4 pt-2 space-y-3">
+              <div>
+                <label className={LABEL}>Slug (URL)</label>
+                <input name="slug" type="text" placeholder="swarm-lure (авто якщо порожньо)" className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Короткий опис</label>
+                <textarea name="short_description" rows={2} className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Опис</label>
+                <textarea name="description" rows={3} className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Вага (г)</label>
+                <input name="weight_g" type="number" className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Застосування</label>
+                <textarea name="usage_notes" rows={2} className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Порядок відображення</label>
+                <input name="display_order" type="number" defaultValue={10} className={INPUT} />
+              </div>
             </div>
           </details>
 

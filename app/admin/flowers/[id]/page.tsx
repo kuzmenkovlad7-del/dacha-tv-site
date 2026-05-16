@@ -62,44 +62,20 @@ export default async function AdminFlowerEditPage({ params }: Props) {
       <form action={updateWithId} className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 space-y-5">
         <h1 className="text-base font-semibold text-gray-900">Редагувати квітку</h1>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={LABEL}>Назва</label>
-            <input name="name" type="text" required defaultValue={String(p.name ?? '')} className={INPUT} />
-          </div>
-          <div>
-            <label className={LABEL}>Slug (URL)</label>
-            <input name="slug" type="text" required defaultValue={String(p.slug ?? '')} className={INPUT} />
-          </div>
+        <div>
+          <label className={LABEL}>Назва</label>
+          <input name="name" type="text" required defaultValue={String(p.name ?? '')} className={INPUT} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={LABEL}>Категорія</label>
-            <select name="category" defaultValue={String(p.category ?? 'chrysanthemum')} className={INPUT}>
-              <option value="chrysanthemum">Хризантема</option>
-              <option value="other">Інше</option>
-            </select>
-          </div>
           <div>
             <label className={LABEL}>Сорт</label>
             <input name="variety" type="text" defaultValue={String(p.variety ?? '')} className={INPUT} />
           </div>
-        </div>
-
-        <div>
-          <label className={LABEL}>Короткий опис</label>
-          <textarea name="short_description" rows={2} defaultValue={String(p.short_description ?? '')} className={INPUT} />
-        </div>
-
-        <div>
-          <label className={LABEL}>Повний опис</label>
-          <textarea name="full_description" rows={4} defaultValue={String(p.full_description ?? '')} className={INPUT} />
-        </div>
-
-        <div>
-          <label className={LABEL}>Колір</label>
-          <input name="color" type="text" defaultValue={String(p.color ?? '')} className={INPUT} />
+          <div>
+            <label className={LABEL}>Колір</label>
+            <input name="color" type="text" defaultValue={String(p.color ?? '')} className={INPUT} />
+          </div>
         </div>
 
         <div>
@@ -133,6 +109,25 @@ export default async function AdminFlowerEditPage({ params }: Props) {
             <span>▸</span> Додатково
           </summary>
           <div className="px-4 pb-4 pt-2 space-y-4">
+            <div>
+              <label className={LABEL}>Slug (URL)</label>
+              <input name="slug" type="text" required defaultValue={String(p.slug ?? '')} className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Категорія</label>
+              <select name="category" defaultValue={String(p.category ?? 'chrysanthemum')} className={INPUT}>
+                <option value="chrysanthemum">Хризантема</option>
+                <option value="other">Інше</option>
+              </select>
+            </div>
+            <div>
+              <label className={LABEL}>Короткий опис</label>
+              <textarea name="short_description" rows={2} defaultValue={String(p.short_description ?? '')} className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Повний опис</label>
+              <textarea name="full_description" rows={4} defaultValue={String(p.full_description ?? '')} className={INPUT} />
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={LABEL}>Сезон цвітіння</label>
