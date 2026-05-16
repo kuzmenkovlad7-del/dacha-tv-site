@@ -13,6 +13,29 @@ async function resolveImageUrl(formData: FormData): Promise<string | null> {
   return (formData.get('image_url') as string)?.trim() || null
 }
 
+async function resolveVideoUrl(formData: FormData): Promise<string | null> {
+  const file = formData.get('video_file') as File | null
+  if (file && file.size > 0) {
+    const result = await uploadProductFile(file)
+    if ('url' in result) return result.url
+  }
+  return (formData.get('video_url') as string)?.trim() || null
+}
+
+async function resolveGalleryImages(formData: FormData): Promise<string[]> {
+  const result: string[] = []
+  for (let i = 0; i < 4; i++) {
+    const file = formData.get(`gallery_file_${i}`) as File | null
+    if (file && file.size > 0) {
+      const res = await uploadProductFile(file)
+      if ('url' in res) { result.push(res.url); continue }
+    }
+    const url = (formData.get(`gallery_url_${i}`) as string)?.trim()
+    if (url) result.push(url)
+  }
+  return result
+}
+
 function parseTextArray(formData: FormData, key: string): string[] {
   return (formData.getAll(key) as string[]).map((s) => s.trim()).filter(Boolean)
 }
@@ -20,6 +43,8 @@ function parseTextArray(formData: FormData, key: string): string[] {
 export async function createFlowerProduct(formData: FormData) {
   const client = getAdminClient()
   const image_url = await resolveImageUrl(formData)
+  const video_url = await resolveVideoUrl(formData)
+  const gallery_images = await resolveGalleryImages(formData)
 
   await client.from('flower_products').insert({
     name: formData.get('name') as string,
@@ -41,7 +66,8 @@ export async function createFlowerProduct(formData: FormData) {
     youtube_video_urls: parseTextArray(formData, 'youtube_video_urls'),
     image_url,
     image_alt: (formData.get('image_alt') as string) || null,
-    gallery_images: parseTextArray(formData, 'gallery_images'),
+    gallery_images,
+    video_url,
   })
 
   revalidatePath('/flowers', 'layout')
@@ -51,6 +77,8 @@ export async function createFlowerProduct(formData: FormData) {
 export async function updateFlowerProduct(id: string, formData: FormData) {
   const client = getAdminClient()
   const image_url = await resolveImageUrl(formData)
+  const video_url = await resolveVideoUrl(formData)
+  const gallery_images = await resolveGalleryImages(formData)
 
   await client.from('flower_products').update({
     name: formData.get('name') as string,
@@ -72,7 +100,8 @@ export async function updateFlowerProduct(id: string, formData: FormData) {
     youtube_video_urls: parseTextArray(formData, 'youtube_video_urls'),
     image_url,
     image_alt: (formData.get('image_alt') as string) || null,
-    gallery_images: parseTextArray(formData, 'gallery_images'),
+    gallery_images,
+    video_url,
     updated_at: new Date().toISOString(),
   }).eq('id', id)
 

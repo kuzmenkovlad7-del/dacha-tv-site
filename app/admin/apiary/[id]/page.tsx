@@ -84,23 +84,8 @@ export default async function AdminApiaryEditPage({ params }: Props) {
         </div>
 
         <div>
-          <label className={LABEL}>Повний опис</label>
-          <textarea name="full_description" rows={4} defaultValue={String(p.full_description ?? '')} className={INPUT} />
-        </div>
-
-        <div>
-          <label className={LABEL}>Склад</label>
-          <textarea name="composition" rows={2} defaultValue={String(p.composition ?? '')} className={INPUT} />
-        </div>
-
-        <div>
           <label className={LABEL}>Застосування</label>
           <textarea name="usage_notes" rows={2} defaultValue={String(p.usage_notes ?? '')} className={INPUT} />
-        </div>
-
-        <div>
-          <label className={LABEL}>Зберігання</label>
-          <textarea name="storage_info" rows={2} defaultValue={String(p.storage_info ?? '')} className={INPUT} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -134,6 +119,7 @@ export default async function AdminApiaryEditPage({ params }: Props) {
           imageUrl={p.image_url as string | null}
           imageAlt={p.image_alt as string | null}
           galleryImages={Array.isArray(p.gallery_images) ? p.gallery_images as string[] : []}
+          videoUrl={p.video_url as string | null}
           youtubeUrl={p.youtube_video_url as string | null}
           youtubeUrls={Array.isArray(p.youtube_video_urls) ? p.youtube_video_urls as string[] : []}
           productName={String(p.name ?? '')}
@@ -143,9 +129,23 @@ export default async function AdminApiaryEditPage({ params }: Props) {
           <summary className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none list-none flex items-center gap-2">
             <span>▸</span> Додатково
           </summary>
-          <div className="px-4 pb-4 pt-2">
-            <label className={LABEL}>Порядок відображення</label>
-            <input name="display_order" type="number" defaultValue={String(p.display_order ?? 10)} className={INPUT} />
+          <div className="px-4 pb-4 pt-2 space-y-4">
+            <div>
+              <label className={LABEL}>Склад</label>
+              <textarea name="composition" rows={2} defaultValue={String(p.composition ?? '')} className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Повний опис</label>
+              <textarea name="full_description" rows={4} defaultValue={String(p.full_description ?? '')} className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Зберігання</label>
+              <textarea name="storage_info" rows={2} defaultValue={String(p.storage_info ?? '')} className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Порядок відображення</label>
+              <input name="display_order" type="number" defaultValue={String(p.display_order ?? 10)} className={INPUT} />
+            </div>
           </div>
         </details>
 

@@ -43,10 +43,6 @@ export default async function AdminApiaryPage() {
               Синхр.
             </button>
           </form>
-          <a href="#create"
-            className="inline-flex items-center gap-1.5 h-9 px-4 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors shadow-sm">
-            + Додати
-          </a>
         </div>
       </div>
 

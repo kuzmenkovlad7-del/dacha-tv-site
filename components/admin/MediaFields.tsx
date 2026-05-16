@@ -8,11 +8,19 @@ const ICON_BTN =
   'shrink-0 h-8 w-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-colors text-base leading-none'
 const ADD_BTN =
   'inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors'
+const FILE_INPUT =
+  'w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer'
+
+interface GallerySlot {
+  url: string
+  preview: string
+}
 
 interface MediaFieldsProps {
   imageUrl?: string | null
   imageAlt?: string | null
   galleryImages?: string[] | null
+  videoUrl?: string | null
   youtubeUrl?: string | null
   youtubeFieldName?: string
   youtubeUrls?: string[] | null
@@ -23,87 +31,95 @@ export function MediaFields({
   imageUrl,
   imageAlt,
   galleryImages,
+  videoUrl,
   youtubeUrl,
   youtubeFieldName = 'youtube_video_url',
   youtubeUrls,
   productName = '',
 }: MediaFieldsProps) {
+  const [imagePreview, setImagePreview] = useState(imageUrl ?? '')
   const [imageUrlState, setImageUrlState] = useState(imageUrl ?? '')
   const [imageAltState, setImageAltState] = useState(imageAlt ?? '')
-  const [previewSrc, setPreviewSrc] = useState(imageUrl ?? '')
-  const [gallery, setGallery] = useState<string[]>(() =>
-    (galleryImages ?? []).filter(Boolean),
+  const [videoPreview, setVideoPreview] = useState(videoUrl ?? '')
+  const [slots, setSlots] = useState<GallerySlot[]>(() =>
+    (galleryImages ?? []).filter(Boolean).slice(0, 4).map((u) => ({ url: u, preview: u })),
   )
   const [primaryYt, setPrimaryYt] = useState(youtubeUrl ?? '')
-  const [extraYts, setExtraYts] = useState<string[]>(() =>
-    (youtubeUrls ?? []).filter(Boolean),
-  )
+  const [extraYts, setExtraYts] = useState<string[]>(() => (youtubeUrls ?? []).filter(Boolean))
 
-  const handleFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
-      if (!file) return
-      setPreviewSrc(URL.createObjectURL(file))
-    },
-    [],
-  )
+  const handleMainFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImagePreview(URL.createObjectURL(file))
+  }, [])
 
-  const handleUrlChange = (val: string) => {
-    setImageUrlState(val)
-    if (!val.startsWith('blob:')) setPreviewSrc(val)
+  const handleVideoFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setVideoPreview(URL.createObjectURL(file))
+  }, [])
+
+  const handleGalleryFileChange = useCallback((i: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const preview = URL.createObjectURL(file)
+    setSlots((s) => s.map((slot, j) => (j === i ? { ...slot, preview } : slot)))
+  }, [])
+
+  const addSlot = () => {
+    if (slots.length < 4) setSlots((s) => [...s, { url: '', preview: '' }])
   }
 
-  const autoAlt = () => {
-    if (productName) setImageAltState(`${productName} — Dacha TV`)
+  const removeSlot = (i: number) => {
+    setSlots((s) => s.filter((_, j) => j !== i))
   }
 
   return (
     <fieldset className="border-t border-gray-100 pt-5 space-y-5">
-      <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-        Медіа
-      </legend>
+      <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Медіа</legend>
 
-      {/* Primary image */}
+      {/* Main image */}
       <div>
         <label className={LABEL}>Головне зображення</label>
-        {previewSrc && (
-          <div className="mb-2 h-28 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center">
+        {imagePreview && (
+          <div className="mb-2 h-32 rounded-xl overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={previewSrc}
-              alt={imageAltState}
-              className="max-h-full max-w-full object-contain"
-            />
+            <img src={imagePreview} alt="" className="max-h-full max-w-full object-contain" />
           </div>
         )}
         <input
           type="file"
           name="image_file"
           accept="image/jpeg,image/jpg,image/png,image/webp,image/avif"
-          onChange={handleFileChange}
-          className="w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
+          onChange={handleMainFileChange}
+          className={FILE_INPUT}
         />
-        <p className="text-xs text-gray-400 mt-1.5 mb-1">або вставте URL:</p>
-        <input
-          name="image_url"
-          type="text"
-          value={imageUrlState}
-          onChange={(e) => handleUrlChange(e.target.value)}
-          placeholder="/images/dacha-tv/... або https://..."
-          className={INPUT}
-        />
+        <details className="mt-2">
+          <summary className="text-xs text-gray-400 cursor-pointer select-none hover:text-gray-600">
+            URL (резервний варіант)
+          </summary>
+          <input
+            name="image_url"
+            type="text"
+            value={imageUrlState}
+            onChange={(e) => {
+              setImageUrlState(e.target.value)
+              if (!e.target.value.startsWith('blob:')) setImagePreview(e.target.value)
+            }}
+            placeholder="/images/dacha-tv/... або https://..."
+            className={`${INPUT} mt-1.5`}
+          />
+        </details>
       </div>
 
       {/* Alt text */}
       <div>
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
-            Alt-текст
-          </span>
+          <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Alt-текст</span>
           {productName && (
             <button
               type="button"
-              onClick={autoAlt}
+              onClick={() => setImageAltState(`${productName} — Dacha TV`)}
               className="text-xs text-gray-400 hover:text-gray-700 underline underline-offset-2"
             >
               Авто
@@ -123,38 +139,54 @@ export function MediaFields({
       {/* Gallery */}
       <div>
         <label className={LABEL}>Галерея (до 4 фото)</label>
-        <div className="space-y-2">
-          {gallery.map((url, i) => (
-            <div key={i} className="flex gap-2">
-              <input
-                name="gallery_images"
-                type="text"
-                value={url}
-                onChange={(e) =>
-                  setGallery((g) => g.map((v, j) => (j === i ? e.target.value : v)))
-                }
-                placeholder="https://..."
-                className={INPUT}
-              />
-              <button
-                type="button"
-                onClick={() => setGallery((g) => g.filter((_, j) => j !== i))}
-                className={ICON_BTN}
-              >
+        <div className="space-y-3">
+          {slots.map((slot, i) => (
+            <div key={i} className="flex gap-2 items-start">
+              <div className="flex-1 space-y-1.5">
+                {slot.preview && (
+                  <div className="h-20 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={slot.preview} alt="" className="max-h-full max-w-full object-contain" />
+                  </div>
+                )}
+                <input type="hidden" name={`gallery_url_${i}`} value={slot.url} />
+                <input
+                  type="file"
+                  name={`gallery_file_${i}`}
+                  accept="image/jpeg,image/jpg,image/png,image/webp,image/avif"
+                  onChange={(e) => handleGalleryFileChange(i, e)}
+                  className="w-full text-sm text-gray-500 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-xs file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
+                />
+              </div>
+              <button type="button" onClick={() => removeSlot(i)} className={ICON_BTN}>
                 ×
               </button>
             </div>
           ))}
-          {gallery.length < 4 && (
-            <button
-              type="button"
-              onClick={() => setGallery((g) => [...g, ''])}
-              className={ADD_BTN}
-            >
+          {slots.length < 4 && (
+            <button type="button" onClick={addSlot} className={ADD_BTN}>
               + Додати фото до галереї
             </button>
           )}
         </div>
+      </div>
+
+      {/* Video file */}
+      <div>
+        <label className={LABEL}>Відео файл (mp4 / webm / mov)</label>
+        {videoPreview && (
+          <div className="mb-2 rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+            <video src={videoPreview} controls className="w-full max-h-40 object-contain" />
+          </div>
+        )}
+        <input type="hidden" name="video_url" value={videoUrl ?? ''} />
+        <input
+          type="file"
+          name="video_file"
+          accept="video/mp4,video/webm,video/quicktime"
+          onChange={handleVideoFileChange}
+          className={FILE_INPUT}
+        />
       </div>
 
       {/* Primary YouTube */}
@@ -180,9 +212,7 @@ export function MediaFields({
                 name="youtube_video_urls"
                 type="text"
                 value={url}
-                onChange={(e) =>
-                  setExtraYts((y) => y.map((v, j) => (j === i ? e.target.value : v)))
-                }
+                onChange={(e) => setExtraYts((y) => y.map((v, j) => (j === i ? e.target.value : v)))}
                 placeholder="https://www.youtube.com/watch?v=..."
                 className={INPUT}
               />
@@ -196,12 +226,8 @@ export function MediaFields({
             </div>
           ))}
           {extraYts.length < 3 && (
-            <button
-              type="button"
-              onClick={() => setExtraYts((y) => [...y, ''])}
-              className={ADD_BTN}
-            >
-              + Додати відео
+            <button type="button" onClick={() => setExtraYts((y) => [...y, ''])} className={ADD_BTN}>
+              + Додати YouTube відео
             </button>
           )}
         </div>
