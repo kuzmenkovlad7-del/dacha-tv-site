@@ -155,22 +155,33 @@ export default async function AdminBeekeeperPage() {
               <input name="breeds" type="text" placeholder="Buckfast, Карніка" className={INPUT} />
             </div>
             <div>
-              <label className={LABEL}>Порядок</label>
-              <input name="display_order" type="number" defaultValue={10} className={INPUT} />
+              <label className={LABEL}>Примітка про сезон</label>
+              <input name="season_note" type="text" placeholder="Доступні з квітня по серпень" className={INPUT} />
             </div>
           </div>
 
-          <div>
-            <label className={LABEL}>Примітка про сезон</label>
-            <input name="season_note" type="text" placeholder="Доступні з квітня по серпень" className={INPUT} />
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="in_stock" defaultChecked className="w-4 h-4 rounded accent-gray-900" />
+              <span className="text-sm font-medium text-gray-700">В наявності</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="is_featured" className="w-4 h-4 rounded accent-gray-900" />
+              <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
+            </label>
           </div>
 
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" name="in_stock" defaultChecked className="w-4 h-4 rounded accent-gray-900" />
-            <span className="text-sm font-medium text-gray-700">В наявності</span>
-          </label>
-
           <MediaFields />
+
+          <details className="border border-gray-100 rounded-lg">
+            <summary className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none list-none flex items-center gap-2">
+              <span>▸</span> Додатково
+            </summary>
+            <div className="px-4 pb-4 pt-2">
+              <label className={LABEL}>Порядок відображення</label>
+              <input name="display_order" type="number" defaultValue={10} className={INPUT} />
+            </div>
+          </details>
 
           <button type="submit"
             className="h-10 px-5 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors text-sm">

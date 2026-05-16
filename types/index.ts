@@ -37,7 +37,9 @@ export interface HoneyProduct {
   display_order: number
   image_url: string | null
   image_alt: string | null
+  gallery_images?: string[] | null
   youtube_video_link: string | null
+  youtube_video_urls?: string[] | null
   created_at?: string
   updated_at?: string
 }
@@ -63,6 +65,7 @@ export interface ApiaryProduct {
   image_url: string | null
   image_alt: string | null
   youtube_video_url: string | null
+  youtube_video_urls?: string[] | null
   created_at?: string
   updated_at?: string
 }
@@ -73,11 +76,16 @@ export interface BeekeeperProduct {
   slug: string
   product_type: 'bee_packages' | 'bee_colonies' | 'empty_hives' | 'hives_with_bees'
   description: string | null
+  full_description: string | null
   breeds: string[] | null
   season_note: string | null
+  in_stock: boolean
+  is_featured: boolean
   image_url: string | null
   image_alt: string | null
+  gallery_images?: string[] | null
   youtube_video_url: string | null
+  youtube_video_urls?: string[] | null
   display_order: number
   created_at?: string
   updated_at?: string
@@ -134,7 +142,9 @@ export interface FlowerProduct {
   in_stock: boolean
   image_url: string | null
   image_alt: string | null
+  gallery_images?: string[] | null
   youtube_video_url: string | null
+  youtube_video_urls?: string[] | null
   created_at?: string
   updated_at?: string
 }
