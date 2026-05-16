@@ -84,16 +84,10 @@ export default async function AdminHoneyEditPage({ params }: Props) {
           <input name="packaging" type="text" defaultValue={Array.isArray(p.packaging) ? (p.packaging as string[]).join(', ') : String(p.packaging ?? '')} className={INPUT} />
         </div>
 
-        <div className="flex gap-6">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" name="in_stock" defaultChecked={Boolean(p.in_stock)} className="w-4 h-4 rounded accent-gray-900" />
-            <span className="text-sm font-medium text-gray-700">В наявності</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" name="is_featured" defaultChecked={Boolean(p.is_featured)} className="w-4 h-4 rounded accent-gray-900" />
-            <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
-          </label>
-        </div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" name="in_stock" defaultChecked={Boolean(p.in_stock)} className="w-4 h-4 rounded accent-gray-900" />
+          <span className="text-sm font-medium text-gray-700">В наявності</span>
+        </label>
 
         <MediaFields
           imageUrl={p.image_url as string | null}
@@ -159,6 +153,10 @@ export default async function AdminHoneyEditPage({ params }: Props) {
               <label className={LABEL}>Порядок відображення</label>
               <input name="display_order" type="number" defaultValue={String(p.display_order ?? 10)} className={INPUT} />
             </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="is_featured" defaultChecked={Boolean(p.is_featured)} className="w-4 h-4 rounded accent-gray-900" />
+              <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
+            </label>
           </div>
         </details>
 

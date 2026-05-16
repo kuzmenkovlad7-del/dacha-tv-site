@@ -121,16 +121,10 @@ export default async function AdminHoneyPage() {
             <input name="packaging" type="text" placeholder="1 л пластик, 1 л скло" className={INPUT} />
           </div>
 
-          <div className="flex gap-6">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" name="in_stock" defaultChecked className="w-4 h-4 rounded accent-gray-900" />
-              <span className="text-sm font-medium text-gray-700">В наявності</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" name="is_featured" className="w-4 h-4 rounded accent-gray-900" />
-              <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
-            </label>
-          </div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="in_stock" defaultChecked className="w-4 h-4 rounded accent-gray-900" />
+            <span className="text-sm font-medium text-gray-700">В наявності</span>
+          </label>
 
           <MediaFields youtubeFieldName="youtube_video_link" />
 
@@ -161,6 +155,10 @@ export default async function AdminHoneyPage() {
                 <label className={LABEL}>Порядок відображення</label>
                 <input name="display_order" type="number" defaultValue={10} className={INPUT} />
               </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="is_featured" className="w-4 h-4 rounded accent-gray-900" />
+                <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
+              </label>
             </div>
           </details>
 
