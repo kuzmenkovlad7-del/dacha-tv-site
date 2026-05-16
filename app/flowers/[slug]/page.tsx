@@ -99,39 +99,57 @@ export default async function FlowerProductPage({ params }: Props) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
-          {/* Image */}
-          <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-50">
-            {heroImage ? (
-              <Image
-                src={heroImage}
-                alt={product.image_alt || `${product.name} від Дача TV`}
-                fill
-                priority
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                placeholder="blur"
-                blurDataURL={BLUR_DATA_URL}
-              />
-            ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-                <span className="text-6xl mb-3 select-none">🌸</span>
-                <span className="text-gray-400 font-medium text-center px-6">{product.name}</span>
-              </div>
-            )}
+          {/* Images */}
+          <div className="space-y-3">
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-50">
+              {heroImage ? (
+                <Image
+                  src={heroImage}
+                  alt={product.image_alt || `${product.name} від Дача TV`}
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  placeholder="blur"
+                  blurDataURL={BLUR_DATA_URL}
+                />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                  <span className="text-6xl mb-3 select-none">🌸</span>
+                  <span className="text-gray-400 font-medium text-center px-6">{product.name}</span>
+                </div>
+              )}
 
-            {product.is_featured && (
-              <div className="absolute top-4 left-4">
-                <span className="bg-gray-900 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
-                  Популярна
-                </span>
-              </div>
-            )}
+              {product.is_featured && (
+                <div className="absolute top-4 left-4">
+                  <span className="bg-gray-900 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
+                    Популярна
+                  </span>
+                </div>
+              )}
 
-            {product.status !== 'available' && product.status !== 'preorder' && (
-              <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                <span className="bg-gray-800 text-white text-sm font-semibold px-4 py-2 rounded-full">
-                  Немає в наявності
-                </span>
+              {product.status !== 'available' && product.status !== 'preorder' && (
+                <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                  <span className="bg-gray-800 text-white text-sm font-semibold px-4 py-2 rounded-full">
+                    Немає в наявності
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {(product.gallery_images ?? []).length > 0 && (
+              <div className="flex gap-2 flex-wrap">
+                {(product.gallery_images ?? []).map((src, i) => (
+                  <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
+                    <Image
+                      src={src}
+                      alt={product.image_alt || product.name}
+                      fill
+                      className="object-cover"
+                      sizes="80px"
+                    />
+                  </div>
+                ))}
               </div>
             )}
           </div>

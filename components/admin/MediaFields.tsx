@@ -41,6 +41,7 @@ export function MediaFields({
   const [imageUrlState, setImageUrlState] = useState(imageUrl ?? '')
   const [imageAltState, setImageAltState] = useState(imageAlt ?? '')
   const [videoPreview, setVideoPreview] = useState(videoUrl ?? '')
+  const [videoUrlState, setVideoUrlState] = useState(videoUrl ?? '')
   const [slots, setSlots] = useState<GallerySlot[]>(() =>
     (galleryImages ?? []).filter(Boolean).map((u) => ({ url: u, preview: u })),
   )
@@ -172,13 +173,29 @@ export function MediaFields({
 
       {/* Video file */}
       <div>
-        <label className={LABEL}>Відео файл (mp4 / webm / mov)</label>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className={LABEL} style={{ marginBottom: 0 }}>Відео файл (mp4 / webm / mov)</label>
+          {videoUrlState && (
+            <button
+              type="button"
+              onClick={() => { setVideoPreview(''); setVideoUrlState('') }}
+              className="text-xs text-red-400 hover:text-red-600 transition-colors"
+            >
+              Видалити відео
+            </button>
+          )}
+        </div>
         {videoPreview && (
           <div className="mb-2 rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
             <video src={videoPreview} controls className="w-full max-h-40 object-contain" />
           </div>
         )}
-        <input type="hidden" name="video_url" value={videoUrl ?? ''} />
+        {videoUrlState && !videoPreview.startsWith('blob:') && (
+          <p className="text-xs text-gray-400 mb-2 truncate" title={videoUrlState}>
+            Поточне: {videoUrlState}
+          </p>
+        )}
+        <input type="hidden" name="video_url" value={videoUrlState} />
         <input
           type="file"
           name="video_file"
