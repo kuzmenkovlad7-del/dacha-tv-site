@@ -17,8 +17,9 @@ export async function createBeekeeperProduct(formData: FormData) {
     breeds,
     season_note: formData.get('season_note') as string || null,
     display_order: parseInt(formData.get('display_order') as string) || 10,
+    in_stock: formData.get('in_stock') === 'on',
     image_url: formData.get('image_url') as string || null,
-    youtube_video_url: formData.get('youtube_url') as string || null,
+    youtube_video_url: formData.get('youtube_video_url') as string || null,
     image_alt: formData.get('image_alt') as string || null,
   })
 
@@ -40,8 +41,9 @@ export async function updateBeekeeperProduct(id: string, formData: FormData) {
     breeds,
     season_note: formData.get('season_note') as string || null,
     display_order: parseInt(formData.get('display_order') as string) || 10,
+    in_stock: formData.get('in_stock') === 'on',
     image_url: formData.get('image_url') as string || null,
-    youtube_video_url: formData.get('youtube_url') as string || null,
+    youtube_video_url: formData.get('youtube_video_url') as string || null,
     image_alt: formData.get('image_alt') as string || null,
     updated_at: new Date().toISOString(),
   }

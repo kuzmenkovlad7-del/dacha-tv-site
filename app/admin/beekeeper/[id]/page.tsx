@@ -1,7 +1,9 @@
 export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { getAdminClient } from '@/lib/supabase/admin'
+import { MediaFields } from '@/components/admin/MediaFields'
 import { updateBeekeeperProduct, deleteBeekeeperProduct } from '../actions'
 
 interface Props {
@@ -13,6 +15,9 @@ export const metadata: Metadata = {
   robots: 'noindex, nofollow',
 }
 
+const INPUT = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent'
+const LABEL = 'block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'
+
 const PRODUCT_TYPES = [
   { value: 'bee_packages', label: 'Бджолопакети' },
   { value: 'bee_colonies', label: 'Бджолосімї' },
@@ -22,35 +27,62 @@ const PRODUCT_TYPES = [
 
 export default async function AdminBeekeeperEditPage({ params }: Props) {
   const { id } = await params
-  const client = getAdminClient()
-  const { data: product } = await client.from('beekeeper_products').select('*').eq('id', id).single()
 
-  if (!product) notFound()
+  let product: Record<string, unknown> | null = null
+  let loadError: string | null = null
 
+  try {
+    const client = getAdminClient()
+    const { data, error } = await client.from('beekeeper_products').select('*').eq('id', id).single()
+    if (error) loadError = error.message
+    else product = data as Record<string, unknown>
+  } catch (e) {
+    loadError = e instanceof Error ? e.message : 'Помилка підключення'
+  }
+
+  if (!loadError && !product) notFound()
+
+  if (loadError) {
+    return (
+      <div className="px-4 sm:px-6 py-8 max-w-2xl">
+        <Link href="/admin/beekeeper" className="text-sm text-gray-500 hover:text-gray-900 mb-4 inline-block">← Назад</Link>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-5">
+          <p className="font-semibold text-red-700">Помилка завантаження</p>
+          <p className="text-sm text-red-600 mt-1 font-mono">{loadError}</p>
+        </div>
+      </div>
+    )
+  }
+
+  const p = product!
   const updateWithId = updateBeekeeperProduct.bind(null, id)
   const deleteWithId = deleteBeekeeperProduct.bind(null, id)
 
   return (
     <div className="px-4 sm:px-6 py-8 max-w-2xl">
-      <h1 className="font-serif text-2xl font-bold text-bark mb-6">Редагувати: {product.name}</h1>
+      <div className="flex items-center gap-3 mb-6">
+        <Link href="/admin/beekeeper" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">← Пасічникам</Link>
+        <span className="text-gray-300">/</span>
+        <span className="text-sm text-gray-700 font-medium truncate">{String(p.name)}</span>
+      </div>
 
-      <form action={updateWithId} className="space-y-5 bg-white rounded-2xl p-6 border border-honey-100">
-        <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Назва</label>
-          <input name="name" type="text" required defaultValue={product.name}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+      <form action={updateWithId} className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 space-y-5">
+        <h1 className="text-base font-semibold text-gray-900">Редагувати продукт</h1>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={LABEL}>Назва</label>
+            <input name="name" type="text" required defaultValue={String(p.name ?? '')} className={INPUT} />
+          </div>
+          <div>
+            <label className={LABEL}>Slug</label>
+            <input name="slug" type="text" required defaultValue={String(p.slug ?? '')} className={INPUT} />
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Slug</label>
-          <input name="slug" type="text" required defaultValue={product.slug}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Тип продукту</label>
-          <select name="product_type" required defaultValue={product.product_type}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400">
+          <label className={LABEL}>Тип продукту</label>
+          <select name="product_type" required defaultValue={String(p.product_type ?? '')} className={INPUT}>
             {PRODUCT_TYPES.map((t) => (
               <option key={t.value} value={t.value}>{t.label}</option>
             ))}
@@ -58,60 +90,47 @@ export default async function AdminBeekeeperEditPage({ params }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Опис</label>
-          <textarea name="description" rows={4} defaultValue={product.description ?? ''}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          <label className={LABEL}>Опис</label>
+          <textarea name="description" rows={4} defaultValue={String(p.description ?? '')} className={INPUT} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={LABEL}>Породи (через кому)</label>
+            <input name="breeds" type="text" defaultValue={Array.isArray(p.breeds) ? (p.breeds as string[]).join(', ') : String(p.breeds ?? '')} className={INPUT} />
+          </div>
+          <div>
+            <label className={LABEL}>Примітка про сезон</label>
+            <input name="season_note" type="text" defaultValue={String(p.season_note ?? '')} className={INPUT} />
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Породи (через кому)</label>
-          <input name="breeds" type="text" defaultValue={product.breeds?.join(', ') ?? ''}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          <label className={LABEL}>Порядок</label>
+          <input name="display_order" type="number" defaultValue={String(p.display_order ?? 10)} className={INPUT} />
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Примітка про сезон</label>
-          <input name="season_note" type="text" defaultValue={product.season_note ?? ''}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
-        </div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" name="in_stock" defaultChecked={Boolean(p.in_stock)} className="w-4 h-4 rounded accent-gray-900" />
+          <span className="text-sm font-medium text-gray-700">В наявності</span>
+        </label>
 
-        <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Порядок відображення</label>
-          <input name="display_order" type="number" defaultValue={product.display_order}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
-        </div>
-
-        {/* Media */}
-        <div className="space-y-3 border-t border-gray-100 pt-4">
-          <h3 className="text-sm font-semibold text-bark">Медіа</h3>
-          <div>
-            <label className="block text-sm font-medium text-bark/70 mb-1">Головне зображення (URL або /images/...)</label>
-            <input name="image_url" type="text" defaultValue={product.image_url ?? ''}
-              placeholder="https://example.com/image.jpg або /images/beekeeper/..."
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-bark/70 mb-1">YouTube відео (URL)</label>
-            <input name="youtube_url" type="text" defaultValue={product.youtube_video_url ?? ''}
-              placeholder="https://youtube.com/watch?v=..."
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-bark/70 mb-1">Alt-текст зображення</label>
-            <input name="image_alt" type="text" defaultValue={product.image_alt ?? ''}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
-          </div>
-        </div>
+        <MediaFields
+          imageUrl={p.image_url as string | null}
+          imageAlt={p.image_alt as string | null}
+          youtubeUrl={p.youtube_video_url as string | null}
+          youtubeFieldName="youtube_video_url"
+        />
 
         <button type="submit"
-          className="w-full bg-bark text-white font-semibold py-3 px-6 rounded-lg hover:bg-bark-light transition-colors min-h-[48px]">
-          Зберегти
+          className="w-full h-11 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors text-sm">
+          Зберегти зміни
         </button>
       </form>
 
-      <form action={deleteWithId} className="mt-4">
+      <form action={deleteWithId} className="mt-3">
         <button type="submit"
-          className="w-full bg-red-50 text-red-700 border border-red-200 font-semibold py-3 px-6 rounded-lg hover:bg-red-100 transition-colors min-h-[48px] text-sm">
+          className="w-full h-10 bg-white text-red-600 border border-red-200 font-medium rounded-lg hover:bg-red-50 transition-colors text-sm">
           Видалити продукт
         </button>
       </form>

@@ -1,7 +1,9 @@
 export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { getAdminClient } from '@/lib/supabase/admin'
+import { MediaFields } from '@/components/admin/MediaFields'
 import { updateApiaryProduct, deleteApiaryProduct } from '../actions'
 
 interface Props {
@@ -13,142 +15,140 @@ export const metadata: Metadata = {
   robots: 'noindex, nofollow',
 }
 
+const INPUT = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent'
+const LABEL = 'block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'
+
 export default async function AdminApiaryEditPage({ params }: Props) {
   const { id } = await params
-  const client = getAdminClient()
-  const { data: product } = await client.from('apiary_products').select('*').eq('id', id).single()
 
-  if (!product) notFound()
+  let product: Record<string, unknown> | null = null
+  let loadError: string | null = null
 
+  try {
+    const client = getAdminClient()
+    const { data, error } = await client.from('apiary_products').select('*').eq('id', id).single()
+    if (error) loadError = error.message
+    else product = data as Record<string, unknown>
+  } catch (e) {
+    loadError = e instanceof Error ? e.message : 'Помилка підключення'
+  }
+
+  if (!loadError && !product) notFound()
+
+  if (loadError) {
+    return (
+      <div className="px-4 sm:px-6 py-8 max-w-2xl">
+        <Link href="/admin/apiary" className="text-sm text-gray-500 hover:text-gray-900 mb-4 inline-block">← Назад</Link>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-5">
+          <p className="font-semibold text-red-700">Помилка завантаження</p>
+          <p className="text-sm text-red-600 mt-1 font-mono">{loadError}</p>
+        </div>
+      </div>
+    )
+  }
+
+  const p = product!
   const updateWithId = updateApiaryProduct.bind(null, id)
   const deleteWithId = deleteApiaryProduct.bind(null, id)
 
   return (
     <div className="px-4 sm:px-6 py-8 max-w-2xl">
-      <h1 className="font-serif text-2xl font-bold text-bark mb-6">
-        Редагувати: {product.name}
-      </h1>
+      <div className="flex items-center gap-3 mb-6">
+        <Link href="/admin/apiary" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">← Продукти пасіки</Link>
+        <span className="text-gray-300">/</span>
+        <span className="text-sm text-gray-700 font-medium truncate">{String(p.name)}</span>
+      </div>
 
-      <form action={updateWithId} className="space-y-5 bg-white rounded-2xl p-6 border border-honey-100">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <form action={updateWithId} className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 space-y-5">
+        <h1 className="text-base font-semibold text-gray-900">Редагувати продукт</h1>
+
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-bark mb-1">Назва</label>
-            <input name="name" type="text" required defaultValue={product.name}
-              className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
+            <label className={LABEL}>Назва</label>
+            <input name="name" type="text" required defaultValue={String(p.name ?? '')} className={INPUT} />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-bark mb-1">Slug (URL)</label>
-            <input name="slug" type="text" required defaultValue={product.slug}
-              className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
+            <label className={LABEL}>Slug (URL)</label>
+            <input name="slug" type="text" required defaultValue={String(p.slug ?? '')} className={INPUT} />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Короткий опис</label>
-          <textarea name="short_description" rows={2} defaultValue={product.short_description ?? ''}
-            className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          <label className={LABEL}>Короткий опис</label>
+          <textarea name="short_description" rows={2} defaultValue={String(p.short_description ?? '')} className={INPUT} />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Повний опис</label>
-          <textarea name="full_description" rows={4} defaultValue={product.full_description ?? ''}
-            className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          <label className={LABEL}>Опис</label>
+          <textarea name="description" rows={3} defaultValue={String(p.description ?? '')} className={INPUT} />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Опис (короткий)</label>
-          <textarea name="description" rows={2} defaultValue={product.description ?? ''}
-            className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          <label className={LABEL}>Повний опис</label>
+          <textarea name="full_description" rows={4} defaultValue={String(p.full_description ?? '')} className={INPUT} />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Склад</label>
-          <textarea name="composition" rows={2} defaultValue={product.composition ?? ''}
-            className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          <label className={LABEL}>Склад</label>
+          <textarea name="composition" rows={2} defaultValue={String(p.composition ?? '')} className={INPUT} />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Застосування</label>
-          <textarea name="usage_notes" rows={2} defaultValue={product.usage_notes ?? ''}
-            className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          <label className={LABEL}>Застосування</label>
+          <textarea name="usage_notes" rows={2} defaultValue={String(p.usage_notes ?? '')} className={INPUT} />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-bark mb-1">Зберігання</label>
-          <textarea name="storage_info" rows={2} defaultValue={product.storage_info ?? ''}
-            className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
+          <label className={LABEL}>Зберігання</label>
+          <textarea name="storage_info" rows={2} defaultValue={String(p.storage_info ?? '')} className={INPUT} />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-bark mb-1">Упаковка (через кому)</label>
-            <input name="packaging" type="text" defaultValue={product.packaging?.join(', ') ?? ''}
-              placeholder="35 г, 70 г"
-              className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
+            <label className={LABEL}>Ціна (грн)</label>
+            <input name="price_uah" type="number" defaultValue={String(p.price_uah ?? '')} className={INPUT} />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-bark mb-1">Ціна (грн)</label>
-            <input name="price_uah" type="number" defaultValue={product.price_uah ?? ''}
-              className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
+            <label className={LABEL}>Вага (г)</label>
+            <input name="weight_g" type="number" defaultValue={String(p.weight_g ?? '')} className={INPUT} />
+          </div>
+          <div>
+            <label className={LABEL}>Порядок</label>
+            <input name="display_order" type="number" defaultValue={String(p.display_order ?? 10)} className={INPUT} />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold text-bark mb-1">Порядок відображення</label>
-            <input name="display_order" type="number" defaultValue={product.display_order}
-              className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-bark mb-1">Вага (г)</label>
-            <input name="weight_g" type="number" defaultValue={product.weight_g ?? ''}
-              className="w-full border border-gray-200 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-honey-400" />
-          </div>
+        <div>
+          <label className={LABEL}>Упаковка (через кому)</label>
+          <input name="packaging" type="text" defaultValue={Array.isArray(p.packaging) ? (p.packaging as string[]).join(', ') : String(p.packaging ?? '')} className={INPUT} placeholder="35 г, 70 г" />
         </div>
 
-        <div className="flex flex-wrap gap-5">
-          <label className="flex items-center gap-2 cursor-pointer min-h-[44px]">
-            <input type="checkbox" name="in_stock" defaultChecked={product.in_stock} className="w-5 h-5 accent-honey-600" />
-            <span className="text-base font-medium text-bark">В наявності</span>
+        <div className="flex gap-6">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="in_stock" defaultChecked={Boolean(p.in_stock)} className="w-4 h-4 rounded accent-gray-900" />
+            <span className="text-sm font-medium text-gray-700">В наявності</span>
           </label>
-          <label className="flex items-center gap-2 cursor-pointer min-h-[44px]">
-            <input type="checkbox" name="is_featured" defaultChecked={product.is_featured} className="w-5 h-5 accent-honey-600" />
-            <span className="text-base font-medium text-bark">Популярний</span>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="is_featured" defaultChecked={Boolean(p.is_featured)} className="w-4 h-4 rounded accent-gray-900" />
+            <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
           </label>
         </div>
 
-        {/* Media */}
-        <div className="space-y-3 border-t border-gray-100 pt-4">
-          <h3 className="text-sm font-semibold text-bark">Медіа</h3>
-          <div>
-            <label className="block text-sm font-medium text-bark/70 mb-1">Головне зображення (URL або /images/...)</label>
-            <input name="image_url" type="text" defaultValue={product.image_url ?? ''}
-              placeholder="https://example.com/image.jpg або /images/honey/acacia.jpg"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-bark/70 mb-1">YouTube відео (URL)</label>
-            <input name="youtube_video_url" type="text" defaultValue={product.youtube_video_url ?? ''}
-              placeholder="https://youtube.com/watch?v=..."
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-bark/70 mb-1">Alt-текст зображення</label>
-            <input name="image_alt" type="text" defaultValue={product.image_alt ?? ''}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-honey-400" />
-          </div>
-        </div>
+        <MediaFields
+          imageUrl={p.image_url as string | null}
+          imageAlt={p.image_alt as string | null}
+          youtubeUrl={p.youtube_video_url as string | null}
+        />
 
         <button type="submit"
-          className="w-full bg-bark text-white font-semibold py-4 px-6 rounded-xl hover:bg-bark-light transition-colors min-h-[52px] text-base">
+          className="w-full h-11 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors text-sm">
           Зберегти зміни
         </button>
       </form>
 
-      <form action={deleteWithId} className="mt-4">
+      <form action={deleteWithId} className="mt-3">
         <button type="submit"
-          className="w-full bg-red-50 text-red-700 border border-red-200 font-semibold py-4 px-6 rounded-xl hover:bg-red-100 transition-colors min-h-[52px] text-sm"
-          onClick={(e) => { if (!confirm('Видалити цей продукт?')) e.preventDefault() }}>
+          className="w-full h-10 bg-white text-red-600 border border-red-200 font-medium rounded-lg hover:bg-red-50 transition-colors text-sm">
           Видалити продукт
         </button>
       </form>

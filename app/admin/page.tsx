@@ -81,11 +81,11 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const newCount = inquiries.filter((i) => i.status === 'new').length
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+    <div className="px-4 sm:px-6 py-8 max-w-3xl">
       <div className="mb-6">
-        <h1 className="font-serif text-2xl md:text-3xl font-bold text-bark mb-1">Заявки</h1>
+        <h1 className="text-xl font-bold text-gray-900">Заявки</h1>
         {newCount > 0 && (
-          <p className="text-honey-700 font-semibold">{newCount} нових</p>
+          <p className="text-sm text-gray-500 mt-0.5">{newCount} нових</p>
         )}
       </div>
 
@@ -94,10 +94,10 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <a
             key={value}
             href={`/admin${value !== 'all' ? `?status=${value}` : ''}`}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors min-h-[44px] flex items-center ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors min-h-[40px] flex items-center ${
               safeStatus === value || (value === 'all' && safeStatus === 'all')
-                ? 'bg-honey-700 text-white'
-                : 'bg-white text-bark border border-honey-200 hover:bg-honey-50'
+                ? 'bg-gray-900 text-white'
+                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
             }`}
           >
             {label}
