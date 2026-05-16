@@ -40,6 +40,7 @@ export interface HoneyProduct {
   gallery_images?: string[] | null
   youtube_video_link: string | null
   youtube_video_urls?: string[] | null
+  video_url?: string | null
   created_at?: string
   updated_at?: string
 }
@@ -66,6 +67,7 @@ export interface ApiaryProduct {
   image_alt: string | null
   youtube_video_url: string | null
   youtube_video_urls?: string[] | null
+  video_url?: string | null
   created_at?: string
   updated_at?: string
 }
@@ -86,6 +88,7 @@ export interface BeekeeperProduct {
   gallery_images?: string[] | null
   youtube_video_url: string | null
   youtube_video_urls?: string[] | null
+  video_url?: string | null
   display_order: number
   created_at?: string
   updated_at?: string
@@ -145,6 +148,7 @@ export interface FlowerProduct {
   gallery_images?: string[] | null
   youtube_video_url: string | null
   youtube_video_urls?: string[] | null
+  video_url?: string | null
   created_at?: string
   updated_at?: string
 }

@@ -97,23 +97,9 @@ export default async function AdminFlowerEditPage({ params }: Props) {
           <textarea name="full_description" rows={4} defaultValue={String(p.full_description ?? '')} className={INPUT} />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={LABEL}>Колір</label>
-            <input name="color" type="text" defaultValue={String(p.color ?? '')} className={INPUT} />
-          </div>
-          <div>
-            <label className={LABEL}>Сезон цвітіння</label>
-            <input name="bloom_season" type="text" defaultValue={String(p.bloom_season ?? '')} className={INPUT} />
-          </div>
-          <div>
-            <label className={LABEL}>Висота (см)</label>
-            <input name="height_cm" type="number" defaultValue={String(p.height_cm ?? '')} className={INPUT} />
-          </div>
-          <div>
-            <label className={LABEL}>Освітлення</label>
-            <input name="lighting" type="text" defaultValue={String(p.lighting ?? '')} className={INPUT} />
-          </div>
+        <div>
+          <label className={LABEL}>Колір</label>
+          <input name="color" type="text" defaultValue={String(p.color ?? '')} className={INPUT} />
         </div>
 
         <div>
@@ -136,6 +122,7 @@ export default async function AdminFlowerEditPage({ params }: Props) {
           imageUrl={p.image_url as string | null}
           imageAlt={p.image_alt as string | null}
           galleryImages={Array.isArray(p.gallery_images) ? p.gallery_images as string[] : []}
+          videoUrl={p.video_url as string | null}
           youtubeUrl={p.youtube_video_url as string | null}
           youtubeUrls={Array.isArray(p.youtube_video_urls) ? p.youtube_video_urls as string[] : []}
           productName={String(p.name ?? '')}
@@ -145,9 +132,25 @@ export default async function AdminFlowerEditPage({ params }: Props) {
           <summary className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none list-none flex items-center gap-2">
             <span>▸</span> Додатково
           </summary>
-          <div className="px-4 pb-4 pt-2">
-            <label className={LABEL}>Порядок відображення</label>
-            <input name="display_order" type="number" defaultValue={String(p.display_order ?? 10)} className={INPUT} />
+          <div className="px-4 pb-4 pt-2 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={LABEL}>Сезон цвітіння</label>
+                <input name="bloom_season" type="text" defaultValue={String(p.bloom_season ?? '')} className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Висота (см)</label>
+                <input name="height_cm" type="number" defaultValue={String(p.height_cm ?? '')} className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Освітлення</label>
+                <input name="lighting" type="text" defaultValue={String(p.lighting ?? '')} className={INPUT} />
+              </div>
+            </div>
+            <div>
+              <label className={LABEL}>Порядок відображення</label>
+              <input name="display_order" type="number" defaultValue={String(p.display_order ?? 10)} className={INPUT} />
+            </div>
           </div>
         </details>
 

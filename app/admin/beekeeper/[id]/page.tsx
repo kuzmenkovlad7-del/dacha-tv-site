@@ -125,6 +125,7 @@ export default async function AdminBeekeeperEditPage({ params }: Props) {
           imageUrl={p.image_url as string | null}
           imageAlt={p.image_alt as string | null}
           galleryImages={Array.isArray(p.gallery_images) ? p.gallery_images as string[] : []}
+          videoUrl={p.video_url as string | null}
           youtubeUrl={p.youtube_video_url as string | null}
           youtubeFieldName="youtube_video_url"
           youtubeUrls={Array.isArray(p.youtube_video_urls) ? p.youtube_video_urls as string[] : []}

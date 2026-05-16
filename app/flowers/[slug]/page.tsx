@@ -206,14 +206,32 @@ export default async function FlowerProductPage({ params }: Props) {
               </p>
             )}
 
-            {youtubeId && (
+            {product.video_url && (
               <div className="mb-6">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
                   Відео про цю квітку
                 </p>
+                <video src={product.video_url} controls className="w-full rounded-xl" />
+              </div>
+            )}
+
+            {youtubeId && (
+              <div className="mb-6">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
+                  {product.video_url ? 'Також на YouTube' : 'Відео про цю квітку'}
+                </p>
                 <YouTubeFacade videoId={youtubeId} title={`Відео: ${product.name}`} />
               </div>
             )}
+
+            {(product.youtube_video_urls ?? []).filter(Boolean).map((url, i) => {
+              const vid = extractYouTubeId(url)
+              return vid ? (
+                <div key={i} className="mb-4">
+                  <YouTubeFacade videoId={vid} title={`Відео ${i + 2}: ${product.name}`} />
+                </div>
+              ) : null
+            })}
 
             {/* Inquiry form */}
             <div id="order-form" className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
