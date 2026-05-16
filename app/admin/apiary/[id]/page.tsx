@@ -62,41 +62,14 @@ export default async function AdminApiaryEditPage({ params }: Props) {
       <form action={updateWithId} className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 space-y-5">
         <h1 className="text-base font-semibold text-gray-900">Редагувати продукт</h1>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={LABEL}>Назва</label>
-            <input name="name" type="text" required defaultValue={String(p.name ?? '')} className={INPUT} />
-          </div>
-          <div>
-            <label className={LABEL}>Slug (URL)</label>
-            <input name="slug" type="text" required defaultValue={String(p.slug ?? '')} className={INPUT} />
-          </div>
+        <div>
+          <label className={LABEL}>Назва</label>
+          <input name="name" type="text" required defaultValue={String(p.name ?? '')} className={INPUT} />
         </div>
 
         <div>
-          <label className={LABEL}>Короткий опис</label>
-          <textarea name="short_description" rows={2} defaultValue={String(p.short_description ?? '')} className={INPUT} />
-        </div>
-
-        <div>
-          <label className={LABEL}>Опис</label>
-          <textarea name="description" rows={3} defaultValue={String(p.description ?? '')} className={INPUT} />
-        </div>
-
-        <div>
-          <label className={LABEL}>Застосування</label>
-          <textarea name="usage_notes" rows={2} defaultValue={String(p.usage_notes ?? '')} className={INPUT} />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={LABEL}>Ціна (грн)</label>
-            <input name="price_uah" type="number" defaultValue={String(p.price_uah ?? '')} className={INPUT} />
-          </div>
-          <div>
-            <label className={LABEL}>Вага (г)</label>
-            <input name="weight_g" type="number" defaultValue={String(p.weight_g ?? '')} className={INPUT} />
-          </div>
+          <label className={LABEL}>Ціна (грн)</label>
+          <input name="price_uah" type="number" defaultValue={String(p.price_uah ?? '')} className={INPUT} />
         </div>
 
         <div>
@@ -130,6 +103,26 @@ export default async function AdminApiaryEditPage({ params }: Props) {
             <span>▸</span> Додатково
           </summary>
           <div className="px-4 pb-4 pt-2 space-y-4">
+            <div>
+              <label className={LABEL}>Slug (URL)</label>
+              <input name="slug" type="text" required defaultValue={String(p.slug ?? '')} className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Короткий опис</label>
+              <textarea name="short_description" rows={2} defaultValue={String(p.short_description ?? '')} className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Опис</label>
+              <textarea name="description" rows={3} defaultValue={String(p.description ?? '')} className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Вага (г)</label>
+              <input name="weight_g" type="number" defaultValue={String(p.weight_g ?? '')} className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Застосування</label>
+              <textarea name="usage_notes" rows={2} defaultValue={String(p.usage_notes ?? '')} className={INPUT} />
+            </div>
             <div>
               <label className={LABEL}>Склад</label>
               <textarea name="composition" rows={2} defaultValue={String(p.composition ?? '')} className={INPUT} />

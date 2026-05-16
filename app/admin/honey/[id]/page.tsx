@@ -63,32 +63,9 @@ export default async function AdminHoneyEditPage({ params }: Props) {
       <form action={updateWithId} className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 space-y-5">
         <h1 className="text-base font-semibold text-gray-900">Редагувати мед</h1>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={LABEL}>Назва</label>
-            <input name="name" type="text" required defaultValue={String(p.name ?? '')} className={INPUT} />
-          </div>
-          <div>
-            <label className={LABEL}>Slug (URL)</label>
-            <input name="slug" type="text" required defaultValue={String(p.slug ?? '')} className={INPUT} />
-          </div>
-        </div>
-
         <div>
-          <label className={LABEL}>Сорт</label>
-          <select name="variety" required defaultValue={String(p.variety ?? '')} className={INPUT}>
-            {VARIETIES.map((v) => <option key={v} value={v}>{v}</option>)}
-          </select>
-        </div>
-
-        <div>
-          <label className={LABEL}>Короткий опис</label>
-          <textarea name="short_description" rows={2} defaultValue={String(p.short_description ?? '')} className={INPUT} />
-        </div>
-
-        <div>
-          <label className={LABEL}>Основний опис</label>
-          <textarea name="description" rows={3} defaultValue={String(p.description ?? '')} className={INPUT} />
+          <label className={LABEL}>Назва</label>
+          <input name="name" type="text" required defaultValue={String(p.name ?? '')} className={INPUT} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -134,6 +111,24 @@ export default async function AdminHoneyEditPage({ params }: Props) {
             <span>▸</span> Додатково
           </summary>
           <div className="px-4 pb-4 pt-2 space-y-4">
+            <div>
+              <label className={LABEL}>Slug (URL)</label>
+              <input name="slug" type="text" required defaultValue={String(p.slug ?? '')} className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Сорт</label>
+              <select name="variety" defaultValue={String(p.variety ?? '')} className={INPUT}>
+                {VARIETIES.map((v) => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={LABEL}>Короткий опис</label>
+              <textarea name="short_description" rows={2} defaultValue={String(p.short_description ?? '')} className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Основний опис</label>
+              <textarea name="description" rows={3} defaultValue={String(p.description ?? '')} className={INPUT} />
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={LABEL}>Аромат</label>

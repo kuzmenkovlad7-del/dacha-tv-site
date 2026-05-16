@@ -42,7 +42,7 @@ export function MediaFields({
   const [imageAltState, setImageAltState] = useState(imageAlt ?? '')
   const [videoPreview, setVideoPreview] = useState(videoUrl ?? '')
   const [slots, setSlots] = useState<GallerySlot[]>(() =>
-    (galleryImages ?? []).filter(Boolean).slice(0, 4).map((u) => ({ url: u, preview: u })),
+    (galleryImages ?? []).filter(Boolean).map((u) => ({ url: u, preview: u })),
   )
   const [primaryYt, setPrimaryYt] = useState(youtubeUrl ?? '')
   const [extraYts, setExtraYts] = useState<string[]>(() => (youtubeUrls ?? []).filter(Boolean))
@@ -65,14 +65,6 @@ export function MediaFields({
     const preview = URL.createObjectURL(file)
     setSlots((s) => s.map((slot, j) => (j === i ? { ...slot, preview } : slot)))
   }, [])
-
-  const addSlot = () => {
-    if (slots.length < 4) setSlots((s) => [...s, { url: '', preview: '' }])
-  }
-
-  const removeSlot = (i: number) => {
-    setSlots((s) => s.filter((_, j) => j !== i))
-  }
 
   return (
     <fieldset className="border-t border-gray-100 pt-5 space-y-5">
@@ -136,9 +128,10 @@ export function MediaFields({
         />
       </div>
 
-      {/* Gallery */}
+      {/* Gallery — unlimited */}
       <div>
-        <label className={LABEL}>Галерея (до 4 фото)</label>
+        <label className={LABEL}>Галерея</label>
+        <input type="hidden" name="gallery_slot_count" value={slots.length} />
         <div className="space-y-3">
           {slots.map((slot, i) => (
             <div key={i} className="flex gap-2 items-start">
@@ -158,16 +151,22 @@ export function MediaFields({
                   className="w-full text-sm text-gray-500 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-xs file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
                 />
               </div>
-              <button type="button" onClick={() => removeSlot(i)} className={ICON_BTN}>
+              <button
+                type="button"
+                onClick={() => setSlots((s) => s.filter((_, j) => j !== i))}
+                className={ICON_BTN}
+              >
                 ×
               </button>
             </div>
           ))}
-          {slots.length < 4 && (
-            <button type="button" onClick={addSlot} className={ADD_BTN}>
-              + Додати фото до галереї
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setSlots((s) => [...s, { url: '', preview: '' }])}
+            className={ADD_BTN}
+          >
+            + Додати фото
+          </button>
         </div>
       </div>
 
@@ -202,9 +201,9 @@ export function MediaFields({
         />
       </div>
 
-      {/* Additional YouTube */}
+      {/* Additional YouTube — unlimited */}
       <div>
-        <label className={LABEL}>Додаткові відео YouTube (до 3)</label>
+        <label className={LABEL}>Додаткові YouTube відео</label>
         <div className="space-y-2">
           {extraYts.map((url, i) => (
             <div key={i} className="flex gap-2">
@@ -225,11 +224,13 @@ export function MediaFields({
               </button>
             </div>
           ))}
-          {extraYts.length < 3 && (
-            <button type="button" onClick={() => setExtraYts((y) => [...y, ''])} className={ADD_BTN}>
-              + Додати YouTube відео
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setExtraYts((y) => [...y, ''])}
+            className={ADD_BTN}
+          >
+            + Додати YouTube відео
+          </button>
         </div>
       </div>
     </fieldset>
