@@ -1,26 +1,44 @@
 'use server'
 import { getAdminClient } from '@/lib/supabase/admin'
+import { uploadProductFile } from '@/lib/supabase/storage'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+async function resolveImageUrl(formData: FormData): Promise<string | null> {
+  const file = formData.get('image_file') as File | null
+  if (file && file.size > 0) {
+    const result = await uploadProductFile(file)
+    if ('url' in result) return result.url
+  }
+  return (formData.get('image_url') as string)?.trim() || null
+}
+
+function parseTextArray(formData: FormData, key: string): string[] {
+  return (formData.getAll(key) as string[]).map((s) => s.trim()).filter(Boolean)
+}
+
 export async function createBeekeeperProduct(formData: FormData) {
   const client = getAdminClient()
-  const slug = (formData.get('slug') as string).trim()
+  const image_url = await resolveImageUrl(formData)
   const breedsRaw = formData.get('breeds') as string
   const breeds = breedsRaw ? breedsRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
 
   await client.from('beekeeper_products').insert({
     name: formData.get('name') as string,
-    slug,
+    slug: (formData.get('slug') as string).trim(),
     product_type: formData.get('product_type') as string,
-    description: formData.get('description') as string || null,
+    description: (formData.get('description') as string) || null,
+    full_description: (formData.get('full_description') as string) || null,
     breeds,
-    season_note: formData.get('season_note') as string || null,
+    season_note: (formData.get('season_note') as string) || null,
     display_order: parseInt(formData.get('display_order') as string) || 10,
     in_stock: formData.get('in_stock') === 'on',
-    image_url: formData.get('image_url') as string || null,
-    youtube_video_url: formData.get('youtube_video_url') as string || null,
-    image_alt: formData.get('image_alt') as string || null,
+    is_featured: formData.get('is_featured') === 'on',
+    youtube_video_url: (formData.get('youtube_video_url') as string) || null,
+    youtube_video_urls: parseTextArray(formData, 'youtube_video_urls'),
+    image_url,
+    image_alt: (formData.get('image_alt') as string) || null,
+    gallery_images: parseTextArray(formData, 'gallery_images'),
   })
 
   revalidatePath('/beekeeper', 'layout')
@@ -29,26 +47,28 @@ export async function createBeekeeperProduct(formData: FormData) {
 
 export async function updateBeekeeperProduct(id: string, formData: FormData) {
   const client = getAdminClient()
-  const slug = (formData.get('slug') as string).trim()
+  const image_url = await resolveImageUrl(formData)
   const breedsRaw = formData.get('breeds') as string
   const breeds = breedsRaw ? breedsRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
 
-  const updates: Record<string, unknown> = {
+  await client.from('beekeeper_products').update({
     name: formData.get('name') as string,
-    slug,
+    slug: (formData.get('slug') as string).trim(),
     product_type: formData.get('product_type') as string,
-    description: formData.get('description') as string || null,
+    description: (formData.get('description') as string) || null,
+    full_description: (formData.get('full_description') as string) || null,
     breeds,
-    season_note: formData.get('season_note') as string || null,
+    season_note: (formData.get('season_note') as string) || null,
     display_order: parseInt(formData.get('display_order') as string) || 10,
     in_stock: formData.get('in_stock') === 'on',
-    image_url: formData.get('image_url') as string || null,
-    youtube_video_url: formData.get('youtube_video_url') as string || null,
-    image_alt: formData.get('image_alt') as string || null,
+    is_featured: formData.get('is_featured') === 'on',
+    youtube_video_url: (formData.get('youtube_video_url') as string) || null,
+    youtube_video_urls: parseTextArray(formData, 'youtube_video_urls'),
+    image_url,
+    image_alt: (formData.get('image_alt') as string) || null,
+    gallery_images: parseTextArray(formData, 'gallery_images'),
     updated_at: new Date().toISOString(),
-  }
-
-  await client.from('beekeeper_products').update(updates).eq('id', id)
+  }).eq('id', id)
 
   revalidatePath('/beekeeper', 'layout')
   redirect('/admin/beekeeper')
