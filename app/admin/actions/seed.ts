@@ -54,6 +54,36 @@ async function backfillNullMedia(
   }
 }
 
+// Backfill product_media for products that have image_url but no media rows yet
+async function backfillProductMedia(
+  client: ReturnType<typeof getAdminClient>,
+  section: string,
+  table: string,
+  items: Array<{ slug: string; image_url?: string | null; image_alt?: string | null }>,
+): Promise<void> {
+  for (const item of items) {
+    if (!item.image_url) continue
+    const { data: product } = await client.from(table).select('id').eq('slug', item.slug).single()
+    if (!product?.id) continue
+    const { data: existing } = await client
+      .from('product_media')
+      .select('id')
+      .eq('product_section', section)
+      .eq('product_id', product.id)
+      .limit(1)
+    if (existing && existing.length > 0) continue
+    await client.from('product_media').insert({
+      product_section: section,
+      product_id: product.id,
+      media_type: 'image',
+      url: item.image_url,
+      alt: item.image_alt ?? null,
+      position: 0,
+      is_primary: true,
+    })
+  }
+}
+
 export async function syncCatalog(): Promise<SyncResult> {
   const details: Record<string, string> = {}
   const missingTables: string[] = []
@@ -73,7 +103,10 @@ export async function syncCatalog(): Promise<SyncResult> {
     const { error: he } = await client
       .from('honey_products')
       .upsert(honeyRows, { onConflict: 'slug', ignoreDuplicates: false })
-    if (!he) await backfillNullMedia(client, 'honey_products', STATIC_HONEY)
+    if (!he) {
+      await backfillNullMedia(client, 'honey_products', STATIC_HONEY)
+      await backfillProductMedia(client, 'honey', 'honey_products', STATIC_HONEY).catch(() => {})
+    }
     details.honey = he ? `Помилка: ${he.message}` : `Синхронізовано ${honeyRows.length} продуктів`
 
     // Apiary — delete stale non-canonical rows, then upsert canonical set (catalog fields only)
@@ -88,7 +121,10 @@ export async function syncCatalog(): Promise<SyncResult> {
     const { error: ae } = await client
       .from('apiary_products')
       .upsert(apiaryRows, { onConflict: 'slug', ignoreDuplicates: false })
-    if (!ae) await backfillNullMedia(client, 'apiary_products', STATIC_APIARY)
+    if (!ae) {
+      await backfillNullMedia(client, 'apiary_products', STATIC_APIARY)
+      await backfillProductMedia(client, 'apiary', 'apiary_products', STATIC_APIARY).catch(() => {})
+    }
     details.apiary = ae ? `Помилка: ${ae.message}` : `Синхронізовано ${apiaryRows.length} продуктів`
 
     // Beekeeper — delete stale non-canonical rows, then upsert canonical set (catalog fields only)
@@ -103,9 +139,16 @@ export async function syncCatalog(): Promise<SyncResult> {
     const { error: bke } = await client
       .from('beekeeper_products')
       .upsert(beekeeperRows, { onConflict: 'slug', ignoreDuplicates: false })
+    if (!bke) {
+      await backfillProductMedia(client, 'beekeeper', 'beekeeper_products', STATIC_BEEKEEPER).catch(() => {})
+    }
     details.beekeeper = bke ? `Помилка: ${bke.message}` : `Синхронізовано ${beekeeperRows.length} продуктів`
 
-    // Flowers — upsert catalog fields only (50 entries; all have null image_url in static data)
+    // Flowers — delete stale rows, then upsert canonical set
+    const flowerSlugs = STATIC_FLOWERS.map((f) => f.slug)
+    const { data: existingFlowers } = await client.from('flower_products').select('slug')
+    const staleFlowers = (existingFlowers ?? []).map((r: { slug: string }) => r.slug).filter((s) => !flowerSlugs.includes(s))
+    if (staleFlowers.length > 0) await client.from('flower_products').delete().in('slug', staleFlowers)
     const flowerRows = STATIC_FLOWERS.map(({
       id: _id, created_at: _ca, updated_at: _ua,
       image_url: _img, image_alt: _alt, youtube_video_url: _yt,
@@ -123,6 +166,7 @@ export async function syncCatalog(): Promise<SyncResult> {
         details.flowers = `Помилка: ${fe.message}`
       }
     } else {
+      await backfillProductMedia(client, 'flowers', 'flower_products', STATIC_FLOWERS).catch(() => {})
       details.flowers = `Синхронізовано ${flowerRows.length} позицій`
     }
 
