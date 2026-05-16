@@ -74,15 +74,6 @@ export default async function AdminBeekeeperEditPage({ params }: Props) {
           <input name="name" type="text" required defaultValue={String(p.name ?? '')} className={INPUT} />
         </div>
 
-        <div>
-          <label className={LABEL}>Тип продукту</label>
-          <select name="product_type" required defaultValue={String(p.product_type ?? '')} className={INPUT}>
-            {PRODUCT_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>{t.label}</option>
-            ))}
-          </select>
-        </div>
-
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={LABEL}>Породи (через кому)</label>
@@ -123,6 +114,14 @@ export default async function AdminBeekeeperEditPage({ params }: Props) {
             <div>
               <label className={LABEL}>Slug (URL)</label>
               <input name="slug" type="text" required defaultValue={String(p.slug ?? '')} className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Тип продукту</label>
+              <select name="product_type" defaultValue={String(p.product_type ?? '')} className={INPUT}>
+                {PRODUCT_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className={LABEL}>Опис</label>
