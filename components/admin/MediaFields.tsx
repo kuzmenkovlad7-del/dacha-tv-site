@@ -3,14 +3,14 @@ interface MediaFieldsProps {
   imageUrl?: string | null
   imageAlt?: string | null
   youtubeUrl?: string | null
-  youtubeFieldName?: string // default: 'youtube_url'
+  youtubeFieldName?: string // default: 'youtube_video_url'
 }
 
 export function MediaFields({
   imageUrl,
   imageAlt,
   youtubeUrl,
-  youtubeFieldName = 'youtube_url',
+  youtubeFieldName = 'youtube_video_url',
 }: MediaFieldsProps) {
   return (
     <fieldset className="border-t border-gray-100 pt-5 space-y-4">

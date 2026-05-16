@@ -110,10 +110,16 @@ export default async function AdminBeekeeperEditPage({ params }: Props) {
           <input name="display_order" type="number" defaultValue={String(p.display_order ?? 10)} className={INPUT} />
         </div>
 
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" name="in_stock" defaultChecked={Boolean(p.in_stock)} className="w-4 h-4 rounded accent-gray-900" />
+          <span className="text-sm font-medium text-gray-700">В наявності</span>
+        </label>
+
         <MediaFields
           imageUrl={p.image_url as string | null}
           imageAlt={p.image_alt as string | null}
           youtubeUrl={p.youtube_video_url as string | null}
+          youtubeFieldName="youtube_video_url"
         />
 
         <button type="submit"

@@ -87,14 +87,14 @@ const CANONICAL_APIARY = [
   },
 ]
 
-// Default beekeeper products to bootstrap the section
+// Canonical beekeeper products — slugs match production DB after migration 018
 const CANONICAL_BEEKEEPER = [
   {
-    name: 'Бджолопакет Buckfast',
-    slug: 'bee-package-buckfast',
+    name: 'Бджолопакети',
+    slug: 'bee-packages',
     product_type: 'bee_packages',
-    description: 'Бджолопакет породи Buckfast — спокійна, продуктивна порода. Доступні з квітня по червень.',
-    breeds: ['Buckfast'],
+    description: 'Бджолопакети порід Buckfast та Карніка. Спокійні, продуктивні породи. Доступні з квітня по червень.',
+    breeds: ['Buckfast', 'Карніка'],
     season_note: 'Доступні з квітня по червень',
     display_order: 1,
     in_stock: true,
@@ -103,12 +103,12 @@ const CANONICAL_BEEKEEPER = [
     youtube_video_url: null,
   },
   {
-    name: 'Бджолопакет Карніка',
-    slug: 'bee-package-carnica',
-    product_type: 'bee_packages',
-    description: 'Бджолопакет породи Карніка — миролюбна, зимостійка порода.',
-    breeds: ['Карніка'],
-    season_note: 'Доступні з квітня по червень',
+    name: 'Бджолосімї',
+    slug: 'bee-colonies',
+    product_type: 'bee_colonies',
+    description: 'Повноцінні бджолосімї у вуликах. Підходять для початківців і досвідчених пасічників.',
+    breeds: ['Buckfast', 'Карніка'],
+    season_note: 'Доступні з квітня по серпень',
     display_order: 2,
     in_stock: true,
     image_url: null,
@@ -116,12 +116,12 @@ const CANONICAL_BEEKEEPER = [
     youtube_video_url: null,
   },
   {
-    name: 'Бджолосімя',
-    slug: 'bee-colony',
-    product_type: 'bee_colonies',
-    description: 'Повноцінна бджолосімя у вулику. Уточнюйте наявність.',
-    breeds: ['Buckfast', 'Карніка'],
-    season_note: 'Доступні з квітня по серпень',
+    name: 'Порожні вулики',
+    slug: 'empty-hives',
+    product_type: 'empty_hives',
+    description: 'Порожні вулики для самостійного заселення. Уточнюйте наявність та конструкцію.',
+    breeds: null,
+    season_note: null,
     display_order: 3,
     in_stock: true,
     image_url: null,
