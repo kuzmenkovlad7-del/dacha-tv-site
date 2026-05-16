@@ -176,13 +176,21 @@ export async function syncCatalog(): Promise<SyncResult> {
       .upsert(honeyRows, { onConflict: 'slug', ignoreDuplicates: true })
     details.honey = he ? `Помилка: ${he.message}` : `Синхронізовано ${honeyRows.length} продуктів`
 
-    // Apiary — upsert by slug (includes swarm-lure)
+    // Apiary — delete stale non-canonical rows, then upsert canonical set
+    const canonicalApiarySlugs = CANONICAL_APIARY.map((p) => p.slug)
+    const { data: existingApiary } = await client.from('apiary_products').select('slug')
+    const staleApiary = (existingApiary ?? []).map((r: { slug: string }) => r.slug).filter((s) => !canonicalApiarySlugs.includes(s))
+    if (staleApiary.length > 0) await client.from('apiary_products').delete().in('slug', staleApiary)
     const { error: ae } = await client
       .from('apiary_products')
       .upsert(CANONICAL_APIARY, { onConflict: 'slug', ignoreDuplicates: true })
     details.apiary = ae ? `Помилка: ${ae.message}` : `Синхронізовано ${CANONICAL_APIARY.length} продуктів`
 
-    // Beekeeper — upsert by slug
+    // Beekeeper — delete stale non-canonical rows, then upsert canonical set
+    const canonicalBeekeeperSlugs = CANONICAL_BEEKEEPER.map((p) => p.slug)
+    const { data: existingBeekeeper } = await client.from('beekeeper_products').select('slug')
+    const staleBeekeeper = (existingBeekeeper ?? []).map((r: { slug: string }) => r.slug).filter((s) => !canonicalBeekeeperSlugs.includes(s))
+    if (staleBeekeeper.length > 0) await client.from('beekeeper_products').delete().in('slug', staleBeekeeper)
     const { error: bke } = await client
       .from('beekeeper_products')
       .upsert(CANONICAL_BEEKEEPER, { onConflict: 'slug', ignoreDuplicates: true })
