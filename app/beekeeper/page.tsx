@@ -21,6 +21,7 @@ export default async function BeekeeperPage() {
   const hiveProducts = products.filter(
     (p) => p.product_type === 'empty_hives' || p.product_type === 'hives_with_bees'
   )
+  const supplyProducts = products.filter((p) => p.product_type === 'apiary_supply')
 
   return (
     <div className="bg-cream min-h-screen">
@@ -116,6 +117,16 @@ export default async function BeekeeperPage() {
                 </div>
               )}
             </section>
+
+            {/* Apiary supplies */}
+            {supplyProducts.length > 0 && (
+              <section aria-labelledby="supplies-heading">
+                <h2 id="supplies-heading" className="font-serif text-2xl md:text-3xl font-bold text-bark mb-6">
+                  Товари пасічника
+                </h2>
+                <BeekeeperSection products={supplyProducts} />
+              </section>
+            )}
 
             {/* Important note */}
             <div className="bg-honey-50 rounded-2xl p-6 border border-honey-200">

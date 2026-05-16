@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAdminClient } from '@/lib/supabase/admin'
-import { syncCatalogAction } from '@/app/admin/actions/seed'
 import { createFlowerProduct } from './actions'
 import { MediaManager } from '@/components/admin/MediaManager'
 import type { FlowerProduct } from '@/types'
@@ -42,22 +41,11 @@ export default async function AdminFlowersPage() {
   return (
     <div className="px-4 sm:px-6 py-8">
       {/* Header */}
-      <div className="flex items-start justify-between mb-6 gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Квіти</h1>
-          {products.length > 0 && (
-            <p className="text-sm text-gray-500 mt-0.5">{products.length} позицій</p>
-          )}
-        </div>
-        <form action={syncCatalogAction}>
-          <button type="submit"
-            className="inline-flex items-center gap-1.5 h-9 px-4 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
-            <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Синхр.
-          </button>
-        </form>
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-gray-900">Квіти</h1>
+        {products.length > 0 && (
+          <p className="text-sm text-gray-500 mt-0.5">{products.length} позицій</p>
+        )}
       </div>
 
       {/* Blocking: table missing */}
@@ -92,13 +80,7 @@ export default async function AdminFlowersPage() {
       {!tablesMissing && !dbError && products.length === 0 && (
         <div className="bg-white border border-gray-100 rounded-xl shadow-sm text-center py-12 px-6 mb-8">
           <p className="text-gray-900 font-semibold mb-1">Квітів ще немає в базі</p>
-          <p className="text-sm text-gray-500 mb-5">Натисніть «Синхр.» щоб імпортувати всі 50 сортів</p>
-          <form action={syncCatalogAction}>
-            <button type="submit"
-              className="inline-flex items-center gap-2 h-10 px-5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
-              Синхронізувати каталог
-            </button>
-          </form>
+          <p className="text-sm text-gray-500">Додайте першу квітку за допомогою форми нижче</p>
         </div>
       )}
 

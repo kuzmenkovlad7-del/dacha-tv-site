@@ -92,7 +92,7 @@ export interface BeekeeperProduct {
   id: string
   name: string
   slug: string
-  product_type: 'bee_packages' | 'bee_colonies' | 'empty_hives' | 'hives_with_bees'
+  product_type: 'bee_packages' | 'bee_colonies' | 'empty_hives' | 'hives_with_bees' | 'apiary_supply'
   description: string | null
   full_description: string | null
   breeds: string[] | null

@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { createBeekeeperProduct } from './actions'
-import { syncCatalogAction } from '@/app/admin/actions/seed'
 import { MediaManager } from '@/components/admin/MediaManager'
 
 export const metadata: Metadata = {
@@ -19,6 +18,7 @@ const PRODUCT_TYPES = [
   { value: 'bee_colonies', label: 'Бджолосімї' },
   { value: 'empty_hives', label: 'Порожні вулики' },
   { value: 'hives_with_bees', label: 'Вулики з бджолами' },
+  { value: 'apiary_supply', label: 'Товар пасічника' },
 ]
 
 const TYPE_LABELS: Record<string, string> = {
@@ -26,6 +26,7 @@ const TYPE_LABELS: Record<string, string> = {
   bee_colonies: 'Бджолосімї',
   empty_hives: 'Порожні вулики',
   hives_with_bees: 'Вулики з бджолами',
+  apiary_supply: 'Товар пасічника',
 }
 
 interface BKProduct { id: string; name: string; product_type: string; season_note: string | null; display_order: number; status: string }
@@ -48,35 +49,18 @@ export default async function AdminBeekeeperPage() {
   return (
     <div className="px-4 sm:px-6 py-8">
       {/* Header */}
-      <div className="flex items-start justify-between mb-6 gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Пасічникам</h1>
-          {products.length > 0 && (
-            <p className="text-sm text-gray-500 mt-0.5">{products.length} позицій</p>
-          )}
-        </div>
-        <form action={syncCatalogAction}>
-          <button type="submit"
-            className="inline-flex items-center gap-1.5 h-9 px-4 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
-            <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Синхр.
-          </button>
-        </form>
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-gray-900">Пасічникам</h1>
+        {products.length > 0 && (
+          <p className="text-sm text-gray-500 mt-0.5">{products.length} позицій</p>
+        )}
       </div>
 
       {/* Empty state */}
       {products.length === 0 && (
         <div className="bg-white border border-gray-100 rounded-xl shadow-sm text-center py-12 px-6 mb-8">
           <p className="text-gray-900 font-semibold mb-1">Продуктів ще немає</p>
-          <p className="text-sm text-gray-500 mb-5">Натисніть «Синхр.» щоб імпортувати базові продукти</p>
-          <form action={syncCatalogAction}>
-            <button type="submit"
-              className="inline-flex items-center gap-2 h-10 px-5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
-              Синхронізувати каталог
-            </button>
-          </form>
+          <p className="text-sm text-gray-500">Додайте перший продукт за допомогою форми нижче</p>
         </div>
       )}
 

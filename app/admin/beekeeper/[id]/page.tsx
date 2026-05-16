@@ -24,6 +24,7 @@ const PRODUCT_TYPES = [
   { value: 'bee_colonies', label: 'Бджолосімї' },
   { value: 'empty_hives', label: 'Порожні вулики' },
   { value: 'hives_with_bees', label: 'Вулики з бджолами' },
+  { value: 'apiary_supply', label: 'Товар пасічника' },
 ]
 
 export default async function AdminBeekeeperEditPage({ params }: Props) {

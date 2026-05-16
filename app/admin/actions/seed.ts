@@ -29,7 +29,7 @@ export interface SyncResult {
   missingTables: string[]
 }
 
-// Full idempotent upsert of all catalog data — safe to run multiple times
+// Internal bootstrap — not exposed in admin UI. Run from CLI or one-off scripts only.
 export async function syncCatalogAction(): Promise<void> {
   await syncCatalog()
   revalidatePath('/admin/honey')
