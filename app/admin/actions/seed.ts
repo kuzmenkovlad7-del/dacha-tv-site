@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { getAdminClient } from '@/lib/supabase/admin'
-import { STATIC_HONEY } from '@/lib/static-catalog'
+import { STATIC_HONEY, STATIC_HONEY_SLUGS } from '@/lib/static-catalog'
 import { STATIC_FLOWERS } from '@/lib/flowers-static'
 import { STATIC_APIARY, STATIC_APIARY_SLUGS, STATIC_BEEKEEPER, STATIC_BEEKEEPER_SLUGS } from '@/lib/static-apiary'
 
@@ -61,7 +61,10 @@ export async function syncCatalog(): Promise<SyncResult> {
   try {
     const client = getAdminClient()
 
-    // Honey — upsert catalog fields only (strip media so admin uploads are never overwritten)
+    // Honey — delete stale non-canonical rows, then upsert canonical set
+    const { data: existingHoney } = await client.from('honey_products').select('slug')
+    const staleHoney = (existingHoney ?? []).map((r: { slug: string }) => r.slug).filter((s) => !STATIC_HONEY_SLUGS.includes(s))
+    if (staleHoney.length > 0) await client.from('honey_products').delete().in('slug', staleHoney)
     const honeyRows = STATIC_HONEY.map(({
       id: _id, created_at: _ca, updated_at: _ua,
       image_url: _img, image_alt: _alt, youtube_video_link: _yt,
