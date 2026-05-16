@@ -67,8 +67,7 @@ export default async function AdminHoneyPage() {
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Назва</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Сорт</th>
-                <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Наявн.</th>
-                <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Топ</th>
+                <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Статус</th>
                 <th className="px-5 py-3 w-20"></th>
               </tr>
             </thead>
@@ -79,9 +78,6 @@ export default async function AdminHoneyPage() {
                   <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">{product.variety ?? '—'}</td>
                   <td className="px-5 py-3.5 text-center">
                     <span className={`inline-block w-2 h-2 rounded-full ${product.status === 'available' ? 'bg-green-500' : product.status === 'preorder' ? 'bg-amber-400' : 'bg-gray-300'}`} title={product.status} />
-                  </td>
-                  <td className="px-5 py-3.5 text-center hidden sm:table-cell">
-                    <span className={`inline-block w-2 h-2 rounded-full ${product.is_featured ? 'bg-amber-400' : 'bg-gray-300'}`} />
                   </td>
                   <td className="px-5 py-3.5 text-right">
                     <Link href={`/admin/honey/${product.id}`}

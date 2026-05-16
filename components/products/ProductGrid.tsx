@@ -1,104 +1,14 @@
 import Link from 'next/link'
 import { ProductCard } from './ProductCard'
+import { STATIC_APIARY } from '@/lib/static-apiary'
 import type { ApiaryProduct } from '@/types'
 
 interface ProductGridProps {
   products: ApiaryProduct[]
 }
 
-const STATIC_PRODUCTS: ApiaryProduct[] = [
-  {
-    id: 'static-swarm-lure',
-    name: 'Приманка для роїв',
-    slug: 'swarm-lure',
-    description: 'Приманка для роїв використовується в сезон роїння для підвищення шансів заселення пастки або підготовленого вулика.',
-    short_description: 'Готова приманка для приваблення бджолиних роїв у компактній зручній банці.',
-    full_description: 'Приманка для роїв використовується в сезон роїння для підвищення шансів заселення пастки або підготовленого вулика. Зручний формат банки дозволяє легко використовувати продукт у практичній роботі на пасіці.',
-    composition: null,
-    usage_notes: 'Нанесіть невелику кількість на внутрішні стінки вулика-пастки за 1–2 дні до очікуваного роїння.',
-    storage_info: 'Зберігати в прохолодному темному місці при температурі до +20°C. Термін придатності — 2 роки.',
-    packaging_note: 'Банка 35 г.',
-    weight_g: 35,
-    price_uah: 200,
-    is_featured: true,
-    gallery_images: null,
-    packaging: ['35 г'],
-    status: 'available',
-    display_order: 1,
-    image_url: '/images/dacha-tv/products/swarm-lure-01.jpg',
-    image_alt: 'Приманка для роїв Dacha TV',
-    youtube_video_url: null,
-  },
-  {
-    id: 'static-pollen',
-    name: 'Квітковий пилок',
-    slug: 'kvitkovyi-pylok',
-    description: 'Зібраний бджолами з квіток і накопичений у вуликах. Містить білки, вітаміни та мінерали.',
-    short_description: 'Свіжий квітковий пилок від нашої пасіки.',
-    full_description: null,
-    composition: 'Натуральний квітковий пилок.',
-    usage_notes: 'Вживати по 1–2 чайні ложки на день, запиваючи водою або медом.',
-    storage_info: 'Зберігати при температурі 0–4°C. Термін придатності — 12 місяців.',
-    packaging_note: null,
-    weight_g: null,
-    price_uah: 180,
-    is_featured: false,
-    gallery_images: null,
-    packaging: ['100 г', '250 г'],
-    status: 'available',
-    display_order: 2,
-    image_url: null,
-    image_alt: null,
-    youtube_video_url: null,
-  },
-  {
-    id: 'static-propolis',
-    name: 'Прополіс',
-    slug: 'propolis',
-    description: 'Смолиста речовина, яку бджоли виробляють для захисту вулика.',
-    short_description: 'Натуральний прополіс від пасіки — у шматках або у вигляді спиртової настоянки.',
-    full_description: null,
-    composition: 'Натуральний прополіс.',
-    usage_notes: 'Настоянку застосовують при застуді, ангіні. Природній прополіс жують або додають до страв.',
-    storage_info: 'Зберігати в прохолодному темному місці.',
-    packaging_note: null,
-    weight_g: null,
-    price_uah: 120,
-    is_featured: false,
-    gallery_images: null,
-    packaging: ['10 г', '20 г'],
-    status: 'available',
-    display_order: 3,
-    image_url: null,
-    image_alt: null,
-    youtube_video_url: null,
-  },
-  {
-    id: 'static-nuts',
-    name: 'Горіхи в меду',
-    slug: 'horixy-v-medu',
-    description: 'Скляна банка горіхів, залитих свіжим медом нашої пасіки.',
-    short_description: 'Суміш горіхів у натуральному меді нашої пасіки. Ідеально як подарунок або перекус.',
-    full_description: null,
-    composition: 'Суміш горіхів (волоський горіх, мигдаль, кешью), мед натуральний.',
-    usage_notes: 'Вживати як самостійний десерт або додавати до каші, йогурту, сиру.',
-    storage_info: 'Зберігати при кімнатній температурі в закритому вигляді. Термін придатності — 12 місяців.',
-    packaging_note: null,
-    weight_g: null,
-    price_uah: 230,
-    is_featured: false,
-    gallery_images: null,
-    packaging: ['200 мл скло'],
-    status: 'available',
-    display_order: 4,
-    image_url: null,
-    image_alt: null,
-    youtube_video_url: null,
-  },
-]
-
 export function ProductGrid({ products }: ProductGridProps) {
-  const displayProducts = products.length > 0 ? products : STATIC_PRODUCTS
+  const displayProducts = products.length > 0 ? products : STATIC_APIARY
 
   return (
     <div>

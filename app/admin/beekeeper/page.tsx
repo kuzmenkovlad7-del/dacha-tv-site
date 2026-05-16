@@ -28,7 +28,7 @@ const TYPE_LABELS: Record<string, string> = {
   hives_with_bees: 'Вулики з бджолами',
 }
 
-interface BKProduct { id: string; name: string; product_type: string; display_order: number; status: string }
+interface BKProduct { id: string; name: string; product_type: string; season_note: string | null; display_order: number; status: string }
 
 export default async function AdminBeekeeperPage() {
   let products: BKProduct[] = []
@@ -39,6 +39,7 @@ export default async function AdminBeekeeperPage() {
       id: String(r.id ?? ''),
       name: String(r.name ?? ''),
       product_type: String(r.product_type ?? ''),
+      season_note: r.season_note != null ? String(r.season_note) : null,
       display_order: Number(r.display_order ?? 0),
       status: String(r.status ?? 'available'),
     }))
@@ -86,8 +87,8 @@ export default async function AdminBeekeeperPage() {
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Назва</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Тип</th>
-                <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Наявн.</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Сезон</th>
+                <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Статус</th>
                 <th className="px-5 py-3 w-20"></th>
               </tr>
             </thead>
@@ -95,7 +96,7 @@ export default async function AdminBeekeeperPage() {
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50/70 transition-colors">
                   <td className="px-5 py-3.5 font-medium text-gray-900">{product.name}</td>
-                  <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">{TYPE_LABELS[product.product_type] ?? product.product_type}</td>
+                  <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">{product.season_note ?? '—'}</td>
                   <td className="px-5 py-3.5 text-center">
                     <span className={`inline-block w-2 h-2 rounded-full ${product.status === 'available' ? 'bg-green-500' : product.status === 'preorder' ? 'bg-amber-400' : 'bg-gray-300'}`} title={product.status} />
                   </td>
@@ -119,15 +120,6 @@ export default async function AdminBeekeeperPage() {
           <div>
             <label className={LABEL}>Назва</label>
             <input name="name" type="text" required className={INPUT} />
-          </div>
-
-          <div>
-            <label className={LABEL}>Тип продукту</label>
-            <select name="product_type" required className={INPUT}>
-              {PRODUCT_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
-              ))}
-            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -161,6 +153,14 @@ export default async function AdminBeekeeperPage() {
               <div>
                 <label className={LABEL}>Slug (URL)</label>
                 <input name="slug" type="text" placeholder="bee-packages (авто якщо порожньо)" className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Тип продукту</label>
+                <select name="product_type" className={INPUT}>
+                  {PRODUCT_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className={LABEL}>Опис</label>
