@@ -129,7 +129,7 @@ export default async function HoneyProductPage({ params }: Props) {
   const youtubeId = extractYouTubeId(product.youtube_video_link)
 
   const related = allProducts
-    .filter((p) => p.id !== product.id && p.in_stock)
+    .filter((p) => p.id !== product.id && (p.status === 'available' || p.status === 'preorder'))
     .slice(0, 3)
 
   const productSchema = {
@@ -140,7 +140,7 @@ export default async function HoneyProductPage({ params }: Props) {
     brand: { '@type': 'Brand', name: 'Дача TV' },
     offers: {
       '@type': 'Offer',
-      availability: product.in_stock
+      availability: (product.status === 'available' || product.status === 'preorder')
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'Дача TV' },
@@ -166,31 +166,49 @@ export default async function HoneyProductPage({ params }: Props) {
       {/* Product detail */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Image */}
-          <div className="relative aspect-square rounded-2xl overflow-hidden bg-honey-50">
-            {heroImage ? (
-              <Image
-                src={heroImage}
-                alt={product.image_alt || `${product.name} від пасіки Дача TV`}
-                fill
-                priority
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                placeholder="blur"
-                blurDataURL={BLUR_DATA_URL}
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-honey-100 to-honey-300">
-                <span className="text-honey-700 font-serif font-bold text-3xl">
-                  {product.variety}
-                </span>
-              </div>
-            )}
-            {product.is_featured && (
-              <div className="absolute top-4 left-4">
-                <span className="bg-honey-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
-                  Найпопулярніший
-                </span>
+          {/* Images */}
+          <div className="space-y-3">
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-honey-50">
+              {heroImage ? (
+                <Image
+                  src={heroImage}
+                  alt={product.image_alt || `${product.name} від пасіки Дача TV`}
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  placeholder="blur"
+                  blurDataURL={BLUR_DATA_URL}
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-honey-100 to-honey-300">
+                  <span className="text-honey-700 font-serif font-bold text-3xl">
+                    {product.variety}
+                  </span>
+                </div>
+              )}
+              {product.is_featured && (
+                <div className="absolute top-4 left-4">
+                  <span className="bg-honey-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
+                    Найпопулярніший
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {(product.gallery_images ?? []).length > 0 && (
+              <div className="flex gap-2 flex-wrap">
+                {(product.gallery_images ?? []).map((src, i) => (
+                  <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden bg-honey-50 flex-shrink-0">
+                    <Image
+                      src={src}
+                      alt={product.image_alt || product.name}
+                      fill
+                      className="object-cover"
+                      sizes="80px"
+                    />
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -207,7 +225,7 @@ export default async function HoneyProductPage({ params }: Props) {
               </p>
             )}
 
-            {!product.in_stock && (
+            {product.status !== 'available' && product.status !== 'preorder' && (
               <div className="bg-gray-100 text-gray-700 rounded-lg px-4 py-3 mb-4 text-sm font-medium">
                 Наразі немає в наявності. Залиште заявку — ми повідомимо, коли з&apos;явиться.
               </div>

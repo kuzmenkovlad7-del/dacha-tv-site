@@ -44,7 +44,7 @@ function colorClass(color: string | null): string {
 
 export default async function FlowersCatalogPage() {
   const allProducts = await getAllFlowerProducts().catch(() => [])
-  const available = allProducts.filter((p) => p.in_stock)
+  const available = allProducts.filter((p) => p.status === 'available' || p.status === 'preorder')
 
   const byVariety = VARIETY_ORDER.reduce<Record<string, FlowerProduct[]>>((acc, v) => {
     const g = available.filter((p) => p.variety === v)

@@ -94,15 +94,14 @@ export default async function AdminBeekeeperEditPage({ params }: Props) {
           </div>
         </div>
 
-        <div className="flex gap-6">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" name="in_stock" defaultChecked={Boolean(p.in_stock)} className="w-4 h-4 rounded accent-gray-900" />
-            <span className="text-sm font-medium text-gray-700">В наявності</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" name="is_featured" defaultChecked={Boolean(p.is_featured)} className="w-4 h-4 rounded accent-gray-900" />
-            <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
-          </label>
+        <div>
+          <label className={LABEL}>Статус</label>
+          <select name="status" defaultValue={String(p.status ?? 'available')} className={INPUT}>
+            <option value="available">В наявності</option>
+            <option value="preorder">Передзамовлення</option>
+            <option value="out_of_stock">Немає в наявності</option>
+            <option value="archived">Архів</option>
+          </select>
         </div>
 
         <MediaFields
@@ -137,6 +136,10 @@ export default async function AdminBeekeeperEditPage({ params }: Props) {
               <label className={LABEL}>Порядок відображення</label>
               <input name="display_order" type="number" defaultValue={String(p.display_order ?? 10)} className={INPUT} />
             </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="is_featured" defaultChecked={Boolean(p.is_featured)} className="w-4 h-4 rounded accent-gray-900" />
+              <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
+            </label>
           </div>
         </details>
 

@@ -22,7 +22,7 @@ const CANONICAL_APIARY = [
     image_url: '/images/dacha-tv/products/swarm-lure-01.jpg',
     image_alt: 'Приманка для роїв Dacha TV',
     is_featured: true,
-    in_stock: true,
+    status: 'available',
     display_order: 1,
     youtube_video_url: null,
   },
@@ -40,7 +40,7 @@ const CANONICAL_APIARY = [
     price_uah: 180,
     weight_g: 100,
     is_featured: false,
-    in_stock: true,
+    status: 'available',
     display_order: 2,
     image_url: null,
     image_alt: 'Квітковий пилок Dacha TV',
@@ -59,7 +59,7 @@ const CANONICAL_APIARY = [
     price_uah: 120,
     weight_g: 20,
     is_featured: false,
-    in_stock: true,
+    status: 'available',
     display_order: 3,
     image_url: null,
     image_alt: 'Прополіс Dacha TV',
@@ -79,7 +79,7 @@ const CANONICAL_APIARY = [
     price_uah: 230,
     weight_g: 200,
     is_featured: false,
-    in_stock: true,
+    status: 'available',
     display_order: 4,
     image_url: null,
     image_alt: 'Горіхи в меду Dacha TV',
@@ -97,7 +97,7 @@ const CANONICAL_BEEKEEPER = [
     breeds: ['Buckfast', 'Карніка'],
     season_note: 'Доступні з квітня по червень',
     display_order: 1,
-    in_stock: true,
+    status: 'available',
     image_url: null,
     image_alt: null,
     youtube_video_url: null,
@@ -110,7 +110,7 @@ const CANONICAL_BEEKEEPER = [
     breeds: ['Buckfast', 'Карніка'],
     season_note: 'Доступні з квітня по серпень',
     display_order: 2,
-    in_stock: true,
+    status: 'available',
     image_url: null,
     image_alt: null,
     youtube_video_url: null,
@@ -123,7 +123,7 @@ const CANONICAL_BEEKEEPER = [
     breeds: null,
     season_note: null,
     display_order: 3,
-    in_stock: true,
+    status: 'available',
     image_url: null,
     image_alt: null,
     youtube_video_url: null,
@@ -176,13 +176,21 @@ export async function syncCatalog(): Promise<SyncResult> {
       .upsert(honeyRows, { onConflict: 'slug', ignoreDuplicates: true })
     details.honey = he ? `Помилка: ${he.message}` : `Синхронізовано ${honeyRows.length} продуктів`
 
-    // Apiary — upsert by slug (includes swarm-lure)
+    // Apiary — delete stale non-canonical rows, then upsert canonical set
+    const canonicalApiarySlugs = CANONICAL_APIARY.map((p) => p.slug)
+    const { data: existingApiary } = await client.from('apiary_products').select('slug')
+    const staleApiary = (existingApiary ?? []).map((r: { slug: string }) => r.slug).filter((s) => !canonicalApiarySlugs.includes(s))
+    if (staleApiary.length > 0) await client.from('apiary_products').delete().in('slug', staleApiary)
     const { error: ae } = await client
       .from('apiary_products')
       .upsert(CANONICAL_APIARY, { onConflict: 'slug', ignoreDuplicates: true })
     details.apiary = ae ? `Помилка: ${ae.message}` : `Синхронізовано ${CANONICAL_APIARY.length} продуктів`
 
-    // Beekeeper — upsert by slug
+    // Beekeeper — delete stale non-canonical rows, then upsert canonical set
+    const canonicalBeekeeperSlugs = CANONICAL_BEEKEEPER.map((p) => p.slug)
+    const { data: existingBeekeeper } = await client.from('beekeeper_products').select('slug')
+    const staleBeekeeper = (existingBeekeeper ?? []).map((r: { slug: string }) => r.slug).filter((s) => !canonicalBeekeeperSlugs.includes(s))
+    if (staleBeekeeper.length > 0) await client.from('beekeeper_products').delete().in('slug', staleBeekeeper)
     const { error: bke } = await client
       .from('beekeeper_products')
       .upsert(CANONICAL_BEEKEEPER, { onConflict: 'slug', ignoreDuplicates: true })

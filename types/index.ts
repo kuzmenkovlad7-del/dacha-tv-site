@@ -1,3 +1,5 @@
+export type ProductStatus = 'available' | 'preorder' | 'out_of_stock' | 'archived'
+
 export interface SiteSettings {
   id: number
   phone: string | null
@@ -32,8 +34,8 @@ export interface HoneyProduct {
   packaging_note: string | null
   price_plastic_uah: number | null
   price_glass_uah: number | null
+  status: ProductStatus
   is_featured: boolean
-  in_stock: boolean
   display_order: number
   image_url: string | null
   image_alt: string | null
@@ -58,10 +60,10 @@ export interface ApiaryProduct {
   packaging_note: string | null
   weight_g: number | null
   price_uah: number | null
+  status: ProductStatus
   is_featured: boolean
   gallery_images: string[] | null
   packaging: string[] | null
-  in_stock: boolean
   display_order: number
   image_url: string | null
   image_alt: string | null
@@ -81,7 +83,7 @@ export interface BeekeeperProduct {
   full_description: string | null
   breeds: string[] | null
   season_note: string | null
-  in_stock: boolean
+  status: ProductStatus
   is_featured: boolean
   image_url: string | null
   image_alt: string | null
@@ -141,8 +143,8 @@ export interface FlowerProduct {
   lighting: string | null
   packaging_note: string | null
   display_order: number
+  status: ProductStatus
   is_featured: boolean
-  in_stock: boolean
   image_url: string | null
   image_alt: string | null
   gallery_images?: string[] | null

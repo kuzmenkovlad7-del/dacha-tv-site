@@ -41,7 +41,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </span>
           </div>
         )}
-        {!product.in_stock && (
+        {product.status !== 'available' && product.status !== 'preorder' && (
           <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
             <span className="bg-gray-800 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
               Немає в наявності
