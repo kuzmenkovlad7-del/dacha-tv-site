@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import type { SiteSettings, HoneyProduct, ApiaryProduct, BeekeeperProduct, Review, FaqItem, FlowerProduct } from '@/types'
 import { STATIC_FLOWERS } from '@/lib/flowers-static'
+import { STATIC_APIARY, STATIC_APIARY_BY_SLUG, STATIC_APIARY_SLUGS, STATIC_BEEKEEPER } from '@/lib/static-apiary'
 
 function getClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -54,36 +55,38 @@ export async function getAllHoneySlugs(): Promise<string[]> {
 
 export async function getAllApiaryProducts(): Promise<ApiaryProduct[]> {
   const client = getClient()
-  if (!client) return []
+  if (!client) return STATIC_APIARY
   const { data } = await client
     .from('apiary_products')
     .select('*')
     .order('display_order', { ascending: true })
-  return data ?? []
+  return (data && data.length > 0) ? data : STATIC_APIARY
 }
 
 export async function getApiaryProductBySlug(slug: string): Promise<ApiaryProduct | null> {
   const client = getClient()
-  if (!client) return null
+  if (!client) return STATIC_APIARY_BY_SLUG[slug] ?? null
   const { data } = await client.from('apiary_products').select('*').eq('slug', slug).single()
-  return data ?? null
+  if (data) return data
+  return STATIC_APIARY_BY_SLUG[slug] ?? null
 }
 
 export async function getAllApiaryProductSlugs(): Promise<string[]> {
   const client = getClient()
-  if (!client) return []
+  if (!client) return STATIC_APIARY_SLUGS
   const { data } = await client.from('apiary_products').select('slug')
-  return (data ?? []).map((r: { slug: string }) => r.slug)
+  const dbSlugs = (data ?? []).map((r: { slug: string }) => r.slug)
+  return dbSlugs.length > 0 ? dbSlugs : STATIC_APIARY_SLUGS
 }
 
 export async function getAllBeekeeperProducts(): Promise<BeekeeperProduct[]> {
   const client = getClient()
-  if (!client) return []
+  if (!client) return STATIC_BEEKEEPER
   const { data } = await client
     .from('beekeeper_products')
     .select('*')
     .order('display_order', { ascending: true })
-  return data ?? []
+  return (data && data.length > 0) ? data : STATIC_BEEKEEPER
 }
 
 export async function getVisibleReviews(): Promise<Review[]> {
