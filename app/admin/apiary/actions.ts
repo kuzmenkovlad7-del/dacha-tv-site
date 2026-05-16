@@ -17,7 +17,7 @@ function autoSlug(name: string): string {
 
 export async function createApiaryProduct(formData: FormData) {
   const client = getAdminClient()
-  const mediaItems = await parseMediaFromForm(formData)
+  const mediaItems = parseMediaFromForm(formData)
   const compat = mediaToBackwardCompat(mediaItems, 'youtube_video_url')
   const packagingRaw = formData.get('packaging') as string
   const packaging = packagingRaw ? packagingRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
@@ -52,7 +52,7 @@ export async function createApiaryProduct(formData: FormData) {
 
 export async function updateApiaryProduct(id: string, formData: FormData) {
   const client = getAdminClient()
-  const mediaItems = await parseMediaFromForm(formData)
+  const mediaItems = parseMediaFromForm(formData)
   const compat = mediaToBackwardCompat(mediaItems, 'youtube_video_url')
   const packagingRaw = formData.get('packaging') as string
   const packaging = packagingRaw ? packagingRaw.split(',').map((s) => s.trim()).filter(Boolean) : null

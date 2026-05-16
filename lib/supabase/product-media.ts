@@ -1,5 +1,3 @@
-import { uploadProductFile } from './storage'
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DbClient = any
 
@@ -63,20 +61,14 @@ export async function saveProductMedia(
 }
 
 // Parses the MediaManager serialization format from a FormData submitted by a server action.
-// Uploads any attached files via Supabase Storage. Returns ordered media items ready for saveProductMedia.
-export async function parseMediaFromForm(formData: FormData): Promise<NewProductMedia[]> {
+// Files are uploaded eagerly on selection in MediaManager — only URLs arrive here.
+export function parseMediaFromForm(formData: FormData): NewProductMedia[] {
   const items: NewProductMedia[] = []
 
   // ── Images ──────────────────────────────────────────────────────────────
   const imgCount = Math.min(parseInt((formData.get('img_count') as string) || '0', 10), 30)
   for (let i = 0; i < imgCount; i++) {
-    const file = formData.get(`img_file_${i}`) as File | null
-    let url: string | null = null
-    if (file && file.size > 0) {
-      const res = await uploadProductFile(file)
-      if ('url' in res) url = res.url
-    }
-    if (!url) url = (formData.get(`img_url_${i}`) as string)?.trim() || null
+    const url = (formData.get(`img_url_${i}`) as string)?.trim() || null
     if (!url) continue
     items.push({
       media_type: 'image',
@@ -90,13 +82,7 @@ export async function parseMediaFromForm(formData: FormData): Promise<NewProduct
   // ── Videos ──────────────────────────────────────────────────────────────
   const vidCount = Math.min(parseInt((formData.get('vid_count') as string) || '0', 10), 5)
   for (let i = 0; i < vidCount; i++) {
-    const file = formData.get(`vid_file_${i}`) as File | null
-    let url: string | null = null
-    if (file && file.size > 0) {
-      const res = await uploadProductFile(file)
-      if ('url' in res) url = res.url
-    }
-    if (!url) url = (formData.get(`vid_url_${i}`) as string)?.trim() || null
+    const url = (formData.get(`vid_url_${i}`) as string)?.trim() || null
     if (!url) continue
     items.push({ media_type: 'video', url, alt: null, position: i, is_primary: false })
   }

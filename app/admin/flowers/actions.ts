@@ -17,7 +17,7 @@ function autoSlug(name: string): string {
 
 export async function createFlowerProduct(formData: FormData) {
   const client = getAdminClient()
-  const mediaItems = await parseMediaFromForm(formData)
+  const mediaItems = parseMediaFromForm(formData)
   const compat = mediaToBackwardCompat(mediaItems, 'youtube_video_url')
   const name = formData.get('name') as string
   const slugRaw = (formData.get('slug') as string)?.trim()
@@ -51,7 +51,7 @@ export async function createFlowerProduct(formData: FormData) {
 
 export async function updateFlowerProduct(id: string, formData: FormData) {
   const client = getAdminClient()
-  const mediaItems = await parseMediaFromForm(formData)
+  const mediaItems = parseMediaFromForm(formData)
   const compat = mediaToBackwardCompat(mediaItems, 'youtube_video_url')
   const name = formData.get('name') as string
   const slugRaw = (formData.get('slug') as string)?.trim()
