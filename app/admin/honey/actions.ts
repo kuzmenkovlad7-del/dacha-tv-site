@@ -1,6 +1,6 @@
 'use server'
 import { getAdminClient } from '@/lib/supabase/admin'
-import { uploadProductFile } from '@/lib/supabase/storage'
+import { parseMediaFromForm, saveProductMedia, mediaToBackwardCompat } from '@/lib/supabase/product-media'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -15,54 +15,16 @@ function autoSlug(name: string): string {
   return slug || `honey-${Date.now()}`
 }
 
-async function resolveImageUrl(formData: FormData): Promise<string | null> {
-  const file = formData.get('image_file') as File | null
-  if (file && file.size > 0) {
-    const result = await uploadProductFile(file)
-    if ('url' in result) return result.url
-  }
-  return (formData.get('image_url') as string)?.trim() || null
-}
-
-async function resolveVideoUrl(formData: FormData): Promise<string | null> {
-  const file = formData.get('video_file') as File | null
-  if (file && file.size > 0) {
-    const result = await uploadProductFile(file)
-    if ('url' in result) return result.url
-  }
-  return (formData.get('video_url') as string)?.trim() || null
-}
-
-async function resolveGalleryImages(formData: FormData): Promise<string[]> {
-  const count = Math.min(parseInt((formData.get('gallery_slot_count') as string) || '0', 10), 20)
-  const result: string[] = []
-  for (let i = 0; i < count; i++) {
-    const file = formData.get(`gallery_file_${i}`) as File | null
-    if (file && file.size > 0) {
-      const res = await uploadProductFile(file)
-      if ('url' in res) { result.push(res.url); continue }
-    }
-    const url = (formData.get(`gallery_url_${i}`) as string)?.trim()
-    if (url) result.push(url)
-  }
-  return result
-}
-
-function parseTextArray(formData: FormData, key: string): string[] {
-  return (formData.getAll(key) as string[]).map((s) => s.trim()).filter(Boolean)
-}
-
 export async function createHoneyProduct(formData: FormData) {
   const client = getAdminClient()
-  const image_url = await resolveImageUrl(formData)
-  const video_url = await resolveVideoUrl(formData)
-  const gallery_images = await resolveGalleryImages(formData)
+  const mediaItems = await parseMediaFromForm(formData)
+  const compat = mediaToBackwardCompat(mediaItems, 'youtube_video_link')
   const packagingRaw = formData.get('packaging') as string
   const packaging = packagingRaw ? packagingRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
   const slugRaw = (formData.get('slug') as string)?.trim()
   const name = formData.get('name') as string
 
-  await client.from('honey_products').insert({
+  const { data, error } = await client.from('honey_products').insert({
     name,
     slug: slugRaw || autoSlug(name),
     variety: (formData.get('variety') as string) || "Різнотрав'я",
@@ -80,13 +42,12 @@ export async function createHoneyProduct(formData: FormData) {
     is_featured: formData.get('is_featured') === 'on',
     status: (formData.get('status') as string) || 'available',
     display_order: parseInt(formData.get('display_order') as string) || 10,
-    youtube_video_link: (formData.get('youtube_video_link') as string) || null,
-    youtube_video_urls: parseTextArray(formData, 'youtube_video_urls'),
-    image_url,
-    image_alt: (formData.get('image_alt') as string) || null,
-    gallery_images,
-    video_url,
-  })
+    ...compat,
+  }).select('id').single()
+
+  if (!error && data) {
+    await saveProductMedia('honey', data.id, mediaItems, client)
+  }
 
   revalidatePath('/honey', 'layout')
   revalidatePath('/')
@@ -95,9 +56,8 @@ export async function createHoneyProduct(formData: FormData) {
 
 export async function updateHoneyProduct(id: string, formData: FormData) {
   const client = getAdminClient()
-  const image_url = await resolveImageUrl(formData)
-  const video_url = await resolveVideoUrl(formData)
-  const gallery_images = await resolveGalleryImages(formData)
+  const mediaItems = await parseMediaFromForm(formData)
+  const compat = mediaToBackwardCompat(mediaItems, 'youtube_video_link')
   const packagingRaw = formData.get('packaging') as string
   const packaging = packagingRaw ? packagingRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
   const name = formData.get('name') as string
@@ -121,14 +81,11 @@ export async function updateHoneyProduct(id: string, formData: FormData) {
     is_featured: formData.get('is_featured') === 'on',
     status: (formData.get('status') as string) || 'available',
     display_order: parseInt(formData.get('display_order') as string) || 10,
-    youtube_video_link: (formData.get('youtube_video_link') as string) || null,
-    youtube_video_urls: parseTextArray(formData, 'youtube_video_urls'),
-    image_url,
-    image_alt: (formData.get('image_alt') as string) || null,
-    gallery_images,
-    video_url,
     updated_at: new Date().toISOString(),
+    ...compat,
   }).eq('id', id)
+
+  await saveProductMedia('honey', id, mediaItems, client)
 
   revalidatePath('/honey', 'layout')
   revalidatePath('/')
@@ -137,6 +94,7 @@ export async function updateHoneyProduct(id: string, formData: FormData) {
 
 export async function deleteHoneyProduct(id: string) {
   const client = getAdminClient()
+  await saveProductMedia('honey', id, [], client)
   await client.from('honey_products').delete().eq('id', id)
   revalidatePath('/honey', 'layout')
   revalidatePath('/')

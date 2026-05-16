@@ -59,8 +59,22 @@ export default async function FlowerProductPage({ params }: Props) {
 
   if (!product) notFound()
 
-  const heroImage = resolveLocalImage(product.image_url)
-  const youtubeId = extractYouTubeId(product.youtube_video_url)
+  const media = product.media ?? []
+  const primaryImg = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image') ?? null
+  const galleryImgs = media.filter((m) => m.media_type === 'image' && m !== primaryImg)
+  const localVideo = media.find((m) => m.media_type === 'video') ?? null
+  const ytItems = media.filter((m) => m.media_type === 'youtube')
+  const heroImageSrc = primaryImg?.url ?? product.image_url ?? null
+  const heroImageAlt = primaryImg?.alt ?? product.image_alt ?? `${product.name} від Дача TV`
+  const heroImage = resolveLocalImage(heroImageSrc)
+  const videoUrl = localVideo?.url ?? product.video_url ?? null
+  const youtubeId = ytItems[0] ? extractYouTubeId(ytItems[0].url) : extractYouTubeId(product.youtube_video_url)
+  const extraYoutubeIds = ytItems.length > 1
+    ? ytItems.slice(1).map((m) => extractYouTubeId(m.url)).filter(Boolean) as string[]
+    : (product.youtube_video_urls ?? []).map(extractYouTubeId).filter(Boolean) as string[]
+  const galleryImageSrcs = galleryImgs.length > 0
+    ? galleryImgs.map((m) => ({ src: m.url, alt: m.alt ?? product.image_alt ?? product.name }))
+    : (product.gallery_images ?? []).map((src) => ({ src, alt: product.image_alt ?? product.name }))
   const related = allProducts
     .filter((p) => p.id !== product.id && (p.status === 'available' || p.status === 'preorder'))
     .slice(0, 3)
@@ -105,7 +119,7 @@ export default async function FlowerProductPage({ params }: Props) {
               {heroImage ? (
                 <Image
                   src={heroImage}
-                  alt={product.image_alt || `${product.name} від Дача TV`}
+                  alt={heroImageAlt}
                   fill
                   priority
                   className="object-cover"
@@ -137,13 +151,13 @@ export default async function FlowerProductPage({ params }: Props) {
               )}
             </div>
 
-            {(product.gallery_images ?? []).length > 0 && (
+            {galleryImageSrcs.length > 0 && (
               <div className="flex gap-2 flex-wrap">
-                {(product.gallery_images ?? []).map((src, i) => (
+                {galleryImageSrcs.map((img, i) => (
                   <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
                     <Image
-                      src={src}
-                      alt={product.image_alt || product.name}
+                      src={img.src}
+                      alt={img.alt}
                       fill
                       className="object-cover"
                       sizes="80px"
@@ -224,32 +238,29 @@ export default async function FlowerProductPage({ params }: Props) {
               </p>
             )}
 
-            {product.video_url && (
+            {videoUrl && (
               <div className="mb-6">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
                   Відео про цю квітку
                 </p>
-                <video src={product.video_url} controls className="w-full rounded-xl" />
+                <video src={videoUrl} controls className="w-full rounded-xl" />
               </div>
             )}
 
             {youtubeId && (
               <div className="mb-6">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
-                  {product.video_url ? 'Також на YouTube' : 'Відео про цю квітку'}
+                  {videoUrl ? 'Також на YouTube' : 'Відео про цю квітку'}
                 </p>
                 <YouTubeFacade videoId={youtubeId} title={`Відео: ${product.name}`} />
               </div>
             )}
 
-            {(product.youtube_video_urls ?? []).filter(Boolean).map((url, i) => {
-              const vid = extractYouTubeId(url)
-              return vid ? (
-                <div key={i} className="mb-4">
-                  <YouTubeFacade videoId={vid} title={`Відео ${i + 2}: ${product.name}`} />
-                </div>
-              ) : null
-            })}
+            {extraYoutubeIds.map((vid, i) => (
+              <div key={i} className="mb-4">
+                <YouTubeFacade videoId={vid} title={`Відео ${i + 2}: ${product.name}`} />
+              </div>
+            ))}
 
             {/* Inquiry form */}
             <div id="order-form" className="bg-gray-50 rounded-2xl p-6 border border-gray-200">

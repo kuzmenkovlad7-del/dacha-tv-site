@@ -1,5 +1,17 @@
 export type ProductStatus = 'available' | 'preorder' | 'out_of_stock' | 'archived'
 
+export interface ProductMedia {
+  id: string
+  product_section: 'honey' | 'apiary' | 'beekeeper' | 'flowers'
+  product_id: string
+  media_type: 'image' | 'video' | 'youtube'
+  url: string
+  alt: string | null
+  position: number
+  is_primary: boolean
+  created_at: string
+}
+
 export interface SiteSettings {
   id: number
   phone: string | null
@@ -43,6 +55,7 @@ export interface HoneyProduct {
   youtube_video_link: string | null
   youtube_video_urls?: string[] | null
   video_url?: string | null
+  media?: ProductMedia[]
   created_at?: string
   updated_at?: string
 }
@@ -70,6 +83,7 @@ export interface ApiaryProduct {
   youtube_video_url: string | null
   youtube_video_urls?: string[] | null
   video_url?: string | null
+  media?: ProductMedia[]
   created_at?: string
   updated_at?: string
 }
@@ -92,6 +106,7 @@ export interface BeekeeperProduct {
   youtube_video_urls?: string[] | null
   video_url?: string | null
   display_order: number
+  media?: ProductMedia[]
   created_at?: string
   updated_at?: string
 }
@@ -151,6 +166,7 @@ export interface FlowerProduct {
   youtube_video_url: string | null
   youtube_video_urls?: string[] | null
   video_url?: string | null
+  media?: ProductMedia[]
   created_at?: string
   updated_at?: string
 }
