@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { ProductGrid } from '@/components/products/ProductGrid'
 import { CTAButton } from '@/components/shared/CTAButton'

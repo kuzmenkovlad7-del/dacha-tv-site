@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { GeneralContactForm } from '@/components/forms/GeneralContactForm'
 import { StructuredData } from '@/components/shared/StructuredData'
 import { YouTubeFacade } from '@/components/shared/YouTubeFacade'
-import { getApiaryProductBySlug, getAllApiaryProductSlugs } from '@/lib/supabase/queries'
+import { getApiaryProductBySlug } from '@/lib/supabase/queries'
 
 function extractYouTubeId(url: string | null): string | null {
   if (!url) return null
@@ -17,10 +17,7 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-export async function generateStaticParams() {
-  const slugs = await getAllApiaryProductSlugs().catch(() => [])
-  return slugs.map((slug) => ({ slug }))
-}
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
