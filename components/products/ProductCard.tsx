@@ -11,23 +11,28 @@ interface ProductCardProps {
   product: ApiaryProduct
 }
 
-function resolveLocalImage(imageUrl: string | null): string | null {
-  if (!imageUrl) return null
-  if (imageUrl.startsWith('http')) return imageUrl
-  return existsSync(join(process.cwd(), 'public', imageUrl)) ? imageUrl : null
+function resolveImage(product: ApiaryProduct): { src: string; alt: string } | null {
+  const media = product.media ?? []
+  const primary = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image')
+  if (primary) return { src: primary.url, alt: primary.alt ?? product.name }
+  if (!product.image_url) return null
+  if (product.image_url.startsWith('http')) return { src: product.image_url, alt: product.image_alt ?? product.name }
+  return existsSync(join(process.cwd(), 'public', product.image_url))
+    ? { src: product.image_url, alt: product.image_alt ?? product.name }
+    : null
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const imageUrl = resolveLocalImage(product.image_url)
+  const img = resolveImage(product)
   const blurb = product.short_description || product.description || null
 
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-honey-100 flex flex-col">
       <Link href={`/products/${product.slug}`} className="block relative aspect-square bg-honey-50">
-        {imageUrl ? (
+        {img ? (
           <Image
-            src={imageUrl}
-            alt={product.image_alt || `${product.name} від пасіки Дача TV`}
+            src={img.src}
+            alt={img.alt}
             fill
             className="object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

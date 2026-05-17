@@ -4,12 +4,6 @@ import { existsSync } from 'fs'
 import { join } from 'path'
 import type { FlowerProduct } from '@/types'
 
-function resolveLocalImage(imageUrl: string | null): string | null {
-  if (!imageUrl) return null
-  if (imageUrl.startsWith('http')) return imageUrl
-  return existsSync(join(process.cwd(), 'public', imageUrl)) ? imageUrl : null
-}
-
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+'
 
@@ -17,16 +11,27 @@ interface FlowerCardProps {
   product: FlowerProduct
 }
 
+function resolveImage(product: FlowerProduct): { src: string; alt: string } | null {
+  const media = product.media ?? []
+  const primary = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image')
+  if (primary) return { src: primary.url, alt: primary.alt ?? product.name }
+  if (!product.image_url) return null
+  if (product.image_url.startsWith('http')) return { src: product.image_url, alt: product.image_alt ?? product.name }
+  return existsSync(join(process.cwd(), 'public', product.image_url))
+    ? { src: product.image_url, alt: product.image_alt ?? product.name }
+    : null
+}
+
 export function FlowerCard({ product }: FlowerCardProps) {
-  const imageUrl = resolveLocalImage(product.image_url)
+  const img = resolveImage(product)
 
   return (
     <article className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-300 hover:shadow-xl transition-all duration-300 flex flex-col">
       <Link href={`/flowers/${product.slug}`} className="block relative aspect-square bg-gray-50 overflow-hidden">
-        {imageUrl ? (
+        {img ? (
           <Image
-            src={imageUrl}
-            alt={product.image_alt || `${product.name} від Дача TV`}
+            src={img.src}
+            alt={img.alt}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { SiteSettings, HoneyProduct, ApiaryProduct, BeekeeperProduct, Review, FaqItem, FlowerProduct } from '@/types'
 import type { ProductSection } from '@/lib/supabase/product-media'
 import { STATIC_FLOWERS } from '@/lib/flowers-static'
-import { STATIC_APIARY, STATIC_APIARY_BY_SLUG, STATIC_APIARY_SLUGS, STATIC_BEEKEEPER } from '@/lib/static-apiary'
+import { STATIC_APIARY, STATIC_APIARY_BY_SLUG, STATIC_APIARY_SLUGS, STATIC_BEEKEEPER, STATIC_BEEKEEPER_SLUGS } from '@/lib/static-apiary'
 
 function getClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -38,7 +38,24 @@ export async function getAllHoneyProducts(): Promise<HoneyProduct[]> {
     .select('*')
     .order('price_plastic_uah', { ascending: true, nullsFirst: false })
     .order('name', { ascending: true })
-  return data ?? []
+  if (!data || data.length === 0) return []
+
+  const ids = data.map((p: { id: string }) => p.id)
+  const { data: mediaData } = await client
+    .from('product_media')
+    .select('*')
+    .eq('product_section', 'honey')
+    .in('product_id', ids)
+    .order('position', { ascending: true })
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mediaByProduct: Record<string, any[]> = {}
+  for (const m of (mediaData ?? [])) {
+    if (!mediaByProduct[m.product_id]) mediaByProduct[m.product_id] = []
+    mediaByProduct[m.product_id].push(m)
+  }
+
+  return data.map((p: HoneyProduct) => ({ ...p, media: mediaByProduct[p.id] ?? [] }))
 }
 
 export async function getHoneyProductBySlug(slug: string): Promise<HoneyProduct | null> {
@@ -77,7 +94,24 @@ export async function getAllApiaryProducts(): Promise<ApiaryProduct[]> {
     .select('*')
     .order('price_uah', { ascending: true, nullsFirst: false })
     .order('name', { ascending: true })
-  return (data && data.length > 0) ? data : STATIC_APIARY
+  if (!data || data.length === 0) return STATIC_APIARY
+
+  const ids = data.map((p: { id: string }) => p.id)
+  const { data: mediaData } = await client
+    .from('product_media')
+    .select('*')
+    .eq('product_section', 'apiary')
+    .in('product_id', ids)
+    .order('position', { ascending: true })
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mediaByProduct: Record<string, any[]> = {}
+  for (const m of (mediaData ?? [])) {
+    if (!mediaByProduct[m.product_id]) mediaByProduct[m.product_id] = []
+    mediaByProduct[m.product_id].push(m)
+  }
+
+  return data.map((p: ApiaryProduct) => ({ ...p, media: mediaByProduct[p.id] ?? [] }))
 }
 
 export async function getApiaryProductBySlug(slug: string): Promise<ApiaryProduct | null> {
@@ -126,6 +160,24 @@ export async function getAllBeekeeperProducts(): Promise<BeekeeperProduct[]> {
   return data.map((p: BeekeeperProduct) => ({ ...p, media: mediaByProduct[p.id] ?? [] }))
 }
 
+export async function getBeekeeperProductBySlug(slug: string): Promise<BeekeeperProduct | null> {
+  const client = getClient()
+  const staticFallback = STATIC_BEEKEEPER.find((p) => p.slug === slug) ?? null
+  if (!client) return staticFallback
+  const { data } = await client.from('beekeeper_products').select('*').eq('slug', slug).single()
+  if (!data) return staticFallback
+  const media = await fetchMedia('beekeeper', data.id, client).catch(() => [])
+  return { ...data, media }
+}
+
+export async function getAllBeekeeperSlugs(): Promise<string[]> {
+  const client = getClient()
+  if (!client) return STATIC_BEEKEEPER_SLUGS
+  const { data } = await client.from('beekeeper_products').select('slug')
+  const dbSlugs = (data ?? []).map((r: { slug: string }) => r.slug)
+  return dbSlugs.length > 0 ? dbSlugs : STATIC_BEEKEEPER_SLUGS
+}
+
 export async function getVisibleReviews(): Promise<Review[]> {
   const client = getClient()
   if (!client) return []
@@ -156,7 +208,24 @@ export async function getAllFlowerProducts(): Promise<FlowerProduct[]> {
     .select('*')
     .order('variety', { ascending: true, nullsFirst: false })
     .order('name', { ascending: true })
-  return (data && data.length > 0) ? data : STATIC_FLOWERS
+  if (!data || data.length === 0) return STATIC_FLOWERS
+
+  const ids = data.map((p: { id: string }) => p.id)
+  const { data: mediaData } = await client
+    .from('product_media')
+    .select('*')
+    .eq('product_section', 'flowers')
+    .in('product_id', ids)
+    .order('position', { ascending: true })
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mediaByProduct: Record<string, any[]> = {}
+  for (const m of (mediaData ?? [])) {
+    if (!mediaByProduct[m.product_id]) mediaByProduct[m.product_id] = []
+    mediaByProduct[m.product_id].push(m)
+  }
+
+  return data.map((p: FlowerProduct) => ({ ...p, media: mediaByProduct[p.id] ?? [] }))
 }
 
 export async function getFlowerProductBySlug(slug: string): Promise<FlowerProduct | null> {
