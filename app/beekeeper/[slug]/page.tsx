@@ -2,13 +2,14 @@ export const dynamic = 'force-dynamic'
 
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
 import { StructuredData } from '@/components/shared/StructuredData'
 import { YouTubeFacade } from '@/components/shared/YouTubeFacade'
+import { ProductGallery } from '@/components/shared/ProductGallery'
 import { BeekeeperInquiryForm } from '@/components/forms/BeekeeperInquiryForm'
 import { BeekeeperCard } from '@/components/beekeeper/BeekeeperCard'
 import { getBeekeeperProductBySlug, getAllBeekeeperProducts } from '@/lib/supabase/queries'
+import { extractYouTubeId } from '@/lib/youtube'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -24,12 +25,6 @@ const TYPE_LABELS: Record<string, string> = {
 
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWE1YzM1Ii8+PC9zdmc+'
-
-function extractYouTubeId(url: string | null): string | null {
-  if (!url) return null
-  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/)
-  return m ? m[1] : null
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -108,6 +103,7 @@ export default async function BeekeeperProductPage({ params }: Props) {
     brand: { '@type': 'Brand', name: 'Дача TV' },
     offers: {
       '@type': 'Offer',
+      ...(product.price_uah ? { priceCurrency: 'UAH', price: product.price_uah } : {}),
       availability: isUnavailable
         ? 'https://schema.org/OutOfStock'
         : 'https://schema.org/InStock',
@@ -134,52 +130,21 @@ export default async function BeekeeperProductPage({ params }: Props) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
-          {/* Images */}
-          <div className="space-y-3">
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-forest-50">
-              {allImages.length > 0 ? (
-                <Image
-                  src={allImages[0].src}
-                  alt={allImages[0].alt}
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  placeholder="blur"
-                  blurDataURL={BLUR_DATA_URL}
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-forest-50 to-forest-200">
-                  <span className="text-forest-600 font-serif font-bold text-3xl text-center px-6">
-                    {product.name}
-                  </span>
-                </div>
-              )}
-              {isUnavailable && (
-                <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                  <span className="bg-gray-800 text-white text-sm font-semibold px-4 py-2 rounded-full">
-                    Немає в наявності
-                  </span>
-                </div>
-              )}
+          {/* Gallery */}
+          <ProductGallery
+            images={allImages}
+            blurDataURL={BLUR_DATA_URL}
+            priority
+            isUnavailable={isUnavailable}
+            featuredLabel={product.is_featured ? 'Популярне' : undefined}
+            featuredBadgeClass="bg-honey-600"
+          >
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-forest-50 to-forest-200">
+              <span className="text-forest-600 font-serif font-bold text-3xl text-center px-6">
+                {product.name}
+              </span>
             </div>
-
-            {allImages.length > 1 && (
-              <div className="flex gap-2 flex-wrap">
-                {allImages.slice(1).map((img, i) => (
-                  <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden bg-forest-50 flex-shrink-0">
-                    <Image
-                      src={img.src}
-                      alt={img.alt}
-                      fill
-                      className="object-cover"
-                      sizes="80px"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          </ProductGallery>
 
           {/* Info */}
           <div>
@@ -229,6 +194,17 @@ export default async function BeekeeperProductPage({ params }: Props) {
                     </span>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {(product.price_uah != null || product.price_note) && (
+              <div className="flex items-baseline gap-3 mb-6 py-3 border-t border-b border-forest-100">
+                {product.price_uah != null && (
+                  <span className="text-2xl font-bold text-bark">{product.price_uah} грн</span>
+                )}
+                {product.price_note && (
+                  <span className="text-sm text-bark/60">{product.price_note}</span>
+                )}
               </div>
             )}
 

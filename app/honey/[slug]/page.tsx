@@ -2,16 +2,17 @@ export const dynamic = 'force-dynamic'
 
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
 import { HoneyOrderForm } from '@/components/forms/HoneyOrderForm'
 import { HoneyCard } from '@/components/honey/HoneyCard'
 import { StructuredData } from '@/components/shared/StructuredData'
 import { YouTubeFacade } from '@/components/shared/YouTubeFacade'
+import { ProductGallery } from '@/components/shared/ProductGallery'
 import {
   getHoneyProductBySlug,
   getAllHoneyProducts,
 } from '@/lib/supabase/queries'
+import { extractYouTubeId } from '@/lib/youtube'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -102,12 +103,6 @@ const VARIETY_DETAILS: Record<string, {
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmJiZjI0Ii8+PC9zdmc+'
 
-function extractYouTubeId(url: string | null): string | null {
-  if (!url) return null
-  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/)
-  return m ? m[1] : null
-}
-
 export default async function HoneyProductPage({ params }: Props) {
   const { slug } = await params
 
@@ -135,6 +130,9 @@ export default async function HoneyProductPage({ params }: Props) {
   const galleryImageSrcs = galleryImgs.length > 0
     ? galleryImgs.map((m) => ({ src: m.url, alt: m.alt ?? product.image_alt ?? product.name }))
     : (product.gallery_images ?? []).map((src) => ({ src, alt: product.image_alt ?? product.name }))
+  const allImages = heroImage
+    ? [{ src: heroImage, alt: heroImageAlt }, ...galleryImageSrcs]
+    : galleryImageSrcs
 
   const related = allProducts
     .filter((p) => p.id !== product.id && (p.status === 'available' || p.status === 'preorder'))
@@ -176,52 +174,20 @@ export default async function HoneyProductPage({ params }: Props) {
       {/* Product detail */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Images */}
-          <div className="space-y-3">
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-honey-50">
-              {heroImage ? (
-                <Image
-                  src={heroImage}
-                  alt={heroImageAlt}
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  placeholder="blur"
-                  blurDataURL={BLUR_DATA_URL}
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-honey-100 to-honey-300">
-                  <span className="text-honey-700 font-serif font-bold text-3xl">
-                    {product.variety}
-                  </span>
-                </div>
-              )}
-              {product.is_featured && (
-                <div className="absolute top-4 left-4">
-                  <span className="bg-honey-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
-                    Найпопулярніший
-                  </span>
-                </div>
-              )}
+          {/* Gallery */}
+          <ProductGallery
+            images={allImages}
+            blurDataURL={BLUR_DATA_URL}
+            priority
+            featuredLabel={product.is_featured ? 'Найпопулярніший' : undefined}
+            featuredBadgeClass="bg-honey-600"
+          >
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-honey-100 to-honey-300">
+              <span className="text-honey-700 font-serif font-bold text-3xl">
+                {product.variety}
+              </span>
             </div>
-
-            {galleryImageSrcs.length > 0 && (
-              <div className="flex gap-2 flex-wrap">
-                {galleryImageSrcs.map((img, i) => (
-                  <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden bg-honey-50 flex-shrink-0">
-                    <Image
-                      src={img.src}
-                      alt={img.alt}
-                      fill
-                      className="object-cover"
-                      sizes="80px"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          </ProductGallery>
 
           {/* Info */}
           <div>
