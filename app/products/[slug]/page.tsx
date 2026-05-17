@@ -30,21 +30,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: 'Продукт не знайдено' }
   }
 
+  const media = product.media ?? []
+  const primaryImg = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image')
+  const ogImageUrl = primaryImg?.url ?? product.image_url ?? null
+  const description = product.short_description || product.description || `${product.name} від сімейної пасіки Дача TV на Харківщині.`
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   return {
     title: product.name,
-    description:
-      product.short_description ||
-      product.description ||
-      `${product.name} від сімейної пасіки Дача TV на Харківщині.`,
+    description,
+    alternates: { canonical: siteUrl ? `${siteUrl}/products/${slug}` : `/products/${slug}` },
     openGraph: {
       title: `${product.name} | Дача TV`,
       description: product.short_description || product.description || product.name,
-      images: (() => {
-        const media = product.media ?? []
-        const primary = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image')
-        const imgUrl = primary?.url ?? product.image_url
-        return imgUrl ? [{ url: imgUrl, width: 1200, height: 630 }] : []
-      })(),
+      images: ogImageUrl ? [{ url: ogImageUrl, width: 1200, height: 630 }] : [],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${product.name} | Дача TV`,
+      description,
+      images: ogImageUrl ? [ogImageUrl] : [],
     },
   }
 }

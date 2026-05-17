@@ -28,14 +28,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const primaryImg = media.find((m) => m.media_type === 'image' && m.is_primary)
     ?? media.find((m) => m.media_type === 'image')
   const ogImageUrl = primaryImg?.url ?? dbProduct.image_url ?? null
+  const description = dbProduct.short_description ||
+    `${dbProduct.name} — хризантема від домашнього розсадника Дача TV на Харківщині.`
   return {
-    title: `${dbProduct.name} | Дача TV`,
-    description: dbProduct.short_description || `${dbProduct.name} — хризантема від домашнього розсадника Дача TV.`,
-    alternates: siteUrl ? { canonical: `${siteUrl}/flowers/${slug}` } : undefined,
+    title: dbProduct.name,
+    description,
+    alternates: { canonical: siteUrl ? `${siteUrl}/flowers/${slug}` : `/flowers/${slug}` },
     openGraph: {
       title: `${dbProduct.name} | Дача TV`,
       description: dbProduct.short_description || dbProduct.name,
       images: ogImageUrl ? [{ url: ogImageUrl, width: 1200, height: 630, alt: dbProduct.name }] : [],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${dbProduct.name} | Дача TV`,
+      description,
+      images: ogImageUrl ? [ogImageUrl] : [],
     },
   }
 }
@@ -100,7 +109,7 @@ export default async function FlowerProductPage({ params }: Props) {
         : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'Дача TV' },
     },
-    image: heroImage || product.image_url || undefined,
+    image: primaryImg?.url ?? heroImage ?? product.image_url ?? undefined,
   }
 
   return (
