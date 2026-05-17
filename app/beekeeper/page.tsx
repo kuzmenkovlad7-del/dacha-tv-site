@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { BeekeeperProduct } from '@/types'
-import { BeekeeperSection } from '@/components/beekeeper/BeekeeperSection'
+import { BeekeeperCard } from '@/components/beekeeper/BeekeeperCard'
 import { BeekeeperInquiryForm } from '@/components/forms/BeekeeperInquiryForm'
 import { getAllBeekeeperProducts } from '@/lib/supabase/queries'
 
@@ -47,13 +47,28 @@ export default async function BeekeeperPage() {
           <p className="text-gray-500 text-lg max-w-2xl">
             Ми пасічники, і розуміємо, що вам потрібно. Пропонуємо бджолопакети, бджолосім&apos;ї та вулики — з індивідуальним підходом.
           </p>
+
+          {/* Type quick-jump links */}
+          {activeTypes.length > 1 && (
+            <div className="flex flex-wrap gap-2 mt-6">
+              {activeTypes.map((t) => (
+                <a
+                  key={t}
+                  href={`#${t}`}
+                  className="text-xs text-bark/50 border border-bark/20 px-3 py-1.5 rounded-full hover:text-bark hover:border-bark/40 transition-colors"
+                >
+                  {TYPE_HEADINGS[t] ?? t}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
-          {/* Product sections */}
+          {/* Product catalog */}
           <div className="lg:col-span-2 space-y-14">
 
             {activeTypes.length === 0 ? (
@@ -63,14 +78,25 @@ export default async function BeekeeperPage() {
                 </p>
               </div>
             ) : (
-              activeTypes.map((type) => (
-                <section key={type} aria-labelledby={`${type}-heading`}>
-                  <h2 id={`${type}-heading`} className="font-serif text-2xl md:text-3xl font-bold text-bark mb-6">
-                    {TYPE_HEADINGS[type] ?? type}
-                  </h2>
-                  <BeekeeperSection products={byType[type] ?? []} />
-                </section>
-              ))
+              activeTypes.map((type) => {
+                const group = byType[type] ?? []
+                return (
+                  <section key={type} id={type} aria-labelledby={`${type}-heading`}>
+                    <div className="flex items-center gap-3 mb-6">
+                      <span className="w-6 h-px bg-forest-300" />
+                      <h2 id={`${type}-heading`} className="font-serif text-2xl font-bold text-bark">
+                        {TYPE_HEADINGS[type] ?? type}
+                      </h2>
+                      <span className="text-sm text-bark/40">{group.length}</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {group.map((p) => (
+                        <BeekeeperCard key={p.id} product={p} />
+                      ))}
+                    </div>
+                  </section>
+                )
+              })
             )}
 
             {/* Important note */}
@@ -84,7 +110,7 @@ export default async function BeekeeperPage() {
 
           {/* Sticky inquiry form */}
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-24">
+            <div id="inquiry-form" className="lg:sticky lg:top-24">
               <div className="bg-forest-50 rounded-2xl p-6 border border-forest-200">
                 <h2 className="font-serif text-2xl font-bold text-bark mb-2">
                   Залишити заявку
