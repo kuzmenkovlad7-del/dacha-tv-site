@@ -1,17 +1,15 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { existsSync } from 'fs'
-import { join } from 'path'
 import { HoneyOrderForm } from '@/components/forms/HoneyOrderForm'
 import { HoneyCard } from '@/components/honey/HoneyCard'
 import { StructuredData } from '@/components/shared/StructuredData'
 import { YouTubeFacade } from '@/components/shared/YouTubeFacade'
-import { STATIC_HONEY, STATIC_HONEY_BY_SLUG, STATIC_HONEY_SLUGS } from '@/lib/static-catalog'
 import {
   getHoneyProductBySlug,
-  getAllHoneySlugs,
   getAllHoneyProducts,
 } from '@/lib/supabase/queries'
 
@@ -19,23 +17,13 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-// Always include all 6 production slugs so detail pages are pre-built regardless
-// of whether the DB migration has run. DB slugs are merged in at build time.
-export async function generateStaticParams() {
-  const dbSlugs = await getAllHoneySlugs().catch(() => [])
-  const allSlugs = [...new Set([...STATIC_HONEY_SLUGS, ...dbSlugs])]
-  return allSlugs.map((slug) => ({ slug }))
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const dbProduct = await getHoneyProductBySlug(slug).catch(() => null)
-  const product = dbProduct ?? STATIC_HONEY_BY_SLUG[slug] ?? null
-
+  const product = await getHoneyProductBySlug(slug).catch(() => null)
   if (!product) return { title: 'Продукт не знайдено' }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
-  const media = dbProduct?.media ?? []
+  const media = product.media ?? []
   const primaryImg = media.find((m) => m.media_type === 'image' && m.is_primary)
     ?? media.find((m) => m.media_type === 'image')
   const ogImageUrl = primaryImg?.url ?? product.image_url ?? null
@@ -114,12 +102,6 @@ const VARIETY_DETAILS: Record<string, {
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmJiZjI0Ii8+PC9zdmc+'
 
-function resolveLocalImage(imageUrl: string | null): string | null {
-  if (!imageUrl) return null
-  if (imageUrl.startsWith('http')) return imageUrl
-  return existsSync(join(process.cwd(), 'public', imageUrl)) ? imageUrl : null
-}
-
 function extractYouTubeId(url: string | null): string | null {
   if (!url) return null
   const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/)
@@ -129,16 +111,12 @@ function extractYouTubeId(url: string | null): string | null {
 export default async function HoneyProductPage({ params }: Props) {
   const { slug } = await params
 
-  const [dbProduct, allDbProducts] = await Promise.all([
+  const [product, allProducts] = await Promise.all([
     getHoneyProductBySlug(slug).catch(() => null),
     getAllHoneyProducts().catch(() => []),
   ])
 
-  // Fall back to static catalog if DB doesn't have the slug yet
-  const product = dbProduct ?? STATIC_HONEY_BY_SLUG[slug] ?? null
   if (!product) notFound()
-
-  const allProducts = allDbProducts.length > 0 ? allDbProducts : STATIC_HONEY
   const details = VARIETY_DETAILS[product.variety]
   const media = product.media ?? []
   const primaryImg = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image') ?? null
@@ -148,7 +126,7 @@ export default async function HoneyProductPage({ params }: Props) {
   // Fall back to legacy columns when media table is empty (migration not yet applied)
   const heroImageSrc = primaryImg?.url ?? product.image_url ?? null
   const heroImageAlt = primaryImg?.alt ?? product.image_alt ?? `${product.name} від пасіки Дача TV`
-  const heroImage = resolveLocalImage(heroImageSrc)
+  const heroImage = heroImageSrc?.startsWith('http') ? heroImageSrc : null
   const youtubeId = ytItems[0] ? extractYouTubeId(ytItems[0].url) : extractYouTubeId(product.youtube_video_link)
   const extraYoutubeIds = ytItems.length > 1
     ? ytItems.slice(1).map((m) => extractYouTubeId(m.url)).filter(Boolean) as string[]

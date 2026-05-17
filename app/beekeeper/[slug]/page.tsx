@@ -5,8 +5,10 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { StructuredData } from '@/components/shared/StructuredData'
+import { YouTubeFacade } from '@/components/shared/YouTubeFacade'
 import { BeekeeperInquiryForm } from '@/components/forms/BeekeeperInquiryForm'
-import { getBeekeeperProductBySlug } from '@/lib/supabase/queries'
+import { BeekeeperCard } from '@/components/beekeeper/BeekeeperCard'
+import { getBeekeeperProductBySlug, getAllBeekeeperProducts } from '@/lib/supabase/queries'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -23,6 +25,12 @@ const TYPE_LABELS: Record<string, string> = {
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWE1YzM1Ii8+PC9zdmc+'
 
+function extractYouTubeId(url: string | null): string | null {
+  if (!url) return null
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const product = await getBeekeeperProductBySlug(slug).catch(() => null)
@@ -30,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const media = product.media ?? []
   const primaryImg = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image')
-  const ogImage = primaryImg?.url ?? product.image_url
+  const ogImage = primaryImg?.url ?? product.image_url ?? null
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const description = product.description || `${product.name} від пасіки Дача TV на Харківщині. Пряма комунікація з пасічником — без посередників.`
@@ -55,21 +63,42 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BeekeeperProductPage({ params }: Props) {
   const { slug } = await params
-  const product = await getBeekeeperProductBySlug(slug).catch(() => null)
+
+  const [product, allProducts] = await Promise.all([
+    getBeekeeperProductBySlug(slug).catch(() => null),
+    getAllBeekeeperProducts().catch(() => []),
+  ])
+
   if (!product) notFound()
 
   const media = product.media ?? []
   const primaryImg = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image') ?? null
   const galleryImgs = media.filter((m) => m.media_type === 'image' && m !== primaryImg)
+  const localVideo = media.find((m) => m.media_type === 'video') ?? null
+  const ytItems = media.filter((m) => m.media_type === 'youtube')
 
-  const allImages = media.length > 0
+  const heroImageSrc = primaryImg?.url ?? product.image_url ?? null
+  const heroImage = heroImageSrc?.startsWith('http') ? heroImageSrc : null
+  const heroImageAlt = primaryImg?.alt ?? product.image_alt ?? product.name
+
+  const allImages = heroImage
     ? [
-        ...(primaryImg ? [{ src: primaryImg.url, alt: primaryImg.alt ?? product.name }] : []),
+        { src: heroImage, alt: heroImageAlt },
         ...galleryImgs.map((m) => ({ src: m.url, alt: m.alt ?? product.name })),
       ]
-    : product.image_url
-      ? [{ src: product.image_url, alt: product.image_alt ?? product.name }]
-      : []
+    : []
+
+  const videoUrl = localVideo?.url ?? product.video_url ?? null
+  const youtubeId = ytItems[0] ? extractYouTubeId(ytItems[0].url) : extractYouTubeId(product.youtube_video_url)
+  const extraYoutubeIds = ytItems.length > 1
+    ? ytItems.slice(1).map((m) => extractYouTubeId(m.url)).filter(Boolean) as string[]
+    : (product.youtube_video_urls ?? []).map(extractYouTubeId).filter(Boolean) as string[]
+
+  const related = allProducts
+    .filter((p) => p.id !== product.id && (p.status === 'available' || p.status === 'preorder'))
+    .slice(0, 3)
+
+  const isUnavailable = product.status !== 'available' && product.status !== 'preorder'
 
   const productSchema = {
     '@context': 'https://schema.org',
@@ -79,14 +108,13 @@ export default async function BeekeeperProductPage({ params }: Props) {
     brand: { '@type': 'Brand', name: 'Дача TV' },
     offers: {
       '@type': 'Offer',
-      availability: (product.status === 'available' || product.status === 'preorder')
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
+      availability: isUnavailable
+        ? 'https://schema.org/OutOfStock'
+        : 'https://schema.org/InStock',
       seller: { '@type': 'Organization', name: 'Дача TV' },
     },
+    image: heroImage ?? undefined,
   }
-
-  const isUnavailable = product.status !== 'available' && product.status !== 'preorder'
 
   return (
     <div className="bg-cream min-h-screen">
@@ -165,6 +193,12 @@ export default async function BeekeeperProductPage({ params }: Props) {
               {product.name}
             </h1>
 
+            {product.description && (
+              <p className="text-bark/70 text-lg leading-relaxed mb-4">
+                {product.description}
+              </p>
+            )}
+
             {isUnavailable && (
               <div className="bg-gray-100 text-gray-700 rounded-lg px-4 py-3 mb-4 text-sm font-medium">
                 Наразі немає в наявності. Залиште заявку — ми повідомимо, коли з&apos;явиться.
@@ -198,11 +232,35 @@ export default async function BeekeeperProductPage({ params }: Props) {
               </div>
             )}
 
-            {(product.full_description || product.description) && (
-              <p className="text-bark/70 leading-relaxed mb-6">
-                {product.full_description || product.description}
-              </p>
+            {product.full_description && (
+              <div className="text-bark/70 leading-relaxed mb-6">
+                <p>{product.full_description}</p>
+              </div>
             )}
+
+            {videoUrl && (
+              <div className="mb-6">
+                <p className="text-xs font-semibold text-bark/50 uppercase tracking-widest mb-2">
+                  Відео про цей продукт
+                </p>
+                <video src={videoUrl} controls className="w-full rounded-xl" />
+              </div>
+            )}
+
+            {youtubeId && (
+              <div className="mb-6">
+                <p className="text-xs font-semibold text-bark/50 uppercase tracking-widest mb-2">
+                  {videoUrl ? 'Також на YouTube' : 'Відео про цей продукт'}
+                </p>
+                <YouTubeFacade videoId={youtubeId} title={`Відео: ${product.name}`} />
+              </div>
+            )}
+
+            {extraYoutubeIds.map((vid, i) => (
+              <div key={i} className="mb-4">
+                <YouTubeFacade videoId={vid} title={`Відео ${i + 2}: ${product.name}`} />
+              </div>
+            ))}
 
             {/* Inquiry form */}
             <div id="inquiry-form" className="bg-forest-50 rounded-2xl p-6 border border-forest-200">
@@ -216,6 +274,20 @@ export default async function BeekeeperProductPage({ params }: Props) {
             </div>
           </div>
         </div>
+
+        {/* Related products */}
+        {related.length > 0 && (
+          <div className="mt-16 pt-12 border-t border-forest-100">
+            <h2 className="font-serif text-2xl font-bold text-bark mb-8">
+              Також може зацікавити
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {related.map((p) => (
+                <BeekeeperCard key={p.id} product={p} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
