@@ -44,6 +44,7 @@ export async function createBeekeeperProduct(formData: FormData) {
   }
 
   revalidatePath('/beekeeper', 'layout')
+  revalidatePath('/')
   redirect('/admin/beekeeper')
 }
 
@@ -74,6 +75,7 @@ export async function updateBeekeeperProduct(id: string, formData: FormData) {
   await saveProductMedia('beekeeper', id, mediaItems, client)
 
   revalidatePath('/beekeeper', 'layout')
+  revalidatePath('/')
   redirect('/admin/beekeeper')
 }
 
@@ -82,5 +84,6 @@ export async function deleteBeekeeperProduct(id: string) {
   await saveProductMedia('beekeeper', id, [], client)
   await client.from('beekeeper_products').delete().eq('id', id)
   revalidatePath('/beekeeper', 'layout')
+  revalidatePath('/')
   redirect('/admin/beekeeper')
 }

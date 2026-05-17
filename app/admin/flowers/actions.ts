@@ -44,6 +44,7 @@ export async function createFlowerProduct(formData: FormData) {
   }
 
   revalidatePath('/flowers', 'layout')
+  revalidatePath('/')
   redirect('/admin/flowers')
 }
 
@@ -74,6 +75,7 @@ export async function updateFlowerProduct(id: string, formData: FormData) {
   await saveProductMedia('flowers', id, mediaItems, client)
 
   revalidatePath('/flowers', 'layout')
+  revalidatePath('/')
   redirect('/admin/flowers')
 }
 
@@ -82,5 +84,6 @@ export async function deleteFlowerProduct(id: string) {
   await saveProductMedia('flowers', id, [], client)
   await client.from('flower_products').delete().eq('id', id)
   revalidatePath('/flowers', 'layout')
+  revalidatePath('/')
   redirect('/admin/flowers')
 }

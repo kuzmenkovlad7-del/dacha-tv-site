@@ -45,6 +45,7 @@ export async function createApiaryProduct(formData: FormData) {
   }
 
   revalidatePath('/products', 'layout')
+  revalidatePath('/')
   redirect('/admin/apiary')
 }
 
@@ -76,6 +77,7 @@ export async function updateApiaryProduct(id: string, formData: FormData) {
   await saveProductMedia('apiary', id, mediaItems, client)
 
   revalidatePath('/products', 'layout')
+  revalidatePath('/')
   redirect('/admin/apiary')
 }
 
@@ -84,5 +86,6 @@ export async function deleteApiaryProduct(id: string) {
   await saveProductMedia('apiary', id, [], client)
   await client.from('apiary_products').delete().eq('id', id)
   revalidatePath('/products', 'layout')
+  revalidatePath('/')
   redirect('/admin/apiary')
 }

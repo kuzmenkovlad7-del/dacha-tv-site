@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { getAllHoneySlugs, getAllFlowerSlugs } from '@/lib/supabase/queries'
+import { getAllHoneySlugs, getAllFlowerSlugs, getAllApiaryProductSlugs, getAllBeekeeperSlugs } from '@/lib/supabase/queries'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://dacha-tv.com'
 
@@ -17,9 +17,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/privacy`, lastModified: new Date(), priority: 0.3 },
   ]
 
-  const [honeySlugs, flowerSlugs] = await Promise.all([
+  const [honeySlugs, flowerSlugs, apiarySlugs, beekeeperSlugs] = await Promise.all([
     getAllHoneySlugs().catch(() => []),
     getAllFlowerSlugs().catch(() => []),
+    getAllApiaryProductSlugs().catch(() => []),
+    getAllBeekeeperSlugs().catch(() => []),
   ])
 
   const honeyRoutes: MetadataRoute.Sitemap = honeySlugs.map((slug) => ({
@@ -34,5 +36,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  return [...staticRoutes, ...honeyRoutes, ...flowerRoutes]
+  const apiaryRoutes: MetadataRoute.Sitemap = apiarySlugs.map((slug) => ({
+    url: `${BASE_URL}/products/${slug}`,
+    lastModified: new Date(),
+    priority: 0.75,
+  }))
+
+  const beekeeperRoutes: MetadataRoute.Sitemap = beekeeperSlugs.map((slug) => ({
+    url: `${BASE_URL}/beekeeper/${slug}`,
+    lastModified: new Date(),
+    priority: 0.75,
+  }))
+
+  return [...staticRoutes, ...honeyRoutes, ...flowerRoutes, ...apiaryRoutes, ...beekeeperRoutes]
 }
