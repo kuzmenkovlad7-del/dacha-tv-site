@@ -22,17 +22,15 @@ export async function createBeekeeperProduct(formData: FormData) {
   const breedsRaw = formData.get('breeds') as string
   const breeds = breedsRaw ? breedsRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
   const name = formData.get('name') as string
-  const slugRaw = (formData.get('slug') as string)?.trim()
 
   const { data, error } = await client.from('beekeeper_products').insert({
     name,
-    slug: slugRaw || autoSlug(name),
-    product_type: formData.get('product_type') as string,
+    slug: autoSlug(name),
+    product_type: (formData.get('product_type') as string) || 'bee_packages',
     description: (formData.get('description') as string) || null,
     full_description: (formData.get('full_description') as string) || null,
     breeds,
     season_note: (formData.get('season_note') as string) || null,
-    display_order: parseInt(formData.get('display_order') as string) || 10,
     status: (formData.get('status') as string) || 'available',
     is_featured: formData.get('is_featured') === 'on',
     ...compat,
@@ -53,17 +51,14 @@ export async function updateBeekeeperProduct(id: string, formData: FormData) {
   const breedsRaw = formData.get('breeds') as string
   const breeds = breedsRaw ? breedsRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
   const name = formData.get('name') as string
-  const slugRaw = (formData.get('slug') as string)?.trim()
 
   await client.from('beekeeper_products').update({
     name,
-    slug: slugRaw || autoSlug(name),
-    product_type: formData.get('product_type') as string,
+    product_type: (formData.get('product_type') as string) || 'bee_packages',
     description: (formData.get('description') as string) || null,
     full_description: (formData.get('full_description') as string) || null,
     breeds,
     season_note: (formData.get('season_note') as string) || null,
-    display_order: parseInt(formData.get('display_order') as string) || 10,
     status: (formData.get('status') as string) || 'available',
     is_featured: formData.get('is_featured') === 'on',
     updated_at: new Date().toISOString(),

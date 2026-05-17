@@ -21,7 +21,7 @@ const LABEL = 'block text-xs font-semibold text-gray-600 uppercase tracking-wide
 
 const PRODUCT_TYPES = [
   { value: 'bee_packages', label: 'Бджолопакети' },
-  { value: 'bee_colonies', label: 'Бджолосімї' },
+  { value: 'bee_colonies', label: "Бджолосім'ї" },
   { value: 'empty_hives', label: 'Порожні вулики' },
   { value: 'hives_with_bees', label: 'Вулики з бджолами' },
   { value: 'apiary_supply', label: 'Товар пасічника' },
@@ -80,6 +80,15 @@ export default async function AdminBeekeeperEditPage({ params }: Props) {
           <input name="name" type="text" required defaultValue={String(p.name ?? '')} className={INPUT} />
         </div>
 
+        <div>
+          <label className={LABEL}>Тип продукту</label>
+          <select name="product_type" defaultValue={String(p.product_type ?? 'bee_packages')} className={INPUT}>
+            {PRODUCT_TYPES.map((t) => (
+              <option key={t.value} value={t.value}>{t.label}</option>
+            ))}
+          </select>
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={LABEL}>Породи (через кому)</label>
@@ -101,43 +110,22 @@ export default async function AdminBeekeeperEditPage({ params }: Props) {
           </select>
         </div>
 
-        <MediaManager initialMedia={productMedia} productName={String(p.name ?? '')} />
+        <div>
+          <label className={LABEL}>Опис</label>
+          <textarea name="description" rows={3} defaultValue={String(p.description ?? '')} className={INPUT} />
+        </div>
 
-        <details className="border border-gray-100 rounded-lg">
-          <summary className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none list-none flex items-center gap-2">
-            <span>▸</span> Додатково
-          </summary>
-          <div className="px-4 pb-4 pt-2 space-y-4">
-            <div>
-              <label className={LABEL}>Slug (URL)</label>
-              <input name="slug" type="text" required defaultValue={String(p.slug ?? '')} className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Тип продукту</label>
-              <select name="product_type" defaultValue={String(p.product_type ?? '')} className={INPUT}>
-                {PRODUCT_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className={LABEL}>Опис</label>
-              <textarea name="description" rows={3} defaultValue={String(p.description ?? '')} className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Повний опис</label>
-              <textarea name="full_description" rows={4} defaultValue={String(p.full_description ?? '')} className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Порядок відображення</label>
-              <input name="display_order" type="number" defaultValue={String(p.display_order ?? 10)} className={INPUT} />
-            </div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" name="is_featured" defaultChecked={Boolean(p.is_featured)} className="w-4 h-4 rounded accent-gray-900" />
-              <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
-            </label>
-          </div>
-        </details>
+        <div>
+          <label className={LABEL}>Повний опис</label>
+          <textarea name="full_description" rows={4} defaultValue={String(p.full_description ?? '')} className={INPUT} />
+        </div>
+
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" name="is_featured" defaultChecked={Boolean(p.is_featured)} className="w-4 h-4 rounded accent-gray-900" />
+          <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
+        </label>
+
+        <MediaManager initialMedia={productMedia} productName={String(p.name ?? '')} />
 
         <button type="submit"
           className="w-full h-11 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors text-sm">

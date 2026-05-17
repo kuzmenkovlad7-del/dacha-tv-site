@@ -36,7 +36,8 @@ export async function getAllHoneyProducts(): Promise<HoneyProduct[]> {
   const { data } = await client
     .from('honey_products')
     .select('*')
-    .order('display_order', { ascending: true })
+    .order('price_plastic_uah', { ascending: true, nullsFirst: false })
+    .order('name', { ascending: true })
   return data ?? []
 }
 
@@ -56,7 +57,7 @@ export async function getFeaturedHoneyProducts(): Promise<HoneyProduct[]> {
     .from('honey_products')
     .select('*')
     .eq('is_featured', true)
-    .order('display_order', { ascending: true })
+    .order('name', { ascending: true })
     .limit(4)
   return data ?? []
 }
@@ -74,7 +75,8 @@ export async function getAllApiaryProducts(): Promise<ApiaryProduct[]> {
   const { data } = await client
     .from('apiary_products')
     .select('*')
-    .order('display_order', { ascending: true })
+    .order('price_uah', { ascending: true, nullsFirst: false })
+    .order('name', { ascending: true })
   return (data && data.length > 0) ? data : STATIC_APIARY
 }
 
@@ -101,8 +103,27 @@ export async function getAllBeekeeperProducts(): Promise<BeekeeperProduct[]> {
   const { data } = await client
     .from('beekeeper_products')
     .select('*')
-    .order('display_order', { ascending: true })
-  return (data && data.length > 0) ? data : STATIC_BEEKEEPER
+    .order('product_type', { ascending: true })
+    .order('name', { ascending: true })
+  if (!data || data.length === 0) return STATIC_BEEKEEPER
+
+  // Batch-fetch all product_media for beekeeper in one query
+  const ids = data.map((p: { id: string }) => p.id)
+  const { data: mediaData } = await client
+    .from('product_media')
+    .select('*')
+    .eq('product_section', 'beekeeper')
+    .in('product_id', ids)
+    .order('position', { ascending: true })
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mediaByProduct: Record<string, any[]> = {}
+  for (const m of (mediaData ?? [])) {
+    if (!mediaByProduct[m.product_id]) mediaByProduct[m.product_id] = []
+    mediaByProduct[m.product_id].push(m)
+  }
+
+  return data.map((p: BeekeeperProduct) => ({ ...p, media: mediaByProduct[p.id] ?? [] }))
 }
 
 export async function getVisibleReviews(): Promise<Review[]> {
@@ -133,7 +154,8 @@ export async function getAllFlowerProducts(): Promise<FlowerProduct[]> {
   const { data } = await client
     .from('flower_products')
     .select('*')
-    .order('display_order', { ascending: true })
+    .order('variety', { ascending: true, nullsFirst: false })
+    .order('name', { ascending: true })
   return (data && data.length > 0) ? data : STATIC_FLOWERS
 }
 

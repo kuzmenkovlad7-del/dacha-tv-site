@@ -21,15 +21,21 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const product = await getFlowerProductBySlug(slug).catch(() => null)
-  if (!product) return { title: 'Квітку не знайдено' }
+  const dbProduct = await getFlowerProductBySlug(slug).catch(() => null)
+  if (!dbProduct) return { title: 'Квітку не знайдено' }
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  const media = dbProduct.media ?? []
+  const primaryImg = media.find((m) => m.media_type === 'image' && m.is_primary)
+    ?? media.find((m) => m.media_type === 'image')
+  const ogImageUrl = primaryImg?.url ?? dbProduct.image_url ?? null
   return {
-    title: `${product.name} | Дача TV`,
-    description: product.short_description || `${product.name} — хризантема від домашнього розсадника Дача TV.`,
+    title: `${dbProduct.name} | Дача TV`,
+    description: dbProduct.short_description || `${dbProduct.name} — хризантема від домашнього розсадника Дача TV.`,
+    alternates: siteUrl ? { canonical: `${siteUrl}/flowers/${slug}` } : undefined,
     openGraph: {
-      title: `${product.name} | Дача TV`,
-      description: product.short_description || product.name,
-      images: product.image_url ? [{ url: product.image_url, width: 1200, height: 630 }] : [],
+      title: `${dbProduct.name} | Дача TV`,
+      description: dbProduct.short_description || dbProduct.name,
+      images: ogImageUrl ? [{ url: ogImageUrl, width: 1200, height: 630, alt: dbProduct.name }] : [],
     },
   }
 }
@@ -87,12 +93,14 @@ export default async function FlowerProductPage({ params }: Props) {
     brand: { '@type': 'Brand', name: 'Дача TV' },
     offers: {
       '@type': 'Offer',
+      priceCurrency: 'UAH',
+      price: product.price_uah ?? undefined,
       availability: (product.status === 'available' || product.status === 'preorder')
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'Дача TV' },
     },
-    image: product.image_url || undefined,
+    image: heroImage || product.image_url || undefined,
   }
 
   return (

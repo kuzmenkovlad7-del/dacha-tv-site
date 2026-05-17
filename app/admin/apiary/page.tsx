@@ -18,13 +18,12 @@ export default async function AdminApiaryPage() {
   let products: ApiaryProduct[] = []
   try {
     const client = getAdminClient()
-    const { data } = await client.from('apiary_products').select('*').order('display_order', { ascending: true })
+    const { data } = await client.from('apiary_products').select('*').order('name', { ascending: true })
     products = (data ?? []) as ApiaryProduct[]
   } catch { /* env not configured */ }
 
   return (
     <div className="px-4 sm:px-6 py-8">
-      {/* Header */}
       <div className="mb-6">
         <h1 className="text-xl font-bold text-gray-900">Продукти пасіки</h1>
         {products.length > 0 && (
@@ -32,7 +31,6 @@ export default async function AdminApiaryPage() {
         )}
       </div>
 
-      {/* Empty state */}
       {products.length === 0 && (
         <div className="bg-white border border-gray-100 rounded-xl shadow-sm text-center py-12 px-6 mb-8">
           <p className="text-gray-900 font-semibold mb-1">Продуктів ще немає</p>
@@ -40,7 +38,6 @@ export default async function AdminApiaryPage() {
         </div>
       )}
 
-      {/* Products table */}
       {products.length > 0 && (
         <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden mb-8">
           <table className="w-full text-sm">
@@ -73,7 +70,6 @@ export default async function AdminApiaryPage() {
         </div>
       )}
 
-      {/* Inline create form */}
       <div id="create" className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 max-w-2xl">
         <h2 className="text-base font-semibold text-gray-900 mb-5">Додати продукт</h2>
         <form action={createApiaryProduct} className="space-y-4">
@@ -82,9 +78,15 @@ export default async function AdminApiaryPage() {
             <input name="name" type="text" required className={INPUT} />
           </div>
 
-          <div>
-            <label className={LABEL}>Ціна (грн)</label>
-            <input name="price_uah" type="number" className={INPUT} />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={LABEL}>Ціна (грн)</label>
+              <input name="price_uah" type="number" className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Вага (г)</label>
+              <input name="weight_g" type="number" className={INPUT} />
+            </div>
           </div>
 
           <div>
@@ -102,39 +104,17 @@ export default async function AdminApiaryPage() {
             </select>
           </div>
 
-          <MediaManager initialMedia={[]} />
+          <div>
+            <label className={LABEL}>Короткий опис</label>
+            <textarea name="short_description" rows={2} className={INPUT} />
+          </div>
 
-          <details className="border border-gray-100 rounded-lg">
-            <summary className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none list-none flex items-center gap-2">
-              <span>▸</span> Додатково
-            </summary>
-            <div className="px-4 pb-4 pt-2 space-y-3">
-              <div>
-                <label className={LABEL}>Slug (URL)</label>
-                <input name="slug" type="text" placeholder="swarm-lure (авто якщо порожньо)" className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Короткий опис</label>
-                <textarea name="short_description" rows={2} className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Опис</label>
-                <textarea name="description" rows={3} className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Вага (г)</label>
-                <input name="weight_g" type="number" className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Застосування</label>
-                <textarea name="usage_notes" rows={2} className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Порядок відображення</label>
-                <input name="display_order" type="number" defaultValue={10} className={INPUT} />
-              </div>
-            </div>
-          </details>
+          <div>
+            <label className={LABEL}>Опис</label>
+            <textarea name="description" rows={3} className={INPUT} />
+          </div>
+
+          <MediaManager initialMedia={[]} />
 
           <button type="submit"
             className="h-10 px-5 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors text-sm">

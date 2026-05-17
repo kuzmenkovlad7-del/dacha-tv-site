@@ -73,6 +73,13 @@ export default async function AdminHoneyEditPage({ params }: Props) {
           <input name="name" type="text" required defaultValue={String(p.name ?? '')} className={INPUT} />
         </div>
 
+        <div>
+          <label className={LABEL}>Сорт</label>
+          <select name="variety" defaultValue={String(p.variety ?? "Різнотрав'я")} className={INPUT}>
+            {VARIETIES.map((v) => <option key={v} value={v}>{v}</option>)}
+          </select>
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={LABEL}>Ціна пластик (грн)</label>
@@ -99,67 +106,56 @@ export default async function AdminHoneyEditPage({ params }: Props) {
           </select>
         </div>
 
-        <MediaManager initialMedia={productMedia} productName={String(p.name ?? '')} />
+        <div>
+          <label className={LABEL}>Короткий опис</label>
+          <textarea name="short_description" rows={2} defaultValue={String(p.short_description ?? '')} className={INPUT} />
+        </div>
 
-        <details className="border border-gray-100 rounded-lg">
-          <summary className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none list-none flex items-center gap-2">
-            <span>▸</span> Додатково
-          </summary>
-          <div className="px-4 pb-4 pt-2 space-y-4">
-            <div>
-              <label className={LABEL}>Slug (URL)</label>
-              <input name="slug" type="text" required defaultValue={String(p.slug ?? '')} className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Сорт</label>
-              <select name="variety" defaultValue={String(p.variety ?? '')} className={INPUT}>
-                {VARIETIES.map((v) => <option key={v} value={v}>{v}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className={LABEL}>Короткий опис</label>
-              <textarea name="short_description" rows={2} defaultValue={String(p.short_description ?? '')} className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Основний опис</label>
-              <textarea name="description" rows={3} defaultValue={String(p.description ?? '')} className={INPUT} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={LABEL}>Аромат</label>
-                <input name="aroma_notes" type="text" defaultValue={String(p.aroma_notes ?? '')} className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Смак</label>
-                <input name="taste_notes" type="text" defaultValue={String(p.taste_notes ?? '')} className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Колір</label>
-                <input name="color_note" type="text" defaultValue={String(p.color_note ?? '')} className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Кристалізація</label>
-                <input name="crystallization_note" type="text" defaultValue={String(p.crystallization_note ?? '')} className={INPUT} />
-              </div>
-            </div>
-            <div>
-              <label className={LABEL}>Рекомендовано для</label>
-              <input name="recommended_use" type="text" defaultValue={String(p.recommended_use ?? '')} className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Повний опис</label>
-              <textarea name="full_description" rows={5} defaultValue={String(p.full_description ?? '')} className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Порядок відображення</label>
-              <input name="display_order" type="number" defaultValue={String(p.display_order ?? 10)} className={INPUT} />
-            </div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" name="is_featured" defaultChecked={Boolean(p.is_featured)} className="w-4 h-4 rounded accent-gray-900" />
-              <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
-            </label>
+        <div>
+          <label className={LABEL}>Основний опис</label>
+          <textarea name="description" rows={3} defaultValue={String(p.description ?? '')} className={INPUT} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={LABEL}>Аромат</label>
+            <input name="aroma_notes" type="text" defaultValue={String(p.aroma_notes ?? '')} className={INPUT} />
           </div>
-        </details>
+          <div>
+            <label className={LABEL}>Смак</label>
+            <input name="taste_notes" type="text" defaultValue={String(p.taste_notes ?? '')} className={INPUT} />
+          </div>
+          <div>
+            <label className={LABEL}>Колір</label>
+            <input name="color_note" type="text" defaultValue={String(p.color_note ?? '')} className={INPUT} />
+          </div>
+          <div>
+            <label className={LABEL}>Кристалізація</label>
+            <input name="crystallization_note" type="text" defaultValue={String(p.crystallization_note ?? '')} className={INPUT} />
+          </div>
+        </div>
+
+        <div>
+          <label className={LABEL}>Рекомендовано для</label>
+          <input name="recommended_use" type="text" defaultValue={String(p.recommended_use ?? '')} className={INPUT} />
+        </div>
+
+        <div>
+          <label className={LABEL}>Нотатка про упаковку</label>
+          <input name="packaging_note" type="text" defaultValue={String(p.packaging_note ?? '')} className={INPUT} />
+        </div>
+
+        <div>
+          <label className={LABEL}>Повний опис</label>
+          <textarea name="full_description" rows={5} defaultValue={String(p.full_description ?? '')} className={INPUT} />
+        </div>
+
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" name="is_featured" defaultChecked={Boolean(p.is_featured)} className="w-4 h-4 rounded accent-gray-900" />
+          <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
+        </label>
+
+        <MediaManager initialMedia={productMedia} productName={String(p.name ?? '')} />
 
         <button type="submit"
           className="w-full h-11 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors text-sm">

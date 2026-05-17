@@ -8,24 +8,33 @@ interface BeekeeperSectionProps {
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMTY4MDM0Ii8+PC9zdmc+'
 
+function resolveProductImage(product: BeekeeperProduct): { url: string; alt: string } | null {
+  const media = product.media ?? []
+  const primary = media.find((m) => m.media_type === 'image' && m.is_primary)
+    ?? media.find((m) => m.media_type === 'image')
+  if (primary) return { url: primary.url, alt: primary.alt ?? product.image_alt ?? product.name }
+  if (product.image_url) return { url: product.image_url, alt: product.image_alt ?? product.name }
+  return null
+}
+
 export function BeekeeperSection({ products }: BeekeeperSectionProps) {
   if (products.length === 0) return null
 
   return (
     <div className="space-y-8">
       {products.map((product) => {
-        const imageUrl = product.image_url || null
+        const img = resolveProductImage(product)
 
         return (
           <article
             key={product.id}
             className="bg-white rounded-2xl overflow-hidden border border-forest-100 shadow-sm"
           >
-            {imageUrl && (
+            {img && (
               <div className="relative h-48 md:h-64">
                 <Image
-                  src={imageUrl}
-                  alt={product.image_alt || `${product.name} — пасіка Дача TV`}
+                  src={img.url}
+                  alt={img.alt}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 600px"

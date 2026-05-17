@@ -72,6 +72,14 @@ export default async function AdminFlowerEditPage({ params }: Props) {
           <input name="name" type="text" required defaultValue={String(p.name ?? '')} className={INPUT} />
         </div>
 
+        <div>
+          <label className={LABEL}>Категорія</label>
+          <select name="category" defaultValue={String(p.category ?? 'chrysanthemum')} className={INPUT}>
+            <option value="chrysanthemum">Хризантема</option>
+            <option value="other">Інше</option>
+          </select>
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={LABEL}>Сорт</label>
@@ -98,56 +106,44 @@ export default async function AdminFlowerEditPage({ params }: Props) {
           </select>
         </div>
 
-        <MediaManager initialMedia={productMedia} productName={String(p.name ?? '')} />
+        <div>
+          <label className={LABEL}>Короткий опис</label>
+          <textarea name="short_description" rows={2} defaultValue={String(p.short_description ?? '')} className={INPUT} />
+        </div>
 
-        <details className="border border-gray-100 rounded-lg">
-          <summary className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none list-none flex items-center gap-2">
-            <span>▸</span> Додатково
-          </summary>
-          <div className="px-4 pb-4 pt-2 space-y-4">
-            <div>
-              <label className={LABEL}>Slug (URL)</label>
-              <input name="slug" type="text" required defaultValue={String(p.slug ?? '')} className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Категорія</label>
-              <select name="category" defaultValue={String(p.category ?? 'chrysanthemum')} className={INPUT}>
-                <option value="chrysanthemum">Хризантема</option>
-                <option value="other">Інше</option>
-              </select>
-            </div>
-            <div>
-              <label className={LABEL}>Короткий опис</label>
-              <textarea name="short_description" rows={2} defaultValue={String(p.short_description ?? '')} className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Повний опис</label>
-              <textarea name="full_description" rows={4} defaultValue={String(p.full_description ?? '')} className={INPUT} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={LABEL}>Сезон цвітіння</label>
-                <input name="bloom_season" type="text" defaultValue={String(p.bloom_season ?? '')} className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Висота (см)</label>
-                <input name="height_cm" type="number" defaultValue={String(p.height_cm ?? '')} className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Освітлення</label>
-                <input name="lighting" type="text" defaultValue={String(p.lighting ?? '')} className={INPUT} />
-              </div>
-            </div>
-            <div>
-              <label className={LABEL}>Порядок відображення</label>
-              <input name="display_order" type="number" defaultValue={String(p.display_order ?? 10)} className={INPUT} />
-            </div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" name="is_featured" defaultChecked={Boolean(p.is_featured)} className="w-4 h-4 rounded accent-gray-900" />
-              <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
-            </label>
+        <div>
+          <label className={LABEL}>Повний опис</label>
+          <textarea name="full_description" rows={4} defaultValue={String(p.full_description ?? '')} className={INPUT} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={LABEL}>Сезон цвітіння</label>
+            <input name="bloom_season" type="text" defaultValue={String(p.bloom_season ?? '')} className={INPUT} />
           </div>
-        </details>
+          <div>
+            <label className={LABEL}>Висота (см)</label>
+            <input name="height_cm" type="number" defaultValue={String(p.height_cm ?? '')} className={INPUT} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={LABEL}>Освітлення</label>
+            <input name="lighting" type="text" defaultValue={String(p.lighting ?? '')} className={INPUT} />
+          </div>
+          <div>
+            <label className={LABEL}>Упаковка / примітка</label>
+            <input name="packaging_note" type="text" defaultValue={String(p.packaging_note ?? '')} className={INPUT} />
+          </div>
+        </div>
+
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" name="is_featured" defaultChecked={Boolean(p.is_featured)} className="w-4 h-4 rounded accent-gray-900" />
+          <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
+        </label>
+
+        <MediaManager initialMedia={productMedia} productName={String(p.name ?? '')} />
 
         <button type="submit"
           className="w-full h-11 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors text-sm">
