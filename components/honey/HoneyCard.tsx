@@ -1,7 +1,5 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { existsSync } from 'fs'
-import { join } from 'path'
 import type { HoneyProduct } from '@/types'
 
 interface HoneyCardProps {
@@ -26,9 +24,7 @@ function resolveImage(product: HoneyProduct): { src: string; alt: string } | nul
   if (primary) return { src: primary.url, alt: primary.alt ?? product.name }
   if (!product.image_url) return null
   if (product.image_url.startsWith('http')) return { src: product.image_url, alt: product.image_alt ?? product.name }
-  return existsSync(join(process.cwd(), 'public', product.image_url))
-    ? { src: product.image_url, alt: product.image_alt ?? product.name }
-    : null
+  return null
 }
 
 export function HoneyCard({ product }: HoneyCardProps) {

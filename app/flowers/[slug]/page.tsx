@@ -1,22 +1,17 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { existsSync } from 'fs'
-import { join } from 'path'
 import { FlowerInquiryForm } from '@/components/forms/FlowerInquiryForm'
 import { YouTubeFacade } from '@/components/shared/YouTubeFacade'
 import { StructuredData } from '@/components/shared/StructuredData'
-import { getFlowerProductBySlug, getAllFlowerSlugs, getAllFlowerProducts } from '@/lib/supabase/queries'
+import { getFlowerProductBySlug, getAllFlowerProducts } from '@/lib/supabase/queries'
 import { FlowerCard } from '@/components/flowers/FlowerCard'
 
 interface Props {
   params: Promise<{ slug: string }>
-}
-
-export async function generateStaticParams() {
-  const slugs = await getAllFlowerSlugs().catch(() => [])
-  return slugs.map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -49,12 +44,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-function resolveLocalImage(imageUrl: string | null): string | null {
-  if (!imageUrl) return null
-  if (imageUrl.startsWith('http')) return imageUrl
-  return existsSync(join(process.cwd(), 'public', imageUrl)) ? imageUrl : null
-}
-
 function extractYouTubeId(url: string | null): string | null {
   if (!url) return null
   const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/)
@@ -81,7 +70,7 @@ export default async function FlowerProductPage({ params }: Props) {
   const ytItems = media.filter((m) => m.media_type === 'youtube')
   const heroImageSrc = primaryImg?.url ?? product.image_url ?? null
   const heroImageAlt = primaryImg?.alt ?? product.image_alt ?? `${product.name} від Дача TV`
-  const heroImage = resolveLocalImage(heroImageSrc)
+  const heroImage = heroImageSrc?.startsWith('http') ? heroImageSrc : null
   const videoUrl = localVideo?.url ?? product.video_url ?? null
   const youtubeId = ytItems[0] ? extractYouTubeId(ytItems[0].url) : extractYouTubeId(product.youtube_video_url)
   const extraYoutubeIds = ytItems.length > 1
