@@ -40,14 +40,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ?? media.find((m) => m.media_type === 'image')
   const ogImageUrl = primaryImg?.url ?? product.image_url ?? null
 
+  const description = `Натуральний ${product.name.toLowerCase()} від сімейної пасіки на Харківщині.${product.packaging?.length ? ' ' + product.packaging.join(', ') + '.' : ''} Замовляйте напряму від пасічника без посередників.`
   return {
     title: product.name,
-    description: `Натуральний ${product.name.toLowerCase()} від сімейної пасіки на Харківщині. ${product.packaging?.join(', ') || ''}. Замовляйте напряму від пасічника.`,
-    alternates: siteUrl ? { canonical: `${siteUrl}/honey/${slug}` } : undefined,
+    description,
+    alternates: { canonical: siteUrl ? `${siteUrl}/honey/${slug}` : `/honey/${slug}` },
     openGraph: {
       title: `${product.name} | Дача TV`,
       description: `Натуральний ${product.name.toLowerCase()} від пасіки Дача TV на Харківщині`,
       images: ogImageUrl ? [{ url: ogImageUrl, width: 1200, height: 630, alt: product.name }] : [],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${product.name} | Дача TV`,
+      description,
+      images: ogImageUrl ? [ogImageUrl] : [],
     },
   }
 }
@@ -169,7 +177,7 @@ export default async function HoneyProductPage({ params }: Props) {
         : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'Дача TV' },
     },
-    image: heroImage || product.image_url || undefined,
+    image: primaryImg?.url ?? heroImage ?? product.image_url ?? undefined,
   }
 
   return (

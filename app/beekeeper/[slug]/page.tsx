@@ -35,15 +35,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const primaryImg = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image')
   const ogImage = primaryImg?.url ?? product.image_url
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  const description = product.description || `${product.name} від пасіки Дача TV на Харківщині. Пряма комунікація з пасічником — без посередників.`
   return {
     title: product.name,
-    description:
-      product.description ||
-      `${product.name} від пасіки Дача TV на Харківщині. Пряма комунікація з пасічником — без посередників.`,
+    description,
+    alternates: { canonical: siteUrl ? `${siteUrl}/beekeeper/${slug}` : `/beekeeper/${slug}` },
     openGraph: {
       title: `${product.name} | Дача TV`,
-      description: product.description || product.name,
+      description,
       images: ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : [],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${product.name} | Дача TV`,
+      description,
+      images: ogImage ? [ogImage] : [],
     },
   }
 }
