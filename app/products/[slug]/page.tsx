@@ -76,6 +76,7 @@ export default async function ApiaryProductPage({ params }: Props) {
     ? ytItems.slice(1).map((m) => extractYouTubeId(m.url)).filter(Boolean) as string[]
     : (product.youtube_video_urls ?? []).map(extractYouTubeId).filter(Boolean) as string[]
 
+  const primaryImgForSchema = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image')
   const productSchema = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -84,12 +85,13 @@ export default async function ApiaryProductPage({ params }: Props) {
     brand: { '@type': 'Brand', name: 'Дача TV' },
     offers: {
       '@type': 'Offer',
+      ...(product.price_uah != null ? { priceCurrency: 'UAH', price: product.price_uah } : {}),
       availability: (product.status === 'available' || product.status === 'preorder')
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'Дача TV' },
     },
-    image: product.image_url || undefined,
+    image: primaryImgForSchema?.url ?? product.image_url ?? undefined,
   }
 
   return (

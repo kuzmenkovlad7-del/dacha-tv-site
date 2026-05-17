@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     title: 'Хризантеми | Дача TV',
     description: 'Понад 20 сортів хризантем від домашнього розсадника на Харківщині. Помпонові, кущові, великоквіткові.',
     type: 'website',
+    images: [{ url: '/images/dacha-tv/logo-square.png', width: 1200, height: 1200, alt: 'Дача TV — Хризантеми' }],
   },
   twitter: {
     card: 'summary_large_image',

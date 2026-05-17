@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     title: 'Продукти пасіки | Дача TV',
     description: 'Квітковий пилок, прополіс, горіхи в меду — натуральні продукти від пасіки Дача TV на Харківщині',
     type: 'website',
+    images: [{ url: '/images/dacha-tv/logo-square.png', width: 1200, height: 1200, alt: 'Дача TV — Продукти пасіки' }],
   },
   twitter: {
     card: 'summary_large_image',

@@ -30,6 +30,7 @@ export const metadata: Metadata = {
     locale: 'uk_UA',
     type: 'website',
     siteName: 'Дача TV',
+    images: [{ url: '/images/dacha-tv/logo-square.png', width: 1200, height: 1200, alt: 'Дача TV' }],
   },
   twitter: { card: 'summary_large_image' },
 }
