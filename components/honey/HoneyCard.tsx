@@ -20,11 +20,15 @@ const VARIETY_FALLBACK: Record<string, string> = {
   Ліс: 'Темний, комплексний, мінеральні нотки',
 }
 
-function resolveLocalImage(imageUrl: string | null): string | null {
-  if (!imageUrl) return null
-  if (imageUrl.startsWith('http')) return imageUrl
-  const filePath = join(process.cwd(), 'public', imageUrl)
-  return existsSync(filePath) ? imageUrl : null
+function resolveImage(product: HoneyProduct): { src: string; alt: string } | null {
+  const media = product.media ?? []
+  const primary = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image')
+  if (primary) return { src: primary.url, alt: primary.alt ?? product.name }
+  if (!product.image_url) return null
+  if (product.image_url.startsWith('http')) return { src: product.image_url, alt: product.image_alt ?? product.name }
+  return existsSync(join(process.cwd(), 'public', product.image_url))
+    ? { src: product.image_url, alt: product.image_alt ?? product.name }
+    : null
 }
 
 export function HoneyCard({ product }: HoneyCardProps) {
@@ -32,7 +36,7 @@ export function HoneyCard({ product }: HoneyCardProps) {
     product.short_description ||
     VARIETY_FALLBACK[product.variety] ||
     `Натуральний мед ${product.variety.toLowerCase()}`
-  const imageUrl = resolveLocalImage(product.image_url)
+  const img = resolveImage(product)
 
   const hasPrice = product.price_plastic_uah || product.price_glass_uah
 
@@ -40,10 +44,10 @@ export function HoneyCard({ product }: HoneyCardProps) {
     <article className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-bark/20 hover:shadow-xl transition-all duration-300 flex flex-col">
       {/* Image */}
       <div className="relative aspect-square bg-honey-50 overflow-hidden">
-        {imageUrl ? (
+        {img ? (
           <Image
-            src={imageUrl}
-            alt={product.image_alt || `${product.name} — мед від пасіки Дача TV`}
+            src={img.src}
+            alt={img.alt}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

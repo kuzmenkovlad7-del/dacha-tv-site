@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import type { BeekeeperProduct } from '@/types'
 
 interface BeekeeperCardProps {
@@ -22,8 +23,7 @@ export function BeekeeperCard({ product }: BeekeeperCardProps) {
 
   return (
     <article className="group bg-white rounded-2xl overflow-hidden border border-forest-100 hover:border-forest-300 hover:shadow-lg transition-all duration-300 flex flex-col">
-      {/* Image */}
-      <div className="relative aspect-square bg-forest-50 overflow-hidden flex-shrink-0">
+      <Link href={`/beekeeper/${product.slug}`} className="block relative aspect-square bg-forest-50 overflow-hidden flex-shrink-0">
         {img ? (
           <Image
             src={img.url}
@@ -56,9 +56,8 @@ export function BeekeeperCard({ product }: BeekeeperCardProps) {
             </span>
           </div>
         )}
-      </div>
+      </Link>
 
-      {/* Content */}
       <div className="p-5 flex flex-col flex-1">
         <h3 className="font-serif text-lg font-bold text-bark mb-2 leading-snug">
           {product.name}
@@ -89,12 +88,12 @@ export function BeekeeperCard({ product }: BeekeeperCardProps) {
           </p>
         )}
 
-        <a
-          href="#inquiry-form"
-          className="mt-4 text-center text-sm font-semibold text-forest-700 border border-forest-200 rounded-lg py-2 hover:bg-forest-50 transition-colors"
+        <Link
+          href={`/beekeeper/${product.slug}`}
+          className="mt-4 inline-flex items-center justify-center w-full px-4 py-2.5 bg-forest-700 text-white font-semibold text-sm rounded-lg hover:bg-forest-800 transition-colors min-h-[44px]"
         >
-          Залишити заявку
-        </a>
+          Детальніше
+        </Link>
       </div>
     </article>
   )

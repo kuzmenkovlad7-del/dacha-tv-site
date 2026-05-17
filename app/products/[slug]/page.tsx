@@ -39,7 +39,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: `${product.name} | Дача TV`,
       description: product.short_description || product.description || product.name,
-      images: product.image_url ? [{ url: product.image_url, width: 1200, height: 630 }] : [],
+      images: (() => {
+        const media = product.media ?? []
+        const primary = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image')
+        const imgUrl = primary?.url ?? product.image_url
+        return imgUrl ? [{ url: imgUrl, width: 1200, height: 630 }] : []
+      })(),
     },
   }
 }
