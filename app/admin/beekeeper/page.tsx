@@ -13,14 +13,6 @@ export const metadata: Metadata = {
 const INPUT = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent'
 const LABEL = 'block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'
 
-const PRODUCT_TYPES = [
-  { value: 'bee_packages', label: 'Бджолопакети' },
-  { value: 'bee_colonies', label: "Бджолосім'ї" },
-  { value: 'empty_hives', label: 'Порожні вулики' },
-  { value: 'hives_with_bees', label: 'Вулики з бджолами' },
-  { value: 'apiary_supply', label: 'Товар пасічника' },
-]
-
 interface BKProduct { id: string; name: string; product_type: string; season_note: string | null; status: string }
 
 export default async function AdminBeekeeperPage() {
@@ -93,14 +85,7 @@ export default async function AdminBeekeeperPage() {
             <input name="name" type="text" required className={INPUT} />
           </div>
 
-          <div>
-            <label className={LABEL}>Тип продукту</label>
-            <select name="product_type" defaultValue="bee_packages" className={INPUT}>
-              {PRODUCT_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
-              ))}
-            </select>
-          </div>
+          <input type="hidden" name="product_type" value="bee_packages" />
 
           <div className="grid grid-cols-2 gap-4">
             <div>
