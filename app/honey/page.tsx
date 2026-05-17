@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
 import { HoneyGrid } from '@/components/honey/HoneyGrid'
 import { CTAButton } from '@/components/shared/CTAButton'

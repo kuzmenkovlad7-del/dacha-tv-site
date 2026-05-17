@@ -13,7 +13,6 @@ export const metadata: Metadata = {
 
 const INPUT = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent'
 const LABEL = 'block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'
-const MIGRATION_SQL_PATH = 'supabase/migrations/016_flower_products_table.sql'
 
 export default async function AdminFlowersPage() {
   let products: FlowerProduct[] = []
@@ -57,11 +56,8 @@ export default async function AdminFlowersPage() {
             <div className="flex-1">
               <p className="font-semibold text-amber-900 text-sm">Таблиця flower_products відсутня в базі даних</p>
               <p className="text-amber-800 text-sm mt-1">
-                Відкрийте <span className="font-mono bg-amber-100 px-1 rounded text-xs">SQL Editor</span> у вашому Supabase проєкті та виконайте вміст файлу:
+                Зверніться до адміністратора або перевірте підключення до бази даних.
               </p>
-              <code className="block bg-amber-100 text-amber-900 text-xs px-3 py-2 rounded mt-2 font-mono">
-                {MIGRATION_SQL_PATH}
-              </code>
             </div>
           </div>
         </div>
@@ -167,6 +163,27 @@ export default async function AdminFlowersPage() {
             <div>
               <label className={LABEL}>Короткий опис</label>
               <textarea name="short_description" rows={2} className={INPUT} />
+            </div>
+
+            <div>
+              <label className={LABEL}>Повний опис</label>
+              <textarea name="full_description" rows={3} className={INPUT} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={LABEL}>Висота (см)</label>
+                <input name="height_cm" type="number" className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Освітлення</label>
+                <input name="lighting" type="text" className={INPUT} />
+              </div>
+            </div>
+
+            <div>
+              <label className={LABEL}>Упаковка / примітка</label>
+              <input name="packaging_note" type="text" className={INPUT} />
             </div>
 
             <MediaManager initialMedia={[]} />
