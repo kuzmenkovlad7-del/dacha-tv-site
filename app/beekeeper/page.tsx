@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
 import type { BeekeeperProduct } from '@/types'
 import { BeekeeperCard } from '@/components/beekeeper/BeekeeperCard'
