@@ -97,6 +97,8 @@ export interface BeekeeperProduct {
   full_description: string | null
   breeds: string[] | null
   season_note: string | null
+  price_uah: number | null
+  price_note: string | null
   status: ProductStatus
   is_featured: boolean
   image_url: string | null

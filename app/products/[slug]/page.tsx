@@ -1,17 +1,12 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
 import { GeneralContactForm } from '@/components/forms/GeneralContactForm'
 import { StructuredData } from '@/components/shared/StructuredData'
 import { YouTubeFacade } from '@/components/shared/YouTubeFacade'
+import { ProductGallery } from '@/components/shared/ProductGallery'
 import { getApiaryProductBySlug } from '@/lib/supabase/queries'
-
-function extractYouTubeId(url: string | null): string | null {
-  if (!url) return null
-  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/)
-  return m ? m[1] : null
-}
+import { extractYouTubeId } from '@/lib/youtube'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -115,53 +110,19 @@ export default async function ApiaryProductPage({ params }: Props) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
-          {/* Images */}
-          <div className="space-y-3">
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-honey-50">
-              {allImages.length > 0 ? (
-                <Image
-                  src={allImages[0].src}
-                  alt={allImages[0].alt}
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  placeholder="blur"
-                  blurDataURL={BLUR_DATA_URL}
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-forest-50 to-forest-100">
-                  <span className="text-forest-600 font-serif font-bold text-3xl text-center px-6">
-                    {product.name}
-                  </span>
-                </div>
-              )}
-              {product.status !== 'available' && product.status !== 'preorder' && (
-                <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                  <span className="bg-gray-800 text-white text-sm font-semibold px-4 py-2 rounded-full">
-                    Немає в наявності
-                  </span>
-                </div>
-              )}
+          {/* Gallery */}
+          <ProductGallery
+            images={allImages}
+            blurDataURL={BLUR_DATA_URL}
+            priority
+            isUnavailable={product.status !== 'available' && product.status !== 'preorder'}
+          >
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-forest-50 to-forest-100">
+              <span className="text-forest-600 font-serif font-bold text-3xl text-center px-6">
+                {product.name}
+              </span>
             </div>
-
-            {/* Gallery thumbnails */}
-            {allImages.length > 1 && (
-              <div className="flex gap-2 flex-wrap">
-                {allImages.slice(1).map((img, i) => (
-                  <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden bg-honey-50 flex-shrink-0">
-                    <Image
-                      src={img.src}
-                      alt={img.alt}
-                      fill
-                      className="object-cover"
-                      sizes="80px"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          </ProductGallery>
 
           {/* Info */}
           <div>

@@ -85,6 +85,17 @@ export default async function AdminBeekeeperEditPage({ params }: Props) {
           </div>
         </div>
 
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={LABEL}>Ціна (грн)</label>
+            <input name="price_uah" type="number" step="1" min="0" defaultValue={p.price_uah != null ? String(p.price_uah) : ''} placeholder="0" className={INPUT} />
+          </div>
+          <div>
+            <label className={LABEL}>Примітка до ціни</label>
+            <input name="price_note" type="text" defaultValue={String(p.price_note ?? '')} placeholder="від / за сім'ю / тощо" className={INPUT} />
+          </div>
+        </div>
+
         <div>
           <label className={LABEL}>Статус</label>
           <select name="status" defaultValue={String(p.status ?? 'available')} className={INPUT}>

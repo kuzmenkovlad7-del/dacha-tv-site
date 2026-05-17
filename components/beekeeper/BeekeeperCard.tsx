@@ -88,6 +88,17 @@ export function BeekeeperCard({ product }: BeekeeperCardProps) {
           </p>
         )}
 
+        {(product.price_uah != null || product.price_note) && (
+          <div className="mt-3 flex items-baseline gap-2">
+            {product.price_uah != null && (
+              <span className="text-sm font-semibold text-bark">{product.price_uah} грн</span>
+            )}
+            {product.price_note && (
+              <span className="text-xs text-bark/50">{product.price_note}</span>
+            )}
+          </div>
+        )}
+
         <Link
           href={`/beekeeper/${product.slug}`}
           className="mt-4 inline-flex items-center justify-center w-full px-4 py-2.5 bg-forest-700 text-white font-semibold text-sm rounded-lg hover:bg-forest-800 transition-colors min-h-[44px]"

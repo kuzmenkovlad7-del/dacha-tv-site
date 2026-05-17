@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const INPUT = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent'
 const LABEL = 'block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'
 
-interface BKProduct { id: string; name: string; product_type: string; status: string }
+interface BKProduct { id: string; name: string; product_type: string; status: string; price_uah: number | null }
 
 export default async function AdminBeekeeperPage() {
   let products: BKProduct[] = []
@@ -25,6 +25,7 @@ export default async function AdminBeekeeperPage() {
       name: String(r.name ?? ''),
       product_type: String(r.product_type ?? ''),
       status: String(r.status ?? 'available'),
+      price_uah: r.price_uah != null ? Number(r.price_uah) : null,
     }))
   } catch { /* env not configured */ }
 
@@ -59,7 +60,7 @@ export default async function AdminBeekeeperPage() {
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50/70 transition-colors">
                   <td className="px-5 py-3.5 font-medium text-gray-900">{product.name}</td>
-                  <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">—</td>
+                  <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">{product.price_uah != null ? `${product.price_uah} грн` : '—'}</td>
                   <td className="px-5 py-3.5 text-center">
                     <span className={`inline-block w-2 h-2 rounded-full ${product.status === 'available' ? 'bg-green-500' : product.status === 'preorder' ? 'bg-amber-400' : 'bg-gray-300'}`} title={product.status} />
                   </td>
@@ -94,6 +95,17 @@ export default async function AdminBeekeeperPage() {
             <div>
               <label className={LABEL}>Примітка про сезон</label>
               <input name="season_note" type="text" placeholder="Доступні з квітня по серпень" className={INPUT} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={LABEL}>Ціна (грн)</label>
+              <input name="price_uah" type="number" step="1" min="0" placeholder="0" className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}>Примітка до ціни</label>
+              <input name="price_note" type="text" placeholder="від / за сім'ю / тощо" className={INPUT} />
             </div>
           </div>
 

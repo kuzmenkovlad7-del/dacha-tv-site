@@ -23,6 +23,7 @@ export async function createBeekeeperProduct(formData: FormData) {
   const breeds = breedsRaw ? breedsRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
   const name = formData.get('name') as string
 
+  const priceRaw = formData.get('price_uah') as string
   const { data, error } = await client.from('beekeeper_products').insert({
     name,
     slug: autoSlug(name),
@@ -31,6 +32,8 @@ export async function createBeekeeperProduct(formData: FormData) {
     full_description: (formData.get('full_description') as string) || null,
     breeds,
     season_note: (formData.get('season_note') as string) || null,
+    price_uah: priceRaw ? Number(priceRaw) : null,
+    price_note: (formData.get('price_note') as string) || null,
     status: (formData.get('status') as string) || 'available',
     is_featured: formData.get('is_featured') === 'on',
     ...compat,
@@ -52,6 +55,7 @@ export async function updateBeekeeperProduct(id: string, formData: FormData) {
   const breeds = breedsRaw ? breedsRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
   const name = formData.get('name') as string
 
+  const priceRaw2 = formData.get('price_uah') as string
   await client.from('beekeeper_products').update({
     name,
     product_type: (formData.get('product_type') as string) || 'bee_packages',
@@ -59,6 +63,8 @@ export async function updateBeekeeperProduct(id: string, formData: FormData) {
     full_description: (formData.get('full_description') as string) || null,
     breeds,
     season_note: (formData.get('season_note') as string) || null,
+    price_uah: priceRaw2 ? Number(priceRaw2) : null,
+    price_note: (formData.get('price_note') as string) || null,
     status: (formData.get('status') as string) || 'available',
     is_featured: formData.get('is_featured') === 'on',
     updated_at: new Date().toISOString(),
