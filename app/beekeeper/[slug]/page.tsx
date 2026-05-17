@@ -1,10 +1,12 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { StructuredData } from '@/components/shared/StructuredData'
 import { BeekeeperInquiryForm } from '@/components/forms/BeekeeperInquiryForm'
-import { getBeekeeperProductBySlug, getAllBeekeeperSlugs } from '@/lib/supabase/queries'
+import { getBeekeeperProductBySlug } from '@/lib/supabase/queries'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -20,11 +22,6 @@ const TYPE_LABELS: Record<string, string> = {
 
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWE1YzM1Ii8+PC9zdmc+'
-
-export async function generateStaticParams() {
-  const slugs = await getAllBeekeeperSlugs().catch(() => [])
-  return slugs.map((slug) => ({ slug }))
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params

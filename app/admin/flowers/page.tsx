@@ -87,8 +87,7 @@ export default async function AdminFlowersPage() {
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Назва</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Сорт</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">Ціна</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Ціна</th>
                 <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Статус</th>
                 <th className="px-5 py-3 w-20"></th>
               </tr>
@@ -97,8 +96,7 @@ export default async function AdminFlowersPage() {
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50/70 transition-colors">
                   <td className="px-5 py-3.5 font-medium text-gray-900">{product.name}</td>
-                  <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">{product.variety ?? '—'}</td>
-                  <td className="px-5 py-3.5 text-gray-500 hidden md:table-cell">
+                  <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">
                     {product.price_uah != null ? `${product.price_uah} грн` : '—'}
                   </td>
                   <td className="px-5 py-3.5 text-center">
