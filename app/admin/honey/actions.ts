@@ -21,12 +21,11 @@ export async function createHoneyProduct(formData: FormData) {
   const compat = mediaToBackwardCompat(mediaItems, 'youtube_video_link')
   const packagingRaw = formData.get('packaging') as string
   const packaging = packagingRaw ? packagingRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
-  const slugRaw = (formData.get('slug') as string)?.trim()
   const name = formData.get('name') as string
 
   const { data, error } = await client.from('honey_products').insert({
     name,
-    slug: slugRaw || autoSlug(name),
+    slug: autoSlug(name),
     variety: (formData.get('variety') as string) || "Різнотрав'я",
     short_description: (formData.get('short_description') as string) || null,
     description: (formData.get('description') as string) || null,
@@ -36,12 +35,12 @@ export async function createHoneyProduct(formData: FormData) {
     color_note: (formData.get('color_note') as string) || null,
     crystallization_note: (formData.get('crystallization_note') as string) || null,
     recommended_use: (formData.get('recommended_use') as string) || null,
+    packaging_note: (formData.get('packaging_note') as string) || null,
     price_plastic_uah: formData.get('price_plastic_uah') ? parseInt(formData.get('price_plastic_uah') as string) : null,
     price_glass_uah: formData.get('price_glass_uah') ? parseInt(formData.get('price_glass_uah') as string) : null,
     packaging,
     is_featured: formData.get('is_featured') === 'on',
     status: (formData.get('status') as string) || 'available',
-    display_order: parseInt(formData.get('display_order') as string) || 10,
     ...compat,
   }).select('id').single()
 
@@ -61,11 +60,9 @@ export async function updateHoneyProduct(id: string, formData: FormData) {
   const packagingRaw = formData.get('packaging') as string
   const packaging = packagingRaw ? packagingRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
   const name = formData.get('name') as string
-  const slugRaw = (formData.get('slug') as string)?.trim()
 
   await client.from('honey_products').update({
     name,
-    slug: slugRaw || autoSlug(name),
     variety: (formData.get('variety') as string) || "Різнотрав'я",
     short_description: (formData.get('short_description') as string) || null,
     description: (formData.get('description') as string) || null,
@@ -75,12 +72,12 @@ export async function updateHoneyProduct(id: string, formData: FormData) {
     color_note: (formData.get('color_note') as string) || null,
     crystallization_note: (formData.get('crystallization_note') as string) || null,
     recommended_use: (formData.get('recommended_use') as string) || null,
+    packaging_note: (formData.get('packaging_note') as string) || null,
     price_plastic_uah: formData.get('price_plastic_uah') ? parseInt(formData.get('price_plastic_uah') as string) : null,
     price_glass_uah: formData.get('price_glass_uah') ? parseInt(formData.get('price_glass_uah') as string) : null,
     packaging,
     is_featured: formData.get('is_featured') === 'on',
     status: (formData.get('status') as string) || 'available',
-    display_order: parseInt(formData.get('display_order') as string) || 10,
     updated_at: new Date().toISOString(),
     ...compat,
   }).eq('id', id)

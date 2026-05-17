@@ -22,11 +22,10 @@ export async function createApiaryProduct(formData: FormData) {
   const packagingRaw = formData.get('packaging') as string
   const packaging = packagingRaw ? packagingRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
   const name = formData.get('name') as string
-  const slugRaw = (formData.get('slug') as string)?.trim()
 
   const { data, error } = await client.from('apiary_products').insert({
     name,
-    slug: slugRaw || autoSlug(name),
+    slug: autoSlug(name),
     description: (formData.get('description') as string) || null,
     short_description: (formData.get('short_description') as string) || null,
     full_description: (formData.get('full_description') as string) || null,
@@ -36,7 +35,6 @@ export async function createApiaryProduct(formData: FormData) {
     packaging,
     price_uah: formData.get('price_uah') ? parseFloat(formData.get('price_uah') as string) : null,
     weight_g: formData.get('weight_g') ? parseInt(formData.get('weight_g') as string) : null,
-    display_order: parseInt(formData.get('display_order') as string) || 10,
     status: (formData.get('status') as string) || 'available',
     is_featured: formData.get('is_featured') === 'on',
     ...compat,
@@ -57,11 +55,9 @@ export async function updateApiaryProduct(id: string, formData: FormData) {
   const packagingRaw = formData.get('packaging') as string
   const packaging = packagingRaw ? packagingRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
   const name = formData.get('name') as string
-  const slugRaw = (formData.get('slug') as string)?.trim()
 
   await client.from('apiary_products').update({
     name,
-    slug: slugRaw || autoSlug(name),
     description: (formData.get('description') as string) || null,
     short_description: (formData.get('short_description') as string) || null,
     full_description: (formData.get('full_description') as string) || null,
@@ -71,7 +67,6 @@ export async function updateApiaryProduct(id: string, formData: FormData) {
     packaging,
     price_uah: formData.get('price_uah') ? parseFloat(formData.get('price_uah') as string) : null,
     weight_g: formData.get('weight_g') ? parseInt(formData.get('weight_g') as string) : null,
-    display_order: parseInt(formData.get('display_order') as string) || 10,
     status: (formData.get('status') as string) || 'available',
     is_featured: formData.get('is_featured') === 'on',
     updated_at: new Date().toISOString(),

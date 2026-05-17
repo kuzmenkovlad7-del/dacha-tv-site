@@ -34,13 +34,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!product) return { title: 'Продукт не знайдено' }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  const media = dbProduct?.media ?? []
+  const primaryImg = media.find((m) => m.media_type === 'image' && m.is_primary)
+    ?? media.find((m) => m.media_type === 'image')
+  const ogImageUrl = primaryImg?.url ?? product.image_url ?? null
+
   return {
     title: product.name,
     description: `Натуральний ${product.name.toLowerCase()} від сімейної пасіки на Харківщині. ${product.packaging?.join(', ') || ''}. Замовляйте напряму від пасічника.`,
+    alternates: siteUrl ? { canonical: `${siteUrl}/honey/${slug}` } : undefined,
     openGraph: {
       title: `${product.name} | Дача TV`,
       description: `Натуральний ${product.name.toLowerCase()} від пасіки Дача TV на Харківщині`,
-      images: product.image_url ? [{ url: product.image_url, width: 1200, height: 630 }] : [],
+      images: ogImageUrl ? [{ url: ogImageUrl, width: 1200, height: 630, alt: product.name }] : [],
     },
   }
 }
@@ -155,12 +162,14 @@ export default async function HoneyProductPage({ params }: Props) {
     brand: { '@type': 'Brand', name: 'Дача TV' },
     offers: {
       '@type': 'Offer',
+      priceCurrency: 'UAH',
+      price: product.price_plastic_uah ?? product.price_glass_uah ?? undefined,
       availability: (product.status === 'available' || product.status === 'preorder')
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'Дача TV' },
     },
-    image: product.image_url || undefined,
+    image: heroImage || product.image_url || undefined,
   }
 
   return (

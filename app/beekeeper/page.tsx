@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import type { BeekeeperProduct } from '@/types'
 import { BeekeeperSection } from '@/components/beekeeper/BeekeeperSection'
 import { BeekeeperInquiryForm } from '@/components/forms/BeekeeperInquiryForm'
 import { getAllBeekeeperProducts } from '@/lib/supabase/queries'
@@ -13,15 +14,26 @@ export const metadata: Metadata = {
   },
 }
 
+const TYPE_HEADINGS: Record<string, string> = {
+  bee_packages: 'Бджолопакети',
+  bee_colonies: "Бджолосім'ї",
+  empty_hives: 'Порожні вулики',
+  hives_with_bees: 'Вулики з бджолами',
+  apiary_supply: 'Товари пасічника',
+}
+
+const TYPE_ORDER = ['bee_packages', 'bee_colonies', 'empty_hives', 'hives_with_bees', 'apiary_supply']
+
 export default async function BeekeeperPage() {
   const products = await getAllBeekeeperProducts().catch(() => [])
 
-  const packageProducts = products.filter((p) => p.product_type === 'bee_packages')
-  const colonyProducts = products.filter((p) => p.product_type === 'bee_colonies')
-  const hiveProducts = products.filter(
-    (p) => p.product_type === 'empty_hives' || p.product_type === 'hives_with_bees'
-  )
-  const supplyProducts = products.filter((p) => p.product_type === 'apiary_supply')
+  const byType: Record<string, BeekeeperProduct[]> = {}
+  for (const p of products) {
+    if (!byType[p.product_type]) byType[p.product_type] = []
+    byType[p.product_type].push(p)
+  }
+
+  const activeTypes = [...new Set([...TYPE_ORDER, ...Object.keys(byType)])].filter((t) => byType[t]?.length)
 
   return (
     <div className="bg-cream min-h-screen">
@@ -41,91 +53,24 @@ export default async function BeekeeperPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
-          {/* Product sections — main column */}
-          <div className="lg:col-span-2 space-y-12">
+          {/* Product sections */}
+          <div className="lg:col-span-2 space-y-14">
 
-            {/* Bee Packages */}
-            <section aria-labelledby="packages-heading">
-              <h2 id="packages-heading" className="font-serif text-2xl md:text-3xl font-bold text-bark mb-6">
-                Бджолопакети
-              </h2>
-              {packageProducts.length > 0 ? (
-                <BeekeeperSection products={packageProducts} />
-              ) : (
-                <div className="bg-white rounded-2xl p-6 border border-forest-100">
-                  <p className="text-bark font-semibold mb-2">4-рамкові бджолопакети</p>
-                  <p className="text-bark/70 mb-4 leading-relaxed">
-                    Продаємо 4-рамкові пакети з молодою плідною маткою. Доступні породи:
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {['Buckfast', 'Українська степова', 'Карніка'].map((breed) => (
-                      <span
-                        key={breed}
-                        className="bg-forest-50 text-forest-700 border border-forest-200 px-3 py-1 rounded-full text-sm font-medium"
-                      >
-                        {breed}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="text-bark/60 text-sm">
-                    Сезон: весна — осінь. Доступність і вартість уточнюйте при замовленні.
-                  </p>
-                </div>
-              )}
-            </section>
-
-            {/* Bee Colonies */}
-            <section aria-labelledby="colonies-heading">
-              <h2 id="colonies-heading" className="font-serif text-2xl md:text-3xl font-bold text-bark mb-6">
-                Бджолосім&apos;ї
-              </h2>
-              {colonyProducts.length > 0 ? (
-                <BeekeeperSection products={colonyProducts} />
-              ) : (
-                <div className="bg-white rounded-2xl p-6 border border-forest-100">
-                  <p className="text-bark font-semibold mb-2">
-                    Бджолосім&apos;ї на 10–12 рамках
-                  </p>
-                  <p className="text-bark/70 leading-relaxed">
-                    Продаємо сформовані бджолосім&apos;ї на дерев&apos;яних рамках. Сезонна наявність. Оптимально для розширення пасіки або старту.
-                  </p>
-                </div>
-              )}
-            </section>
-
-            {/* Hives */}
-            <section aria-labelledby="hives-heading">
-              <h2 id="hives-heading" className="font-serif text-2xl md:text-3xl font-bold text-bark mb-6">
-                Вулики
-              </h2>
-              {hiveProducts.length > 0 ? (
-                <BeekeeperSection products={hiveProducts} />
-              ) : (
-                <div className="space-y-4">
-                  <div className="bg-white rounded-2xl p-6 border border-forest-100">
-                    <p className="text-bark font-semibold mb-2">Порожні вулики</p>
-                    <p className="text-bark/70 leading-relaxed">
-                      Дерев&apos;яні та ППУ вулики — Дадан 10-рамковий та багатокорпусні варіанти. Уточнюйте наявність та вартість.
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-2xl p-6 border border-forest-100">
-                    <p className="text-bark font-semibold mb-2">Вулики з бджолами</p>
-                    <p className="text-bark/70 leading-relaxed">
-                      Повністю обладнані вулики з бджолосім&apos;ями — ідеально для старту. Деталі тільки за особистою домовленістю.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </section>
-
-            {/* Apiary supplies */}
-            {supplyProducts.length > 0 && (
-              <section aria-labelledby="supplies-heading">
-                <h2 id="supplies-heading" className="font-serif text-2xl md:text-3xl font-bold text-bark mb-6">
-                  Товари пасічника
-                </h2>
-                <BeekeeperSection products={supplyProducts} />
-              </section>
+            {activeTypes.length === 0 ? (
+              <div className="bg-white rounded-2xl p-8 border border-forest-100 text-center">
+                <p className="text-bark/60">
+                  Каталог поповнюється. Залиште заявку — ми зв&apos;яжемося для обговорення.
+                </p>
+              </div>
+            ) : (
+              activeTypes.map((type) => (
+                <section key={type} aria-labelledby={`${type}-heading`}>
+                  <h2 id={`${type}-heading`} className="font-serif text-2xl md:text-3xl font-bold text-bark mb-6">
+                    {TYPE_HEADINGS[type] ?? type}
+                  </h2>
+                  <BeekeeperSection products={byType[type] ?? []} />
+                </section>
+              ))
             )}
 
             {/* Important note */}

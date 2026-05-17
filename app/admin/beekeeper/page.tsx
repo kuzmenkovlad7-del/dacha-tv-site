@@ -15,7 +15,7 @@ const LABEL = 'block text-xs font-semibold text-gray-600 uppercase tracking-wide
 
 const PRODUCT_TYPES = [
   { value: 'bee_packages', label: 'Бджолопакети' },
-  { value: 'bee_colonies', label: 'Бджолосімї' },
+  { value: 'bee_colonies', label: "Бджолосім'ї" },
   { value: 'empty_hives', label: 'Порожні вулики' },
   { value: 'hives_with_bees', label: 'Вулики з бджолами' },
   { value: 'apiary_supply', label: 'Товар пасічника' },
@@ -23,32 +23,30 @@ const PRODUCT_TYPES = [
 
 const TYPE_LABELS: Record<string, string> = {
   bee_packages: 'Бджолопакети',
-  bee_colonies: 'Бджолосімї',
+  bee_colonies: "Бджолосім'ї",
   empty_hives: 'Порожні вулики',
   hives_with_bees: 'Вулики з бджолами',
   apiary_supply: 'Товар пасічника',
 }
 
-interface BKProduct { id: string; name: string; product_type: string; season_note: string | null; display_order: number; status: string }
+interface BKProduct { id: string; name: string; product_type: string; season_note: string | null; status: string }
 
 export default async function AdminBeekeeperPage() {
   let products: BKProduct[] = []
   try {
     const client = getAdminClient()
-    const { data } = await client.from('beekeeper_products').select('*').order('display_order', { ascending: true })
+    const { data } = await client.from('beekeeper_products').select('*').order('product_type', { ascending: true }).order('name', { ascending: true })
     products = (data ?? []).map((r: Record<string, unknown>) => ({
       id: String(r.id ?? ''),
       name: String(r.name ?? ''),
       product_type: String(r.product_type ?? ''),
       season_note: r.season_note != null ? String(r.season_note) : null,
-      display_order: Number(r.display_order ?? 0),
       status: String(r.status ?? 'available'),
     }))
   } catch { /* env not configured */ }
 
   return (
     <div className="px-4 sm:px-6 py-8">
-      {/* Header */}
       <div className="mb-6">
         <h1 className="text-xl font-bold text-gray-900">Пасічникам</h1>
         {products.length > 0 && (
@@ -56,7 +54,6 @@ export default async function AdminBeekeeperPage() {
         )}
       </div>
 
-      {/* Empty state */}
       {products.length === 0 && (
         <div className="bg-white border border-gray-100 rounded-xl shadow-sm text-center py-12 px-6 mb-8">
           <p className="text-gray-900 font-semibold mb-1">Продуктів ще немає</p>
@@ -64,14 +61,14 @@ export default async function AdminBeekeeperPage() {
         </div>
       )}
 
-      {/* Products table */}
       {products.length > 0 && (
         <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden mb-8">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Назва</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Сезон</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Тип</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">Сезон</th>
                 <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Статус</th>
                 <th className="px-5 py-3 w-20"></th>
               </tr>
@@ -80,7 +77,8 @@ export default async function AdminBeekeeperPage() {
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50/70 transition-colors">
                   <td className="px-5 py-3.5 font-medium text-gray-900">{product.name}</td>
-                  <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">{product.season_note ?? '—'}</td>
+                  <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">{TYPE_LABELS[product.product_type] ?? product.product_type}</td>
+                  <td className="px-5 py-3.5 text-gray-500 hidden md:table-cell">{product.season_note ?? '—'}</td>
                   <td className="px-5 py-3.5 text-center">
                     <span className={`inline-block w-2 h-2 rounded-full ${product.status === 'available' ? 'bg-green-500' : product.status === 'preorder' ? 'bg-amber-400' : 'bg-gray-300'}`} title={product.status} />
                   </td>
@@ -97,13 +95,21 @@ export default async function AdminBeekeeperPage() {
         </div>
       )}
 
-      {/* Inline create form */}
       <div id="create" className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 max-w-2xl">
         <h2 className="text-base font-semibold text-gray-900 mb-5">Додати продукт</h2>
         <form action={createBeekeeperProduct} className="space-y-4">
           <div>
             <label className={LABEL}>Назва</label>
             <input name="name" type="text" required className={INPUT} />
+          </div>
+
+          <div>
+            <label className={LABEL}>Тип продукту</label>
+            <select name="product_type" defaultValue="bee_packages" className={INPUT}>
+              {PRODUCT_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -127,35 +133,12 @@ export default async function AdminBeekeeperPage() {
             </select>
           </div>
 
-          <MediaManager initialMedia={[]} />
+          <div>
+            <label className={LABEL}>Опис</label>
+            <textarea name="description" rows={3} className={INPUT} />
+          </div>
 
-          <details className="border border-gray-100 rounded-lg">
-            <summary className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none list-none flex items-center gap-2">
-              <span>▸</span> Додатково
-            </summary>
-            <div className="px-4 pb-4 pt-2 space-y-3">
-              <div>
-                <label className={LABEL}>Slug (URL)</label>
-                <input name="slug" type="text" placeholder="bee-packages (авто якщо порожньо)" className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Тип продукту</label>
-                <select name="product_type" className={INPUT}>
-                  {PRODUCT_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className={LABEL}>Опис</label>
-                <textarea name="description" rows={3} className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Порядок відображення</label>
-                <input name="display_order" type="number" defaultValue={10} className={INPUT} />
-              </div>
-            </div>
-          </details>
+          <MediaManager initialMedia={[]} />
 
           <button type="submit"
             className="h-10 px-5 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors text-sm">

@@ -20,11 +20,10 @@ export async function createFlowerProduct(formData: FormData) {
   const mediaItems = parseMediaFromForm(formData)
   const compat = mediaToBackwardCompat(mediaItems, 'youtube_video_url')
   const name = formData.get('name') as string
-  const slugRaw = (formData.get('slug') as string)?.trim()
 
   const { data, error } = await client.from('flower_products').insert({
     name,
-    slug: slugRaw || autoSlug(name),
+    slug: autoSlug(name),
     category: (formData.get('category') as string) || 'chrysanthemum',
     variety: (formData.get('variety') as string) || null,
     short_description: (formData.get('short_description') as string) || null,
@@ -35,7 +34,6 @@ export async function createFlowerProduct(formData: FormData) {
     height_cm: formData.get('height_cm') ? parseInt(formData.get('height_cm') as string) : null,
     lighting: (formData.get('lighting') as string) || null,
     packaging_note: (formData.get('packaging_note') as string) || null,
-    display_order: parseInt(formData.get('display_order') as string) || 10,
     is_featured: formData.get('is_featured') === 'on',
     status: (formData.get('status') as string) || 'available',
     ...compat,
@@ -54,11 +52,9 @@ export async function updateFlowerProduct(id: string, formData: FormData) {
   const mediaItems = parseMediaFromForm(formData)
   const compat = mediaToBackwardCompat(mediaItems, 'youtube_video_url')
   const name = formData.get('name') as string
-  const slugRaw = (formData.get('slug') as string)?.trim()
 
   await client.from('flower_products').update({
     name,
-    slug: slugRaw || autoSlug(name),
     category: (formData.get('category') as string) || 'chrysanthemum',
     variety: (formData.get('variety') as string) || null,
     short_description: (formData.get('short_description') as string) || null,
@@ -69,7 +65,6 @@ export async function updateFlowerProduct(id: string, formData: FormData) {
     height_cm: formData.get('height_cm') ? parseInt(formData.get('height_cm') as string) : null,
     lighting: (formData.get('lighting') as string) || null,
     packaging_note: (formData.get('packaging_note') as string) || null,
-    display_order: parseInt(formData.get('display_order') as string) || 10,
     is_featured: formData.get('is_featured') === 'on',
     status: (formData.get('status') as string) || 'available',
     updated_at: new Date().toISOString(),
