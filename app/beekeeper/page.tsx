@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     title: 'Для пасічників | Дача TV',
     description: "Бджолопакети, бджолосім'ї, вулики та товари пасічника від пасіки Дача TV на Харківщині",
     type: 'website',
+    images: [{ url: '/images/dacha-tv/logo-square.png', width: 1200, height: 1200, alt: 'Дача TV — Для пасічників' }],
   },
   twitter: {
     card: 'summary_large_image',

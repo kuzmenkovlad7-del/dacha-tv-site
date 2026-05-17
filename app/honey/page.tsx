@@ -14,6 +14,7 @@ export const metadata: Metadata = {
     title: 'Наш мед | Дача TV',
     description: "Сезонний мед без домішок: Акація, Липа, Сонях, Різнотрав'я від пасіки на Харківщині",
     type: 'website',
+    images: [{ url: '/images/dacha-tv/logo-square.png', width: 1200, height: 1200, alt: 'Дача TV — Натуральний мед' }],
   },
   twitter: {
     card: 'summary_large_image',
