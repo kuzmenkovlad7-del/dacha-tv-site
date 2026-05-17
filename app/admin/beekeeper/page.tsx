@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const INPUT = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent'
 const LABEL = 'block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'
 
-interface BKProduct { id: string; name: string; product_type: string; season_note: string | null; status: string }
+interface BKProduct { id: string; name: string; product_type: string; status: string }
 
 export default async function AdminBeekeeperPage() {
   let products: BKProduct[] = []
@@ -24,7 +24,6 @@ export default async function AdminBeekeeperPage() {
       id: String(r.id ?? ''),
       name: String(r.name ?? ''),
       product_type: String(r.product_type ?? ''),
-      season_note: r.season_note != null ? String(r.season_note) : null,
       status: String(r.status ?? 'available'),
     }))
   } catch { /* env not configured */ }
@@ -51,7 +50,7 @@ export default async function AdminBeekeeperPage() {
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Назва</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Сезон</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Ціна</th>
                 <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Статус</th>
                 <th className="px-5 py-3 w-20"></th>
               </tr>
@@ -60,7 +59,7 @@ export default async function AdminBeekeeperPage() {
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50/70 transition-colors">
                   <td className="px-5 py-3.5 font-medium text-gray-900">{product.name}</td>
-                  <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">{product.season_note ?? '—'}</td>
+                  <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">—</td>
                   <td className="px-5 py-3.5 text-center">
                     <span className={`inline-block w-2 h-2 rounded-full ${product.status === 'available' ? 'bg-green-500' : product.status === 'preorder' ? 'bg-amber-400' : 'bg-gray-300'}`} title={product.status} />
                   </td>
