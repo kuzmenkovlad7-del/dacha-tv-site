@@ -15,7 +15,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/contact`, lastModified: new Date(), priority: 0.7 },
     { url: `${BASE_URL}/delivery`, lastModified: new Date(), priority: 0.6 },
     { url: `${BASE_URL}/faq`, lastModified: new Date(), priority: 0.6 },
-    { url: `${BASE_URL}/privacy`, lastModified: new Date(), priority: 0.3 },
   ]
 
   const [honeySlugs, flowerSlugs, apiarySlugs, beekeeperSlugs] = await Promise.all([

@@ -146,8 +146,9 @@ export default async function HoneyProductPage({ params }: Props) {
     brand: { '@type': 'Brand', name: 'Дача TV' },
     offers: {
       '@type': 'Offer',
-      priceCurrency: 'UAH',
-      price: product.price_plastic_uah ?? product.price_glass_uah ?? undefined,
+      ...(product.price_plastic_uah != null || product.price_glass_uah != null
+        ? { priceCurrency: 'UAH', price: product.price_plastic_uah ?? product.price_glass_uah }
+        : {}),
       availability: (product.status === 'available' || product.status === 'preorder')
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
