@@ -76,10 +76,14 @@ export async function getFeaturedHoneyProducts(): Promise<HoneyProduct[]> {
   const { data } = await client
     .from('honey_products')
     .select('*')
-    .eq('is_featured', true)
+    .in('status', ['available', 'preorder'])
+    .order('display_order', { ascending: true })
     .order('name', { ascending: true })
-    .limit(4)
-  return data ?? []
+    .limit(6)
+  if (!data || data.length === 0) return []
+  const ids = data.map((p: { id: string }) => p.id)
+  const mediaByProduct = await batchFetchMedia('honey', ids, client)
+  return data.map((p: HoneyProduct) => ({ ...p, media: mediaByProduct[p.id] ?? [] }))
 }
 
 export async function getAllHoneySlugs(): Promise<string[]> {

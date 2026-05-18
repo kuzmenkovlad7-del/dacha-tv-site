@@ -220,20 +220,12 @@ export default async function HoneyProductPage({ params }: Props) {
             )}
 
             {/* Price block */}
-            {(product.price_plastic_uah || product.price_glass_uah) && (
-              <div className="flex flex-wrap gap-4 mb-6 py-3 border-t border-b border-honey-100">
-                {product.price_plastic_uah && (
-                  <div>
-                    <span className="text-xs text-bark/50 block mb-0.5">Пластик</span>
-                    <span className="text-xl font-bold text-bark">{product.price_plastic_uah} грн</span>
-                  </div>
-                )}
-                {product.price_glass_uah && (
-                  <div>
-                    <span className="text-xs text-bark/50 block mb-0.5">Скло</span>
-                    <span className="text-xl font-bold text-bark">{product.price_glass_uah} грн</span>
-                  </div>
-                )}
+            {(product.price_plastic_uah ?? product.price_glass_uah) != null && (
+              <div className="flex items-baseline gap-2 mb-6 py-3 border-t border-b border-honey-100">
+                <span className="text-2xl font-bold text-bark">
+                  {product.price_plastic_uah ?? product.price_glass_uah} грн
+                </span>
+                <span className="text-sm text-bark/50">за 1 л</span>
               </div>
             )}
 

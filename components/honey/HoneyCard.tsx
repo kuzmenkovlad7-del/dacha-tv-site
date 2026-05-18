@@ -23,8 +23,7 @@ function resolveImage(product: HoneyProduct): { src: string; alt: string } | nul
   const primary = media.find((m) => m.media_type === 'image' && m.is_primary) ?? media.find((m) => m.media_type === 'image')
   if (primary) return { src: primary.url, alt: primary.alt ?? product.name }
   if (!product.image_url) return null
-  if (product.image_url.startsWith('http')) return { src: product.image_url, alt: product.image_alt ?? product.name }
-  return null
+  return { src: product.image_url, alt: product.image_alt ?? product.name }
 }
 
 export function HoneyCard({ product }: HoneyCardProps) {
@@ -34,7 +33,7 @@ export function HoneyCard({ product }: HoneyCardProps) {
     `Натуральний мед ${product.variety.toLowerCase()}`
   const img = resolveImage(product)
 
-  const hasPrice = product.price_plastic_uah || product.price_glass_uah
+  const price = product.price_plastic_uah ?? product.price_glass_uah
 
   return (
     <article className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-bark/20 hover:shadow-xl transition-all duration-300 flex flex-col">
@@ -100,18 +99,10 @@ export function HoneyCard({ product }: HoneyCardProps) {
         )}
 
         {/* Price line */}
-        {hasPrice && (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-4 text-sm">
-            {product.price_plastic_uah && (
-              <span className="text-bark font-semibold">
-                Пластик — {product.price_plastic_uah} грн
-              </span>
-            )}
-            {product.price_glass_uah && (
-              <span className="text-bark/60">
-                Скло — {product.price_glass_uah} грн
-              </span>
-            )}
+        {price != null && (
+          <div className="mb-4">
+            <span className="text-bark font-bold text-lg">{price} грн</span>
+            <span className="text-bark/50 text-xs ml-1.5">/ 1 л</span>
           </div>
         )}
 
