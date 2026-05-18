@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import type { SiteSettings, HoneyProduct, ApiaryProduct, BeekeeperProduct, Review, FaqItem, FlowerProduct } from '@/types'
+import type { SiteSettings, HoneyProduct, ApiaryProduct, BeekeeperProduct, Review, FaqItem, FlowerProduct, Service } from '@/types'
 import type { ProductSection } from '@/lib/supabase/product-media'
 
 function getClient() {
@@ -201,5 +201,30 @@ export async function getAllFlowerSlugs(): Promise<string[]> {
   const client = getClient()
   if (!client) return []
   const { data } = await client.from('flower_products').select('slug')
+  return (data ?? []).map((r: { slug: string }) => r.slug)
+}
+
+export async function getAllServices(): Promise<Service[]> {
+  const client = getClient()
+  if (!client) return []
+  const { data } = await client
+    .from('services')
+    .select('*')
+    .eq('status', 'active')
+    .order('display_order', { ascending: true })
+  return data ?? []
+}
+
+export async function getServiceBySlug(slug: string): Promise<Service | null> {
+  const client = getClient()
+  if (!client) return null
+  const { data } = await client.from('services').select('*').eq('slug', slug).single()
+  return data ?? null
+}
+
+export async function getAllServiceSlugs(): Promise<string[]> {
+  const client = getClient()
+  if (!client) return []
+  const { data } = await client.from('services').select('slug').eq('status', 'active')
   return (data ?? []).map((r: { slug: string }) => r.slug)
 }
