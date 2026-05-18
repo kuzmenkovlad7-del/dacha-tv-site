@@ -190,6 +190,91 @@ export interface Service {
   updated_at?: string
 }
 
+// ─── Dropshipping / Supplier layer ────────────────────────────────────────
+// Completely separate from dacha-tv own catalog (honey, apiary, beekeeper, flowers, services).
+
+export interface SupplierCategory {
+  id: string
+  supplier_id: string
+  name: string
+  name_ua: string | null
+  slug: string | null
+  parent_supplier_id: string | null
+  is_approved: boolean
+  display_order: number
+  raw_data?: Record<string, unknown> | null
+  synced_at: string
+  created_at: string
+}
+
+export interface SupplierProduct {
+  id: string
+  supplier_sku: string
+  supplier_category_id: string | null
+  name: string
+  name_ua: string | null
+  slug: string | null
+  description: string | null
+  description_ua: string | null
+  short_description_ua: string | null
+  price_uah: number | null
+  our_price_uah: number | null
+  stock_quantity: number
+  is_in_stock: boolean
+  main_image_url: string | null
+  images: string[] | null
+  attributes: Record<string, unknown> | null
+  weight_kg: number | null
+  is_approved: boolean
+  is_published: boolean
+  publish_priority: number
+  meta_title: string | null
+  meta_description: string | null
+  last_synced_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type CatalogProductStatus = 'published' | 'draft' | 'archived'
+
+export interface CatalogProduct {
+  id: string
+  supplier_product_id: string | null
+  supplier_sku: string
+  name_ua: string
+  slug: string
+  category_slug: string | null
+  short_description: string | null
+  description: string | null
+  price_uah: number
+  compare_price_uah: number | null
+  main_image_url: string | null
+  images: string[] | null
+  attributes: Record<string, unknown> | null
+  status: CatalogProductStatus
+  is_featured: boolean
+  display_order: number
+  meta_title: string | null
+  meta_description: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SupplierSyncLog {
+  id: string
+  sync_type: string
+  status: 'running' | 'completed' | 'failed'
+  products_total: number
+  products_new: number
+  products_updated: number
+  products_errors: number
+  categories_total: number
+  error_details: Record<string, unknown> | null
+  triggered_by: string | null
+  started_at: string
+  completed_at: string | null
+}
+
 // Legacy type aliases kept for backward compatibility with admin components and inquiry actions
 export type InquiryStatus = 'new' | 'contacted' | 'completed' | 'cancelled'
 export type InquiryType = 'honey_order' | 'beekeeper_inquiry' | 'general' | 'flower_inquiry'
