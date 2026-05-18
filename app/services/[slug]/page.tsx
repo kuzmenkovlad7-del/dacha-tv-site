@@ -1,9 +1,10 @@
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getServiceBySlug, getAllServiceSlugs } from '@/lib/supabase/queries'
+import { getServiceBySlug } from '@/lib/supabase/queries'
 import { GeneralContactForm } from '@/components/forms/GeneralContactForm'
 import { StructuredData } from '@/components/shared/StructuredData'
 
@@ -37,11 +38,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: service.image_url ? [service.image_url] : [`${siteUrl}/images/dacha-tv/logo-square.png`],
     },
   }
-}
-
-export async function generateStaticParams() {
-  const slugs = await getAllServiceSlugs().catch(() => [])
-  return slugs.map((slug) => ({ slug }))
 }
 
 export default async function ServiceDetailPage({ params }: Props) {

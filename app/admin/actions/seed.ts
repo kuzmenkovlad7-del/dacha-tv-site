@@ -1,10 +1,53 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { STATIC_HONEY, STATIC_HONEY_SLUGS } from '@/lib/static-catalog'
 import { STATIC_FLOWERS } from '@/lib/flowers-static'
 import { STATIC_APIARY, STATIC_APIARY_SLUGS, STATIC_BEEKEEPER, STATIC_BEEKEEPER_SLUGS } from '@/lib/static-apiary'
+
+const STATIC_SERVICES = [
+  {
+    name: 'Фотосесія у лаванді',
+    slug: 'fotosesiia-lavandove-pole',
+    short_description: 'Незабутні знімки на тлі квітучої лаванди на нашій садибі.',
+    description: 'Проведіть фотосесію серед рядів квітучої лаванди на садибі Дача TV. Ідеально для сімейних знімків, лавстрі та особистих брендових фото. Ми надаємо локацію, а ви приводите свого фотографа або замовляєте через нас. Сезон — червень–липень.',
+    price_uah: 1000,
+    price_note: '₴1000 / година',
+    duration_note: 'Від 1 години',
+    status: 'active' as const,
+    is_featured: true,
+    display_order: 1,
+    image_url: null,
+  },
+  {
+    name: 'Альтанка на воді',
+    slug: 'orenda-altanky-na-vodi',
+    short_description: 'Затишна альтанка над ставком — для відпочинку, пікніка або особливого вечора.',
+    description: 'Орендуйте нашу альтанку на воді для романтичного вечора, сімейного відпочинку або невеликого святкування. Альтанка розташована над тихим ставком у тіні дерев. Вміщує до 8 осіб. Безкоштовна риболовля включена.',
+    price_uah: 3000,
+    price_note: '₴3000 / доба',
+    duration_note: 'Від 1 доби',
+    status: 'active' as const,
+    is_featured: true,
+    display_order: 2,
+    image_url: null,
+  },
+  {
+    name: 'Послуги пасічника',
+    slug: 'posluhy-pasisnyka',
+    short_description: 'Консультація, обслуговування вуликів і практична допомога від досвідченого пасічника.',
+    description: 'Наш пасічник з багаторічним досвідом допоможе з оглядом і обслуговуванням вуликів, консультацією щодо розведення бджіл, лікуванням сімей та підготовкою до зими. Послуги надаються на вашій або нашій пасіці.',
+    price_uah: null,
+    price_note: 'Ціна за домовленістю',
+    duration_note: 'За домовленістю',
+    status: 'active' as const,
+    is_featured: false,
+    display_order: 3,
+    image_url: null,
+  },
+]
 
 const LAUNCH_SITE_SETTINGS = {
   id: 1,
@@ -176,7 +219,21 @@ export async function syncCatalog(): Promise<SyncResult> {
       .upsert(LAUNCH_SITE_SETTINGS, { onConflict: 'id', ignoreDuplicates: true })
     details.settings = se ? `Помилка: ${se.message}` : 'Синхронізовано'
 
-    const allOk = Object.values(details).every((v) => !v.startsWith('Помилка'))
+    // Services — upsert canonical 3 rows (table must already exist via migration 035)
+    const { error: srve } = await client.from('services').upsert(STATIC_SERVICES, { onConflict: 'slug', ignoreDuplicates: false })
+    if (srve) {
+      const isMissing = srve.message.includes('does not exist') || srve.message.includes('schema cache') || srve.message.includes('relation')
+      if (isMissing) {
+        missingTables.push('services')
+        details.services = 'ТАБЛИЦЯ ВІДСУТНЯ — запустіть міграцію 035 в Supabase'
+      } else {
+        details.services = `Помилка: ${srve.message}`
+      }
+    } else {
+      details.services = `Синхронізовано ${STATIC_SERVICES.length} послуг`
+    }
+
+    const allOk = Object.values(details).every((v) => !v.startsWith('Помилка') && !v.startsWith('ТАБЛИЦЯ'))
     return {
       ok: allOk,
       message: Object.entries(details).map(([k, v]) => `${k}: ${v}`).join(' | '),
@@ -197,4 +254,12 @@ export async function seedLaunchDataAction(): Promise<void> {
 export async function seedLaunchData(): Promise<{ ok: boolean; message: string }> {
   const r = await syncCatalog()
   return { ok: r.ok, message: r.message }
+}
+
+export async function seedServicesAction(): Promise<void> {
+  const client = getAdminClient()
+  await client.from('services').upsert(STATIC_SERVICES, { onConflict: 'slug', ignoreDuplicates: false })
+  revalidatePath('/services', 'layout')
+  revalidatePath('/')
+  redirect('/admin/services')
 }
