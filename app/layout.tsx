@@ -18,7 +18,7 @@ const lora = Lora({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://dacha-tv.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dachatv.com'),
   title: {
     template: '%s | Дача TV',
     default: 'Дача TV — Натуральний мед від сімейної пасіки на Харківщині',

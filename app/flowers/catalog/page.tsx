@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAllFlowerProducts } from '@/lib/supabase/queries'
@@ -5,8 +7,20 @@ import type { FlowerProduct } from '@/types'
 import { FlowerInquiryForm } from '@/components/forms/FlowerInquiryForm'
 
 export const metadata: Metadata = {
-  title: 'Каталог хризантем — Дача TV',
-  description: 'Колекція хризантем від домашнього розсадника. Понад 50 сортів: помпонові, кущові, великоквіткові, рідкісні.',
+  title: 'Каталог хризантем',
+  description: 'Колекція хризантем від домашнього розсадника. Понад 50 сортів: помпонові, кущові, великоквіткові, рідкісні. Харківщина.',
+  alternates: { canonical: '/flowers/catalog' },
+  openGraph: {
+    title: 'Каталог хризантем | Дача TV',
+    description: 'Понад 50 сортів хризантем від домашнього розсадника на Харківщині — помпонові, кущові, великоквіткові.',
+    type: 'website',
+    images: [{ url: '/images/dacha-tv/logo-square.png', width: 1200, height: 1200, alt: 'Дача TV — Хризантеми' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Каталог хризантем | Дача TV',
+    description: 'Понад 50 сортів хризантем від домашнього розсадника на Харківщині.',
+  },
 }
 
 const VARIETY_ORDER = ['Помпонова', 'Кущова', 'Великоквіткова', 'Дрібноквіткова', 'Компактна', 'Анемонова', 'Павукоподібна']
