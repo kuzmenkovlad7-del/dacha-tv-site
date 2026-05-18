@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { getAllHoneySlugs, getAllFlowerSlugs, getAllApiaryProductSlugs, getAllBeekeeperSlugs } from '@/lib/supabase/queries'
+import { getAllHoneySlugs, getAllFlowerSlugs, getAllApiaryProductSlugs, getAllBeekeeperSlugs, getAllServiceSlugs } from '@/lib/supabase/queries'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dachatv.com'
 
@@ -10,6 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/products`, lastModified: new Date(), priority: 0.8 },
     { url: `${BASE_URL}/flowers`, lastModified: new Date(), priority: 0.85 },
     { url: `${BASE_URL}/flowers/catalog`, lastModified: new Date(), priority: 0.8 },
+    { url: `${BASE_URL}/services`, lastModified: new Date(), priority: 0.8 },
     { url: `${BASE_URL}/beekeeper`, lastModified: new Date(), priority: 0.8 },
     { url: `${BASE_URL}/about`, lastModified: new Date(), priority: 0.7 },
     { url: `${BASE_URL}/contact`, lastModified: new Date(), priority: 0.7 },
@@ -17,11 +18,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/faq`, lastModified: new Date(), priority: 0.6 },
   ]
 
-  const [honeySlugs, flowerSlugs, apiarySlugs, beekeeperSlugs] = await Promise.all([
+  const [honeySlugs, flowerSlugs, apiarySlugs, beekeeperSlugs, serviceSlugs] = await Promise.all([
     getAllHoneySlugs().catch(() => []),
     getAllFlowerSlugs().catch(() => []),
     getAllApiaryProductSlugs().catch(() => []),
     getAllBeekeeperSlugs().catch(() => []),
+    getAllServiceSlugs().catch(() => []),
   ])
 
   const honeyRoutes: MetadataRoute.Sitemap = honeySlugs.map((slug) => ({
@@ -48,5 +50,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.75,
   }))
 
-  return [...staticRoutes, ...honeyRoutes, ...flowerRoutes, ...apiaryRoutes, ...beekeeperRoutes]
+  const serviceRoutes: MetadataRoute.Sitemap = serviceSlugs.map((slug) => ({
+    url: `${BASE_URL}/services/${slug}`,
+    lastModified: new Date(),
+    priority: 0.75,
+  }))
+
+  return [...staticRoutes, ...honeyRoutes, ...flowerRoutes, ...apiaryRoutes, ...beekeeperRoutes, ...serviceRoutes]
 }

@@ -21,6 +21,7 @@ const NAV_ITEMS = [
   { href: '/honey', label: 'Мед' },
   { href: '/products', label: 'Продукти' },
   { href: '/flowers', label: 'Квіти' },
+  { href: '/services', label: 'Послуги' },
   { href: '/beekeeper', label: 'Пасічникам' },
   { href: '/about', label: 'Про нас' },
   { href: '/contact', label: 'Контакти' },

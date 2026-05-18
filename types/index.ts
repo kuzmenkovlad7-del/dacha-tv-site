@@ -173,6 +173,23 @@ export interface FlowerProduct {
   updated_at?: string
 }
 
+export interface Service {
+  id: string
+  name: string
+  slug: string
+  short_description: string | null
+  description: string | null
+  price_uah: number | null
+  price_note: string | null
+  duration_note: string | null
+  status: 'active' | 'inactive'
+  is_featured: boolean
+  display_order: number
+  image_url: string | null
+  created_at?: string
+  updated_at?: string
+}
+
 // Legacy type aliases kept for backward compatibility with admin components and inquiry actions
 export type InquiryStatus = 'new' | 'contacted' | 'completed' | 'cancelled'
 export type InquiryType = 'honey_order' | 'beekeeper_inquiry' | 'general' | 'flower_inquiry'
