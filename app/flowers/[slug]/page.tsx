@@ -89,8 +89,7 @@ export default async function FlowerProductPage({ params }: Props) {
     brand: { '@type': 'Brand', name: 'Дача TV' },
     offers: {
       '@type': 'Offer',
-      priceCurrency: 'UAH',
-      price: product.price_uah ?? undefined,
+      ...(product.price_uah != null ? { priceCurrency: 'UAH', price: product.price_uah } : {}),
       availability: (product.status === 'available' || product.status === 'preorder')
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
