@@ -16,7 +16,6 @@ const LABEL = 'block text-xs font-semibold text-gray-600 uppercase tracking-wide
 
 export default async function AdminFlowersPage() {
   let products: FlowerProduct[] = []
-  let tablesMissing = false
   let dbError: string | null = null
 
   try {
@@ -27,13 +26,8 @@ export default async function AdminFlowersPage() {
       .order('variety', { ascending: true, nullsFirst: false })
       .order('name', { ascending: true })
 
-    if (error) {
-      const isMissing = error.message.includes('does not exist') || error.message.includes('schema cache')
-      if (isMissing) tablesMissing = true
-      else dbError = error.message
-    } else {
-      products = (data ?? []) as FlowerProduct[]
-    }
+    if (error) dbError = error.message
+    else products = (data ?? []) as FlowerProduct[]
   } catch (e) {
     dbError = e instanceof Error ? e.message : 'Помилка підключення'
   }
@@ -47,22 +41,6 @@ export default async function AdminFlowersPage() {
         )}
       </div>
 
-      {tablesMissing && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
-          <div className="flex items-start gap-3">
-            <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-            </svg>
-            <div className="flex-1">
-              <p className="font-semibold text-amber-900 text-sm">Таблиця flower_products відсутня в базі даних</p>
-              <p className="text-amber-800 text-sm mt-1">
-                Зверніться до адміністратора або перевірте підключення до бази даних.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {dbError && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
           <p className="text-sm font-semibold text-red-700">Помилка бази даних</p>
@@ -70,7 +48,7 @@ export default async function AdminFlowersPage() {
         </div>
       )}
 
-      {!tablesMissing && !dbError && products.length === 0 && (
+      {!dbError && products.length === 0 && (
         <div className="bg-white border border-gray-100 rounded-xl shadow-sm text-center py-12 px-6 mb-8">
           <p className="text-gray-900 font-semibold mb-1">Квітів ще немає в базі</p>
           <p className="text-sm text-gray-500">Додайте першу квітку за допомогою форми нижче</p>
@@ -111,7 +89,7 @@ export default async function AdminFlowersPage() {
         </div>
       )}
 
-      {!tablesMissing && (
+      {!dbError && (
         <div id="create" className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 max-w-2xl">
           <h2 className="text-base font-semibold text-gray-900 mb-5">Додати квітку</h2>
           <form action={createFlowerProduct} className="space-y-4">

@@ -3,6 +3,8 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Політика конфіденційності',
   description: 'Політика конфіденційності сайту Дача TV',
+  alternates: { canonical: '/privacy' },
+  robots: { index: false, follow: false },
 }
 
 export default function PrivacyPage() {

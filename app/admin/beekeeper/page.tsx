@@ -85,7 +85,16 @@ export default async function AdminBeekeeperPage() {
             <input name="name" type="text" required className={INPUT} />
           </div>
 
-          <input type="hidden" name="product_type" value="bee_packages" />
+          <div>
+            <label className={LABEL}>Тип продукту</label>
+            <select name="product_type" defaultValue="bee_packages" className={INPUT}>
+              <option value="bee_packages">Бджолопакети</option>
+              <option value="bee_colonies">Бджолосім'ї</option>
+              <option value="empty_hives">Порожні вулики</option>
+              <option value="hives_with_bees">Вулики з бджолами</option>
+              <option value="apiary_supply">Товари пасічника</option>
+            </select>
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -123,6 +132,11 @@ export default async function AdminBeekeeperPage() {
             <label className={LABEL}>Опис</label>
             <textarea name="description" rows={3} className={INPUT} />
           </div>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="is_featured" className="w-4 h-4 rounded accent-gray-900" />
+            <span className="text-sm font-medium text-gray-700">Топ-продукт</span>
+          </label>
 
           <MediaManager initialMedia={[]} />
 

@@ -37,11 +37,11 @@ export default async function HomePage() {
   const localBusinessSchema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://dacha-tv.com'}/#business`,
+    '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dachatv.com'}/#business`,
     name: 'Дача TV',
     description:
       'Сімейна пасіка на Харківщині. Натуральний мед, пилок, прополіс та бджолині пакети напряму від виробника.',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://dacha-tv.com',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dachatv.com',
     telephone: siteSettings?.phone || '',
     address: {
       '@type': 'PostalAddress',

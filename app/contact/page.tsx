@@ -14,9 +14,16 @@ export const metadata: Metadata = {
   title: "Зв'язатись з нами",
   description:
     "Зателефонуйте або напишіть — пасіка Дача TV відповідає протягом кількох годин. Адреса: Коротич, Пісочинська ОТГ, Харківська область.",
+  alternates: { canonical: '/contact' },
   openGraph: {
     title: "Контакти | Дача TV",
-    description: "Зв'яжіться з пасікою Дача TV",
+    description: "Зв'яжіться з пасікою Дача TV на Харківщині. Телефон, Telegram, адреса.",
+    images: [{ url: '/images/dacha-tv/logo-square.png', width: 1200, height: 1200, alt: 'Дача TV — Контакти' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Контакти | Дача TV",
+    description: "Зателефонуйте або напишіть — пасіка Дача TV відповідає протягом кількох годин.",
   },
 }
 
@@ -38,7 +45,7 @@ export default async function ContactPage() {
       addressRegion: 'Харківська область',
       addressCountry: 'UA',
     },
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://dacha-tv.com',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dachatv.com',
   }
 
   return (

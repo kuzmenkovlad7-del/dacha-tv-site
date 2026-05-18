@@ -40,7 +40,7 @@ function formatEmailHtml(inquiry: InquiryData): string {
     )
     .join('')
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dacha-tv.com'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dachatv.com'
 
   return `
     <!DOCTYPE html>
@@ -89,7 +89,7 @@ export async function sendEmailNotification(inquiry: InquiryData): Promise<void>
 
   try {
     await resend.emails.send({
-      from: 'Дача TV <notifications@dacha-tv.com>',
+      from: 'Дача TV <notifications@dachatv.com>',
       to: ownerEmail,
       subject: `Нова заявка від ${inquiry.name} — Дача TV`,
       html: formatEmailHtml(inquiry),
