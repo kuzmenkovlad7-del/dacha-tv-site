@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { getAdminClient } from '@/lib/supabase/admin'
-import { SyncPanel } from './SyncPanel'
+import { SyncPanel, type PersistedResult } from './SyncPanel'
 import { SyncPoller } from './SyncPoller'
 import type { SupplierSyncLog } from '@/types'
 
@@ -46,6 +46,21 @@ export default async function AdminSupplierPage() {
     (l) => l.status === 'running' && now - new Date(l.started_at).getTime() < 10 * 60 * 1000
   )
   const runningType = runningLog?.sync_type ?? null
+
+  const lastCompletedLog = recentLogs.find((l) => l.status === 'completed' || l.status === 'failed')
+  const persistedResult: PersistedResult | null = lastCompletedLog
+    ? {
+        ok: lastCompletedLog.status === 'completed',
+        syncType: lastCompletedLog.sync_type,
+        message: lastCompletedLog.status === 'completed'
+          ? `«${lastCompletedLog.sync_type}» завершено: ${
+              lastCompletedLog.sync_type === 'categories'
+                ? lastCompletedLog.categories_total
+                : lastCompletedLog.products_total
+            } записів`
+          : `«${lastCompletedLog.sync_type}» завершився з помилкою`,
+      }
+    : null
 
   function formatDuration(log: SupplierSyncLog): string {
     const details = log.error_details as Record<string, unknown> | null
@@ -106,7 +121,7 @@ export default async function AdminSupplierPage() {
       {!tablesMissing && (
         <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 mb-8">
           <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Синхронізація</h2>
-          <SyncPanel apiConfigured={apiConfigured} runningType={runningType} />
+          <SyncPanel apiConfigured={apiConfigured} runningType={runningType} persistedResult={persistedResult} />
         </div>
       )}
 
