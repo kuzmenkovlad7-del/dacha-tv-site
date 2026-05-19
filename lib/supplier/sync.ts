@@ -26,7 +26,12 @@ function toArray(data: unknown): unknown[] {
   if (Array.isArray(data)) return data
   if (data && typeof data === 'object') {
     const d = data as Record<string, unknown>
-    return (d.data ?? d.items ?? d.products ?? d.categories ?? []) as unknown[]
+    // Try common wrapper keys in priority order
+    for (const key of ['data', 'items', 'results', 'products', 'categories', 'list']) {
+      if (Array.isArray(d[key])) return d[key] as unknown[]
+    }
+    // If root object looks like a single record, wrap it
+    if (d.id || d.sku || d.supplier_sku) return [d]
   }
   return []
 }
@@ -39,6 +44,22 @@ function autoSlug(text: string): string {
   }
   return text.toLowerCase().split('').map((c) => map[c] ?? c).join('')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `item-${Date.now()}`
+}
+
+function summariseRecords(records: unknown[], limit = 3): unknown[] {
+  return records.slice(0, limit).map((r) => {
+    if (r && typeof r === 'object') {
+      const obj = r as Record<string, unknown>
+      return {
+        id: obj.id ?? obj.supplier_id,
+        sku: obj.sku ?? obj.supplier_sku,
+        name: obj.name ?? obj.title,
+        price: obj.price ?? obj.price_uah,
+        stock: obj.stock ?? obj.quantity ?? obj.stock_quantity,
+      }
+    }
+    return r
+  })
 }
 
 export interface SyncResult {
@@ -64,12 +85,25 @@ export async function syncSupplierCategories(): Promise<SyncResult> {
     const raw = await apiFetch('/categories')
     const categories = toArray(raw)
 
+    const debugInfo = {
+      request_path: '/categories',
+      response_type: Array.isArray(raw) ? 'array' : typeof raw,
+      response_root_keys: raw && typeof raw === 'object' ? Object.keys(raw as object) : [],
+      response_count: categories.length,
+      sample_records: summariseRecords(categories),
+    }
+
     for (const cat of categories) {
       const c = cat as Record<string, unknown>
+      const supplierId = String(c.id ?? c.supplier_id ?? '')
+      if (!supplierId) { errors++; continue }
+
       const { error } = await client.from('supplier_categories').upsert(
         {
-          supplier_id: String(c.id ?? c.supplier_id ?? ''),
+          supplier_id: supplierId,
           name: String(c.name ?? c.title ?? ''),
+          name_ua: c.name_ua ? String(c.name_ua) : null,
+          slug: c.slug ? String(c.slug) : null,
           parent_supplier_id: c.parent_id ? String(c.parent_id) : null,
           raw_data: c,
           synced_at: new Date().toISOString(),
@@ -83,10 +117,11 @@ export async function syncSupplierCategories(): Promise<SyncResult> {
       status: 'completed',
       categories_total: synced,
       products_errors: errors,
+      error_details: { ...debugInfo, synced, errors },
       completed_at: new Date().toISOString(),
     }).eq('id', log?.id)
 
-    return { ok: errors === 0, synced, errors, message: `Синхронізовано ${synced} категорій` }
+    return { ok: errors === 0, synced, errors, message: `Синхронізовано ${synced} категорій (у відповіді: ${categories.length})` }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
     await client.from('supplier_sync_log').update({
@@ -125,9 +160,17 @@ export async function syncSupplierProducts(options?: {
     const raw = await apiFetch(path)
     const products = toArray(raw)
 
+    const debugInfo = {
+      request_path: path,
+      response_type: Array.isArray(raw) ? 'array' : typeof raw,
+      response_root_keys: raw && typeof raw === 'object' ? Object.keys(raw as object) : [],
+      response_count: products.length,
+      sample_records: summariseRecords(products),
+    }
+
     for (const prod of products) {
       const p = prod as Record<string, unknown>
-      const sku = String(p.id ?? p.sku ?? p.supplier_sku ?? '')
+      const sku = String(p.id ?? p.sku ?? p.supplier_sku ?? p.article ?? '')
       if (!sku) { errors++; continue }
 
       const { data: existing } = await client
@@ -140,6 +183,9 @@ export async function syncSupplierProducts(options?: {
         ? (p.images as string[])
         : p.image ? [String(p.image)] : []
 
+      const priceRaw = p.price ?? p.price_uah ?? p.cost
+      const stockRaw = p.stock ?? p.quantity ?? p.stock_quantity ?? p.qty
+
       const row = {
         supplier_sku: sku,
         supplier_category_id: p.category_id ? String(p.category_id) : null,
@@ -149,9 +195,9 @@ export async function syncSupplierProducts(options?: {
         description: p.description ? String(p.description) : null,
         description_ua: p.description_ua ? String(p.description_ua) : null,
         short_description_ua: p.short_description_ua ? String(p.short_description_ua) : null,
-        price_uah: p.price != null ? Number(p.price) : null,
-        stock_quantity: p.stock != null ? Number(p.stock) : (p.quantity != null ? Number(p.quantity) : 0),
-        is_in_stock: Number(p.stock ?? p.quantity ?? 0) > 0,
+        price_uah: priceRaw != null ? Number(priceRaw) : null,
+        stock_quantity: stockRaw != null ? Number(stockRaw) : 0,
+        is_in_stock: Number(stockRaw ?? 0) > 0,
         main_image_url: images[0] ?? null,
         images: images.length > 0 ? images : null,
         attributes: typeof p.attributes === 'object' ? p.attributes as Record<string, unknown> : null,
@@ -175,6 +221,7 @@ export async function syncSupplierProducts(options?: {
       products_new: isNew,
       products_updated: synced - isNew,
       products_errors: errors,
+      error_details: { ...debugInfo, synced, errors, new: isNew },
       completed_at: new Date().toISOString(),
     }).eq('id', log?.id)
 
@@ -182,7 +229,7 @@ export async function syncSupplierProducts(options?: {
       ok: errors === 0,
       synced,
       errors,
-      message: `Синхронізовано ${synced} продуктів (нових: ${isNew})`,
+      message: `Синхронізовано ${synced} продуктів (нових: ${isNew}, у відповіді: ${products.length})`,
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
@@ -211,15 +258,22 @@ export async function syncPricesAndStock(): Promise<SyncResult> {
     const raw = await apiFetch('/prices')
     const items = toArray(raw)
 
+    const debugInfo = {
+      request_path: '/prices',
+      response_count: items.length,
+      sample_records: summariseRecords(items),
+    }
+
     for (const item of items) {
       const i = item as Record<string, unknown>
-      const sku = String(i.id ?? i.sku ?? '')
+      const sku = String(i.id ?? i.sku ?? i.supplier_sku ?? '')
       if (!sku) continue
 
+      const stockRaw = i.stock ?? i.quantity ?? i.stock_quantity
       const { error } = await client.from('supplier_products').update({
         price_uah: i.price != null ? Number(i.price) : null,
-        stock_quantity: Number(i.stock ?? i.quantity ?? 0),
-        is_in_stock: Number(i.stock ?? i.quantity ?? 0) > 0,
+        stock_quantity: Number(stockRaw ?? 0),
+        is_in_stock: Number(stockRaw ?? 0) > 0,
         last_synced_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }).eq('supplier_sku', sku)
@@ -231,10 +285,11 @@ export async function syncPricesAndStock(): Promise<SyncResult> {
       status: 'completed',
       products_updated: synced,
       products_errors: errors,
+      error_details: { ...debugInfo, synced, errors },
       completed_at: new Date().toISOString(),
     }).eq('id', log?.id)
 
-    return { ok: errors === 0, synced, errors, message: `Оновлено ${synced} позицій` }
+    return { ok: errors === 0, synced, errors, message: `Оновлено ${synced} позицій (у відповіді: ${items.length})` }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
     await client.from('supplier_sync_log').update({

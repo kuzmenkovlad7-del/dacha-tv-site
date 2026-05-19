@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: '/admin/beekeeper', label: 'Пасічникам' },
   { href: '/admin/supplier', label: 'Постачальник' },
   { href: '/admin/catalog', label: 'Каталог' },
+  { href: '/admin/catalog/import', label: 'Імпорт' },
 ]
 
 export default function AdminLayout({
