@@ -275,6 +275,21 @@ export interface SupplierSyncLog {
   completed_at: string | null
 }
 
+export interface CatalogCategory {
+  id: string
+  supplier_category_id: string | null
+  slug: string
+  name_ua: string
+  description: string | null
+  meta_title: string | null
+  meta_description: string | null
+  image_url: string | null
+  is_published: boolean
+  display_order: number
+  created_at: string
+  updated_at: string
+}
+
 // Legacy type aliases kept for backward compatibility with admin components and inquiry actions
 export type InquiryStatus = 'new' | 'contacted' | 'completed' | 'cancelled'
 export type InquiryType = 'honey_order' | 'beekeeper_inquiry' | 'general' | 'flower_inquiry'

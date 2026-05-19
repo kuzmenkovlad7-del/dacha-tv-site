@@ -271,3 +271,167 @@ export async function applySheetImport(
     message: `Імпортовано: ${inserted} нових + ${updated} оновлених${errors > 0 ? `, ${errors} помилок` : ''}`,
   }
 }
+
+// ─── SEO-only import for catalog_products ────────────────────────────────────
+// Updates ONLY SEO/content fields on catalog_products. Never touches price,
+// stock, supplier IDs, or sync metadata.
+//
+// Supported sheet columns:
+//   SKU (required) · title/name_ua · description · short_description ·
+//   meta_title · meta_description · category_slug · image_url (override)
+
+export interface SeoImportRow {
+  row_num: number
+  supplier_sku: string
+  name_ua: string | null
+  short_description: string | null
+  description: string | null
+  meta_title: string | null
+  meta_description: string | null
+  category_slug: string | null
+  image_override: string | null
+  action: 'update' | 'skip'  // only update — no new catalog products via SEO import
+  catalog_id?: string
+}
+
+export interface SeoImportPreview {
+  ok: boolean
+  error?: string
+  total: number
+  update_count: number
+  skip_count: number
+  rows: SeoImportRow[]
+  response_url: string
+}
+
+export interface SeoApplyResult {
+  ok: boolean
+  updated: number
+  skipped: number
+  errors: number
+  message: string
+}
+
+const SEO_HEADER_MAP: Record<string, string> = {
+  sku: 'sku', id: 'sku', article: 'sku', артикул: 'sku', supplier_sku: 'sku', код: 'sku',
+  name_ua: 'name_ua', title: 'name_ua', назва: 'name_ua', 'назва (укр)': 'name_ua', name: 'name_ua',
+  short_description: 'short_desc', 'короткий опис': 'short_desc', short_desc: 'short_desc',
+  description: 'description', опис: 'description', description_ua: 'description',
+  meta_title: 'meta_title', 'meta title': 'meta_title', 'seo title': 'meta_title', 'seo заголовок': 'meta_title',
+  meta_description: 'meta_description', 'meta description': 'meta_description', 'seo description': 'meta_description', 'seo опис': 'meta_description',
+  category_slug: 'category_slug', 'slug категорії': 'category_slug', category: 'category_slug',
+  image_url: 'image', image: 'image', зображення: 'image', фото: 'image',
+}
+
+function getSeoCol(row: string[], headers: string[], field: string): string {
+  const idx = headers.findIndex((h) => SEO_HEADER_MAP[h.toLowerCase().trim()] === field)
+  return idx >= 0 ? (row[idx] ?? '').trim() : ''
+}
+
+export async function previewSeoImport(formData: FormData): Promise<SeoImportPreview> {
+  const rawUrl = (formData.get('sheet_url') as string ?? '').trim()
+  const limitStr = formData.get('limit') as string | null
+  const limit = Math.min(parseInt(limitStr ?? '200', 10) || 200, 1000)
+
+  if (!rawUrl) return { ok: false, error: 'URL таблиці не вказано', total: 0, update_count: 0, skip_count: 0, rows: [], response_url: '' }
+
+  const csvUrl = normalizeSheetUrl(rawUrl)
+  let csvText: string
+  try {
+    const res = await fetch(csvUrl, { cache: 'no-store', headers: { Accept: 'text/csv,*/*' } })
+    if (!res.ok) return { ok: false, error: `HTTP ${res.status} при завантаженні таблиці`, total: 0, update_count: 0, skip_count: 0, rows: [], response_url: csvUrl }
+    csvText = await res.text()
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e), total: 0, update_count: 0, skip_count: 0, rows: [], response_url: csvUrl }
+  }
+
+  const allRows = parseCsv(csvText)
+  if (allRows.length < 2) return { ok: false, error: 'Таблиця порожня', total: 0, update_count: 0, skip_count: 0, rows: [], response_url: csvUrl }
+
+  const headers = allRows[0]
+  const dataRows = allRows.slice(1, limit + 1)
+
+  const client = getAdminClient()
+  const skus = dataRows.map((r) => getSeoCol(r, headers, 'sku')).filter(Boolean)
+  const { data: existing } = await client
+    .from('catalog_products')
+    .select('id, supplier_sku, name_ua, meta_title, meta_description')
+    .in('supplier_sku', skus)
+
+  const existingBySku = new Map((existing ?? []).map((e) => [e.supplier_sku, e]))
+
+  const rows: SeoImportRow[] = []
+  let updateCount = 0
+  let skipCount = 0
+
+  for (let i = 0; i < dataRows.length; i++) {
+    const r = dataRows[i]
+    const sku = getSeoCol(r, headers, 'sku')
+    if (!sku) { skipCount++; continue }
+
+    const ex = existingBySku.get(sku)
+    if (!ex) { skipCount++; continue }  // not in catalog yet — skip
+
+    rows.push({
+      row_num: i + 2,
+      supplier_sku: sku,
+      name_ua: getSeoCol(r, headers, 'name_ua') || null,
+      short_description: getSeoCol(r, headers, 'short_desc') || null,
+      description: getSeoCol(r, headers, 'description') || null,
+      meta_title: getSeoCol(r, headers, 'meta_title') || null,
+      meta_description: getSeoCol(r, headers, 'meta_description') || null,
+      category_slug: getSeoCol(r, headers, 'category_slug') || null,
+      image_override: getSeoCol(r, headers, 'image') || null,
+      action: 'update',
+      catalog_id: ex.id,
+    })
+    updateCount++
+  }
+
+  return { ok: true, total: rows.length, update_count: updateCount, skip_count: skipCount, rows, response_url: csvUrl }
+}
+
+export async function applySeoImport(
+  rows: SeoImportRow[],
+  overwriteContent: boolean,
+): Promise<SeoApplyResult> {
+  const client = getAdminClient()
+  let updated = 0
+  let skipped = 0
+  let errors = 0
+
+  for (const row of rows) {
+    if (row.action === 'skip') { skipped++; continue }
+
+    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
+
+    // Only update fields that are present in the sheet
+    if (row.name_ua) patch.name_ua = row.name_ua
+    if (row.short_description) patch.short_description = row.short_description
+    if (row.category_slug) patch.category_slug = row.category_slug
+    if (row.image_override) patch.main_image_url = row.image_override
+
+    // SEO fields: always update (these are never touched by supplier sync)
+    if (row.meta_title) patch.meta_title = row.meta_title
+    if (row.meta_description) patch.meta_description = row.meta_description
+    if (row.description && overwriteContent) patch.description = row.description
+
+    const { error } = await client
+      .from('catalog_products')
+      .update(patch)
+      .eq('supplier_sku', row.supplier_sku)
+
+    if (error) errors++; else updated++
+  }
+
+  revalidatePath('/admin/catalog')
+  revalidatePath('/catalog')
+
+  return {
+    ok: errors === 0,
+    updated,
+    skipped,
+    errors,
+    message: `SEO оновлено: ${updated} товарів${skipped > 0 ? `, пропущено: ${skipped}` : ''}${errors > 0 ? `, помилок: ${errors}` : ''}`,
+  }
+}

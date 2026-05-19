@@ -19,6 +19,7 @@ import type { SiteSettings } from '@/types'
 
 const NAV_ITEMS = [
   { href: '/honey', label: 'Мед' },
+  { href: '/catalog', label: 'Каталог' },
   { href: '/products', label: 'Продукти' },
   { href: '/flowers', label: 'Квіти' },
   { href: '/services', label: 'Послуги' },
