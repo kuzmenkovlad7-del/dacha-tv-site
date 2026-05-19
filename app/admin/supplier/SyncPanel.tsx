@@ -4,9 +4,16 @@ import { useTransition, useState } from 'react'
 import { syncCategoriesAction, syncProductsAction, syncPricesAction } from './actions'
 import type { SyncResult } from '@/lib/supplier/sync'
 
+export interface PersistedResult {
+  ok: boolean
+  syncType: string
+  message: string
+}
+
 interface SyncPanelProps {
   apiConfigured: boolean
   runningType: string | null
+  persistedResult?: PersistedResult | null
 }
 
 function Spinner() {
@@ -18,7 +25,7 @@ function Spinner() {
   )
 }
 
-export function SyncPanel({ apiConfigured, runningType }: SyncPanelProps) {
+export function SyncPanel({ apiConfigured, runningType, persistedResult }: SyncPanelProps) {
   const [pendingCat, startCat] = useTransition()
   const [pendingProd, startProd] = useTransition()
   const [pendingPrice, startPrice] = useTransition()
@@ -55,17 +62,22 @@ export function SyncPanel({ apiConfigured, runningType }: SyncPanelProps) {
         </div>
       )}
 
-      {lastResult && (
-        <div className={`text-sm rounded-lg px-4 py-2.5 mb-4 border ${
-          lastResult.alreadyRunning
-            ? 'bg-blue-50 border-blue-200 text-blue-800'
-            : lastResult.ok
-            ? 'bg-green-50 border-green-200 text-green-800'
-            : 'bg-red-50 border-red-200 text-red-700'
-        }`}>
-          {lastResult.message}
-        </div>
-      )}
+      {(lastResult || (!anyPending && persistedResult)) && (() => {
+        const r = lastResult ?? persistedResult!
+        const ok = lastResult ? lastResult.ok : persistedResult!.ok
+        const alreadyRunning = lastResult?.alreadyRunning
+        return (
+          <div className={`text-sm rounded-lg px-4 py-2.5 mb-4 border ${
+            alreadyRunning
+              ? 'bg-blue-50 border-blue-200 text-blue-800'
+              : ok
+              ? 'bg-green-50 border-green-200 text-green-800'
+              : 'bg-red-50 border-red-200 text-red-700'
+          }`}>
+            {lastResult ? lastResult.message : `[Останній результат] ${r.message}`}
+          </div>
+        )
+      })()}
 
       <div className="flex flex-wrap gap-3">
         <button

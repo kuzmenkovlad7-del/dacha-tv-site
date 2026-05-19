@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: '/admin/catalog', label: 'Каталог' },
   { href: '/admin/catalog/categories', label: 'Категорії' },
   { href: '/admin/catalog/import', label: 'Імпорт' },
+  { href: '/admin/catalog/pipeline', label: 'Пайплайн' },
 ]
 
 export default function AdminLayout({
