@@ -1,23 +1,23 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { syncSupplierCategories, syncSupplierProducts, syncPricesAndStock } from '@/lib/supplier/sync'
+import type { SyncResult } from '@/lib/supplier/sync'
 
-export async function syncCategoriesAction(): Promise<void> {
-  await syncSupplierCategories()
+export async function syncCategoriesAction(): Promise<SyncResult> {
+  const result = await syncSupplierCategories()
   revalidatePath('/admin/supplier')
-  redirect('/admin/supplier')
+  return result
 }
 
-export async function syncProductsAction(): Promise<void> {
-  await syncSupplierProducts({ pageSize: 1000 })
+export async function syncProductsAction(): Promise<SyncResult> {
+  const result = await syncSupplierProducts({ pageSize: 1000 })
   revalidatePath('/admin/supplier')
-  redirect('/admin/supplier')
+  return result
 }
 
-export async function syncPricesAction(): Promise<void> {
-  await syncPricesAndStock()
+export async function syncPricesAction(): Promise<SyncResult> {
+  const result = await syncPricesAndStock()
   revalidatePath('/admin/supplier')
-  redirect('/admin/supplier')
+  return result
 }

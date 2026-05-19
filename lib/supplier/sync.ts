@@ -109,6 +109,48 @@ function summarise(records: unknown[], limit = 3): unknown[] {
   })
 }
 
+// ─── Stale run detection ──────────────────────────────────────────────────────
+// Marks runs stuck in 'running' for >10 min as 'stale'.
+// Returns true if a fresh (< 10 min) run of the same type is already active.
+
+const STALE_MS = 10 * 60 * 1000
+
+async function handleActiveRuns(
+  client: ReturnType<typeof getAdminClient>,
+  syncType: string,
+): Promise<boolean> {
+  const { data: active } = await client
+    .from('supplier_sync_log')
+    .select('id, started_at')
+    .eq('sync_type', syncType)
+    .eq('status', 'running')
+
+  if (!active || active.length === 0) return false
+
+  const now = Date.now()
+  const staleIds: string[] = []
+  let hasFresh = false
+
+  for (const run of active) {
+    const age = now - new Date(run.started_at as string).getTime()
+    if (age > STALE_MS) {
+      staleIds.push(run.id as string)
+    } else {
+      hasFresh = true
+    }
+  }
+
+  if (staleIds.length > 0) {
+    await client.from('supplier_sync_log').update({
+      status: 'stale',
+      error_details: { message: 'Auto-marked stale: run exceeded 10 min without completing' },
+      completed_at: new Date().toISOString(),
+    }).in('id', staleIds)
+  }
+
+  return hasFresh
+}
+
 // ─── Public types ─────────────────────────────────────────────────────────────
 
 export interface SyncResult {
@@ -116,6 +158,7 @@ export interface SyncResult {
   synced: number
   errors: number
   message: string
+  alreadyRunning?: boolean
 }
 
 // ─── Categories sync ──────────────────────────────────────────────────────────
@@ -123,6 +166,12 @@ export interface SyncResult {
 export async function syncSupplierCategories(): Promise<SyncResult> {
   const client = getAdminClient()
 
+  const alreadyRunning = await handleActiveRuns(client, 'categories')
+  if (alreadyRunning) {
+    return { ok: false, synced: 0, errors: 0, message: 'Синхронізація категорій вже виконується', alreadyRunning: true }
+  }
+
+  const startedAt = Date.now()
   const { data: log } = await client
     .from('supplier_sync_log')
     .insert({ sync_type: 'categories', status: 'running', triggered_by: 'admin' })
@@ -173,37 +222,43 @@ export async function syncSupplierCategories(): Promise<SyncResult> {
       await client.from('supplier_sync_log').update({
         status: 'completed',
         categories_total: 0,
-        error_details: { ...debugInfo, warning: 'API returned 0 categories and no category_id found in products' },
+        error_details: { ...debugInfo, warning: 'API returned 0 categories and no category_id found in products', duration_ms: Date.now() - startedAt },
         completed_at: new Date().toISOString(),
       }).eq('id', log?.id)
       return { ok: false, synced: 0, errors: 0, message: 'API повернуло 0 категорій — перевірте URL та ключ' }
     }
 
-    for (const cat of categories) {
+    const rows = categories.map((cat) => {
       const c = cat as Record<string, unknown>
       const supplierId = String(c.id ?? c.supplier_id ?? c.category_id ?? '').trim()
-      if (!supplierId) { errors++; continue }
+      return supplierId ? {
+        supplier_id: supplierId,
+        name: String(c.name ?? c.title ?? c.category_name ?? supplierId),
+        name_ua: c.name_ua ? String(c.name_ua) : null,
+        slug: c.slug ? String(c.slug) : null,
+        parent_supplier_id: c.parent_id ? String(c.parent_id) : null,
+        raw_data: c,
+        synced_at: new Date().toISOString(),
+      } : null
+    }).filter(Boolean) as Record<string, unknown>[]
 
+    errors = categories.length - rows.length
+
+    const CHUNK = 200
+    for (let i = 0; i < rows.length; i += CHUNK) {
       const { error } = await client.from('supplier_categories').upsert(
-        {
-          supplier_id: supplierId,
-          name: String(c.name ?? c.title ?? c.category_name ?? supplierId),
-          name_ua: c.name_ua ? String(c.name_ua) : null,
-          slug: c.slug ? String(c.slug) : null,
-          parent_supplier_id: c.parent_id ? String(c.parent_id) : null,
-          raw_data: c,
-          synced_at: new Date().toISOString(),
-        },
+        rows.slice(i, i + CHUNK),
         { onConflict: 'supplier_id' },
       )
-      if (error) errors++; else synced++
+      if (error) errors += Math.min(CHUNK, rows.length - i)
+      else synced += Math.min(CHUNK, rows.length - i)
     }
 
     await client.from('supplier_sync_log').update({
       status: 'completed',
       categories_total: synced,
       products_errors: errors,
-      error_details: { ...debugInfo, synced, errors },
+      error_details: { ...debugInfo, synced, errors, duration_ms: Date.now() - startedAt },
       completed_at: new Date().toISOString(),
     }).eq('id', log?.id)
 
@@ -212,7 +267,7 @@ export async function syncSupplierCategories(): Promise<SyncResult> {
     const msg = e instanceof Error ? e.message : String(e)
     await client.from('supplier_sync_log').update({
       status: 'failed',
-      error_details: { message: msg },
+      error_details: { message: msg, duration_ms: Date.now() - startedAt },
       completed_at: new Date().toISOString(),
     }).eq('id', log?.id)
     throw e
@@ -228,6 +283,12 @@ export async function syncSupplierProducts(options?: {
 }): Promise<SyncResult> {
   const client = getAdminClient()
 
+  const alreadyRunning = await handleActiveRuns(client, 'products')
+  if (alreadyRunning) {
+    return { ok: false, synced: 0, errors: 0, message: 'Синхронізація продуктів вже виконується', alreadyRunning: true }
+  }
+
+  const startedAt = Date.now()
   const { data: log } = await client
     .from('supplier_sync_log')
     .insert({ sync_type: 'products', status: 'running', triggered_by: 'admin' })
@@ -242,8 +303,6 @@ export async function syncSupplierProducts(options?: {
     const extra: Record<string, string> = {}
     if (options?.categoryId) extra.category_id = options.categoryId
     if (options?.page) extra.page = String(options.page)
-    // Note: personal.cab may not support per_page — only add if confirmed supported
-    // if (options?.pageSize) extra.per_page = String(options.pageSize)
 
     const { raw, safeUrl, httpStatus, topLevelKeys } = await apiFetch('get_products', extra)
     const products = extractProducts(raw)
@@ -260,28 +319,27 @@ export async function syncSupplierProducts(options?: {
       await client.from('supplier_sync_log').update({
         status: 'completed',
         products_total: 0,
-        error_details: { ...debugInfo, warning: 'API returned 0 products — check URL, key, and method' },
+        error_details: { ...debugInfo, warning: 'API returned 0 products — check URL, key, and method', duration_ms: Date.now() - startedAt },
         completed_at: new Date().toISOString(),
       }).eq('id', log?.id)
       return { ok: false, synced: 0, errors: 0, message: `API повернуло 0 продуктів. Ключі у відповіді: ${topLevelKeys.join(', ') || 'none'}` }
     }
 
+    // Fetch existing SKUs in one query for new/update tracking
+    const { data: existingRows } = await client
+      .from('supplier_products')
+      .select('supplier_sku')
+    const existingSkus = new Set((existingRows ?? []).map((r) => r.supplier_sku as string))
+
+    const rows: Record<string, unknown>[] = []
     for (const prod of products) {
       const p = prod as Record<string, unknown>
 
-      // SKU: personal.cab typically uses id or vendor_code
       const sku = String(
         p.id ?? p.vendor_code ?? p.sku ?? p.article ?? p.supplier_sku ?? ''
       ).trim()
       if (!sku) { errors++; continue }
 
-      const { data: existing } = await client
-        .from('supplier_products')
-        .select('id')
-        .eq('supplier_sku', sku)
-        .single()
-
-      // Images: handle string, array, or comma-separated
       let images: string[] = []
       if (Array.isArray(p.images)) {
         images = (p.images as unknown[]).map(String).filter(Boolean)
@@ -293,12 +351,12 @@ export async function syncSupplierProducts(options?: {
         images = [String(p.photo)]
       }
 
-      // Price: personal.cab may use price, retail_price, price_uah
       const priceRaw = p.price ?? p.retail_price ?? p.price_uah ?? p.cost
-      // Stock: personal.cab typically uses quantity or count
       const stockRaw = p.quantity ?? p.count ?? p.stock ?? p.stock_quantity ?? p.qty
 
-      const row = {
+      if (!existingSkus.has(sku)) isNew++
+
+      rows.push({
         supplier_sku: sku,
         supplier_category_id: p.category_id != null ? String(p.category_id) : (p.cat_id != null ? String(p.cat_id) : null),
         name: String(p.name ?? p.title ?? ''),
@@ -319,14 +377,18 @@ export async function syncSupplierProducts(options?: {
         raw_data: p,
         last_synced_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      }
+      })
+    }
 
-      const { error } = existing
-        ? await client.from('supplier_products').update(row).eq('supplier_sku', sku)
-        : await client.from('supplier_products').insert(row)
-
-      if (error) errors++
-      else { synced++; if (!existing) isNew++ }
+    // Batch upsert in chunks — replaces N+1 SELECT+INSERT/UPDATE loop
+    const CHUNK = 200
+    for (let i = 0; i < rows.length; i += CHUNK) {
+      const { error } = await client.from('supplier_products').upsert(
+        rows.slice(i, i + CHUNK),
+        { onConflict: 'supplier_sku' },
+      )
+      if (error) errors += Math.min(CHUNK, rows.length - i)
+      else synced += Math.min(CHUNK, rows.length - i)
     }
 
     await client.from('supplier_sync_log').update({
@@ -335,7 +397,7 @@ export async function syncSupplierProducts(options?: {
       products_new: isNew,
       products_updated: synced - isNew,
       products_errors: errors,
-      error_details: { ...debugInfo, synced, errors, new: isNew },
+      error_details: { ...debugInfo, synced, errors, new: isNew, duration_ms: Date.now() - startedAt },
       completed_at: new Date().toISOString(),
     }).eq('id', log?.id)
 
@@ -349,7 +411,7 @@ export async function syncSupplierProducts(options?: {
     const msg = e instanceof Error ? e.message : String(e)
     await client.from('supplier_sync_log').update({
       status: 'failed',
-      error_details: { message: msg },
+      error_details: { message: msg, duration_ms: Date.now() - startedAt },
       completed_at: new Date().toISOString(),
     }).eq('id', log?.id)
     throw e
@@ -362,6 +424,12 @@ export async function syncSupplierProducts(options?: {
 export async function syncPricesAndStock(): Promise<SyncResult> {
   const client = getAdminClient()
 
+  const alreadyRunning = await handleActiveRuns(client, 'prices_stock')
+  if (alreadyRunning) {
+    return { ok: false, synced: 0, errors: 0, message: 'Оновлення цін вже виконується', alreadyRunning: true }
+  }
+
+  const startedAt = Date.now()
   const { data: log } = await client
     .from('supplier_sync_log')
     .insert({ sync_type: 'prices_stock', status: 'running', triggered_by: 'admin' })
@@ -383,13 +451,17 @@ export async function syncPricesAndStock(): Promise<SyncResult> {
       sample_records: summarise(items),
     }
 
-    for (const item of items) {
+    const rows = items.map((item) => {
       const i = item as Record<string, unknown>
       const sku = String(i.id ?? i.vendor_code ?? i.sku ?? i.article ?? '').trim()
-      if (!sku) continue
-
+      if (!sku) return null
       const stockRaw = i.quantity ?? i.count ?? i.stock ?? i.stock_quantity
       const priceRaw = i.price ?? i.retail_price ?? i.price_uah
+      return { sku, stockRaw, priceRaw }
+    }).filter(Boolean) as { sku: string; stockRaw: unknown; priceRaw: unknown }[]
+
+    // Update prices/stock one by one — must match on sku, no bulk shortcut here
+    for (const { sku, stockRaw, priceRaw } of rows) {
       const { error } = await client.from('supplier_products').update({
         price_uah: priceRaw != null ? Number(priceRaw) : null,
         stock_quantity: Number(stockRaw ?? 0),
@@ -405,7 +477,7 @@ export async function syncPricesAndStock(): Promise<SyncResult> {
       status: 'completed',
       products_updated: synced,
       products_errors: errors,
-      error_details: { ...debugInfo, synced, errors },
+      error_details: { ...debugInfo, synced, errors, duration_ms: Date.now() - startedAt },
       completed_at: new Date().toISOString(),
     }).eq('id', log?.id)
 
@@ -414,7 +486,7 @@ export async function syncPricesAndStock(): Promise<SyncResult> {
     const msg = e instanceof Error ? e.message : String(e)
     await client.from('supplier_sync_log').update({
       status: 'failed',
-      error_details: { message: msg },
+      error_details: { message: msg, duration_ms: Date.now() - startedAt },
       completed_at: new Date().toISOString(),
     }).eq('id', log?.id)
     throw e

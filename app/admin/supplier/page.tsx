@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { getAdminClient } from '@/lib/supabase/admin'
-import { syncCategoriesAction, syncProductsAction, syncPricesAction } from './actions'
+import { SyncPanel } from './SyncPanel'
+import { SyncPoller } from './SyncPoller'
 import type { SupplierSyncLog } from '@/types'
 
 export const metadata: Metadata = {
@@ -39,12 +40,30 @@ export default async function AdminSupplierPage() {
     }
   } catch { /* env not set */ }
 
+  // Detect any fresh running sync (< 10 min) to drive SyncPoller
+  const now = Date.now()
+  const runningLog = recentLogs.find(
+    (l) => l.status === 'running' && now - new Date(l.started_at).getTime() < 10 * 60 * 1000
+  )
+  const runningType = runningLog?.sync_type ?? null
+
+  function formatDuration(log: SupplierSyncLog): string {
+    const details = log.error_details as Record<string, unknown> | null
+    const ms = details?.duration_ms as number | undefined
+    if (ms == null) return '—'
+    if (ms < 1000) return `${ms}ms`
+    return `${(ms / 1000).toFixed(1)}s`
+  }
+
   return (
     <div className="px-4 sm:px-6 py-8">
       <div className="mb-6">
         <h1 className="text-xl font-bold text-gray-900">Постачальник</h1>
         <p className="text-sm text-gray-500 mt-0.5">Синхронізація сирого каталогу. Публікація управляється окремо у розділі «Каталог».</p>
       </div>
+
+      {/* Auto-refresh while sync active */}
+      <SyncPoller active={runningType !== null} />
 
       {tablesMissing && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-8">
@@ -87,38 +106,7 @@ export default async function AdminSupplierPage() {
       {!tablesMissing && (
         <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 mb-8">
           <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Синхронізація</h2>
-          <div className="flex flex-wrap gap-3">
-            <form action={syncCategoriesAction}>
-              <button
-                type="submit"
-                disabled={!apiConfigured}
-                className="bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Синхронізувати категорії
-              </button>
-            </form>
-            <form action={syncProductsAction}>
-              <button
-                type="submit"
-                disabled={!apiConfigured}
-                className="bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Синхронізувати продукти
-              </button>
-            </form>
-            <form action={syncPricesAction}>
-              <button
-                type="submit"
-                disabled={!apiConfigured}
-                className="bg-gray-100 text-gray-700 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Оновити ціни / залишки
-              </button>
-            </form>
-          </div>
-          {!apiConfigured && (
-            <p className="text-xs text-gray-400 mt-3">Синхронізація недоступна — налаштуйте API ключі.</p>
-          )}
+          <SyncPanel apiConfigured={apiConfigured} runningType={runningType} />
         </div>
       )}
 
@@ -135,6 +123,7 @@ export default async function AdminSupplierPage() {
                 <th className="text-left px-5 py-2.5 text-xs font-medium text-gray-400">Статус</th>
                 <th className="text-right px-5 py-2.5 text-xs font-medium text-gray-400">Збережено</th>
                 <th className="text-right px-5 py-2.5 text-xs font-medium text-gray-400">У відповіді</th>
+                <th className="text-right px-5 py-2.5 text-xs font-medium text-gray-400 hidden sm:table-cell">Тривалість</th>
                 <th className="text-right px-5 py-2.5 text-xs font-medium text-gray-400 hidden sm:table-cell">Дата</th>
               </tr>
             </thead>
@@ -144,6 +133,8 @@ export default async function AdminSupplierPage() {
                 const responseCount = details?.response_count as number | undefined
                 const errorMsg = log.status === 'failed' ? (details?.message as string | undefined) : undefined
                 const saved = log.sync_type === 'categories' ? log.categories_total : log.products_total
+                const isStale = log.status === 'stale'
+                const isRunning = log.status === 'running'
                 return (
                   <tr key={log.id} className="hover:bg-gray-50/50">
                     <td className="px-5 py-3 text-gray-700 font-mono text-xs">{log.sync_type}</td>
@@ -152,23 +143,33 @@ export default async function AdminSupplierPage() {
                         <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${
                           log.status === 'completed' ? 'text-green-700' :
                           log.status === 'failed'    ? 'text-red-600'   :
-                          'text-amber-600'
+                          isStale                    ? 'text-gray-500'  :
+                          isRunning                  ? 'text-amber-600' :
+                          'text-gray-500'
                         }`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${
                             log.status === 'completed' ? 'bg-green-500' :
                             log.status === 'failed'    ? 'bg-red-500'   :
-                            'bg-amber-400'
+                            isStale                    ? 'bg-gray-400'  :
+                            isRunning                  ? 'bg-amber-400 animate-pulse' :
+                            'bg-gray-400'
                           }`} />
-                          {log.status === 'completed' ? 'OK' : log.status === 'failed' ? 'Помилка' : 'Виконується'}
+                          {log.status === 'completed' ? 'OK' :
+                           log.status === 'failed'    ? 'Помилка' :
+                           isStale                    ? 'Застаріла' :
+                           isRunning                  ? 'Виконується' : log.status}
                         </span>
                         {errorMsg && (
                           <p className="text-xs text-red-500 mt-0.5 font-mono max-w-xs truncate" title={errorMsg}>{errorMsg}</p>
                         )}
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-right text-gray-500">{saved}</td>
+                    <td className="px-5 py-3 text-right text-gray-500">{saved ?? '—'}</td>
                     <td className="px-5 py-3 text-right text-gray-400">
                       {responseCount != null ? responseCount : '—'}
+                    </td>
+                    <td className="px-5 py-3 text-right text-gray-400 text-xs hidden sm:table-cell">
+                      {formatDuration(log)}
                     </td>
                     <td className="px-5 py-3 text-right text-gray-400 text-xs hidden sm:table-cell">
                       {new Date(log.started_at).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
