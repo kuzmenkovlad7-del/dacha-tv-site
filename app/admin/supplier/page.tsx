@@ -16,7 +16,7 @@ export default async function AdminSupplierPage() {
   let inStock = 0
   let recentLogs: SupplierSyncLog[] = []
   let tablesMissing = false
-  let apiConfigured = !!(process.env.SUPPLIER_API_URL && process.env.SUPPLIER_API_KEY)
+  const apiConfigured = !!(process.env.SUPPLIER_API_URL && process.env.SUPPLIER_API_KEY)
 
   try {
     const client = getAdminClient()
@@ -133,34 +133,49 @@ export default async function AdminSupplierPage() {
               <tr className="border-b border-gray-100">
                 <th className="text-left px-5 py-2.5 text-xs font-medium text-gray-400">Тип</th>
                 <th className="text-left px-5 py-2.5 text-xs font-medium text-gray-400">Статус</th>
-                <th className="text-right px-5 py-2.5 text-xs font-medium text-gray-400">Продуктів</th>
+                <th className="text-right px-5 py-2.5 text-xs font-medium text-gray-400">Збережено</th>
+                <th className="text-right px-5 py-2.5 text-xs font-medium text-gray-400">У відповіді</th>
                 <th className="text-right px-5 py-2.5 text-xs font-medium text-gray-400 hidden sm:table-cell">Дата</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {recentLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-gray-50/50">
-                  <td className="px-5 py-3 text-gray-700 font-mono text-xs">{log.sync_type}</td>
-                  <td className="px-5 py-3">
-                    <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${
-                      log.status === 'completed' ? 'text-green-700' :
-                      log.status === 'failed'    ? 'text-red-600'   :
-                      'text-amber-600'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        log.status === 'completed' ? 'bg-green-500' :
-                        log.status === 'failed'    ? 'bg-red-500'   :
-                        'bg-amber-400'
-                      }`} />
-                      {log.status === 'completed' ? 'OK' : log.status === 'failed' ? 'Помилка' : 'Виконується'}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-right text-gray-500">{log.products_total}</td>
-                  <td className="px-5 py-3 text-right text-gray-400 text-xs hidden sm:table-cell">
-                    {new Date(log.started_at).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                  </td>
-                </tr>
-              ))}
+              {recentLogs.map((log) => {
+                const details = log.error_details as Record<string, unknown> | null
+                const responseCount = details?.response_count as number | undefined
+                const errorMsg = log.status === 'failed' ? (details?.message as string | undefined) : undefined
+                const saved = log.sync_type === 'categories' ? log.categories_total : log.products_total
+                return (
+                  <tr key={log.id} className="hover:bg-gray-50/50">
+                    <td className="px-5 py-3 text-gray-700 font-mono text-xs">{log.sync_type}</td>
+                    <td className="px-5 py-3">
+                      <div>
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${
+                          log.status === 'completed' ? 'text-green-700' :
+                          log.status === 'failed'    ? 'text-red-600'   :
+                          'text-amber-600'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${
+                            log.status === 'completed' ? 'bg-green-500' :
+                            log.status === 'failed'    ? 'bg-red-500'   :
+                            'bg-amber-400'
+                          }`} />
+                          {log.status === 'completed' ? 'OK' : log.status === 'failed' ? 'Помилка' : 'Виконується'}
+                        </span>
+                        {errorMsg && (
+                          <p className="text-xs text-red-500 mt-0.5 font-mono max-w-xs truncate" title={errorMsg}>{errorMsg}</p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3 text-right text-gray-500">{saved}</td>
+                    <td className="px-5 py-3 text-right text-gray-400">
+                      {responseCount != null ? responseCount : '—'}
+                    </td>
+                    <td className="px-5 py-3 text-right text-gray-400 text-xs hidden sm:table-cell">
+                      {new Date(log.started_at).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
