@@ -263,7 +263,7 @@ export interface CatalogProduct {
 export interface SupplierSyncLog {
   id: string
   sync_type: string
-  status: 'running' | 'completed' | 'failed'
+  status: 'running' | 'completed' | 'failed' | 'stale'
   products_total: number
   products_new: number
   products_updated: number
