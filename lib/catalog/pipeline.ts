@@ -1,21 +1,11 @@
 import { getAdminClient } from '@/lib/supabase/admin'
-
-function autoSlug(text: string): string {
-  const map: Record<string, string> = {
-    а:'a',б:'b',в:'v',г:'h',ґ:'g',д:'d',е:'e',є:'ye',ж:'zh',з:'z',
-    и:'y',і:'i',ї:'yi',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',
-    р:'r',с:'s',т:'t',у:'u',ф:'f',х:'kh',ц:'ts',ч:'ch',ш:'sh',щ:'shch',ь:'',ю:'yu',я:'ya',
-  }
-  return text.toLowerCase().split('').map((c) => map[c] ?? c).join('')
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `item-${Date.now()}`
-}
+import { autoSlug } from '@/lib/catalog/csv-utils'
 
 export interface PipelineStats {
-  supplierCategories: number
   catalogCategories: number
   catalogCategoriesPublished: number
-  supplierProductsEligible: number
   catalogProducts: number
+  catalogProductsDraft: number
   catalogProductsPublished: number
 }
 
@@ -43,32 +33,24 @@ export async function getPipelineStats(): Promise<PipelineStats> {
   const client = getAdminClient()
 
   const [
-    { count: supplierCategories },
     { count: catalogCategories },
     { count: catalogCategoriesPublished },
-    { count: supplierProductsEligible },
     { count: catalogProducts },
+    { count: catalogProductsDraft },
     { count: catalogProductsPublished },
   ] = await Promise.all([
-    client.from('supplier_categories').select('id', { count: 'exact', head: true }),
     client.from('catalog_categories').select('id', { count: 'exact', head: true }),
     client.from('catalog_categories').select('id', { count: 'exact', head: true }).eq('is_published', true),
-    client.from('supplier_products')
-      .select('id', { count: 'exact', head: true })
-      .eq('is_approved', false)
-      .not('name', 'is', null)
-      .not('main_image_url', 'is', null)
-      .gt('price_uah', 0),
     client.from('catalog_products').select('id', { count: 'exact', head: true }),
+    client.from('catalog_products').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
     client.from('catalog_products').select('id', { count: 'exact', head: true }).eq('status', 'published'),
   ])
 
   return {
-    supplierCategories: supplierCategories ?? 0,
     catalogCategories: catalogCategories ?? 0,
     catalogCategoriesPublished: catalogCategoriesPublished ?? 0,
-    supplierProductsEligible: supplierProductsEligible ?? 0,
     catalogProducts: catalogProducts ?? 0,
+    catalogProductsDraft: catalogProductsDraft ?? 0,
     catalogProductsPublished: catalogProductsPublished ?? 0,
   }
 }

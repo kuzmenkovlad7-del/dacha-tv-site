@@ -2,45 +2,48 @@
 
 import { useState, useTransition } from 'react'
 import {
-  syncCategoriesAction,
-  importProductsAction,
+  importCategoriesFromSheetAction,
+  importProductsFromSheetAction,
   publishCategoriesAction,
   publishProductsAction,
+  type SheetImportResult,
 } from './actions'
 import type { PipelineStats } from '@/lib/catalog/pipeline'
 
-interface ResultBanner {
-  ok: boolean
-  message: string
-}
-
-function Banner({ result }: { result: ResultBanner }) {
-  return (
-    <div className={`mt-2 text-sm px-3 py-2 rounded-lg ${result.ok ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-700'}`}>
-      {result.ok ? '✓' : '✗'} {result.message}
-    </div>
-  )
-}
+// ─── UI atoms ────────────────────────────────────────────────────────────────
 
 function Spinner() {
   return (
-    <svg className="animate-spin h-4 w-4 inline mr-1.5" fill="none" viewBox="0 0 24 24">
+    <svg className="animate-spin h-4 w-4 inline mr-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
     </svg>
   )
 }
 
-interface StepCardProps {
+function Banner({ ok, message }: { ok: boolean; message: string }) {
+  return (
+    <div className={`mt-3 text-sm px-3 py-2 rounded-lg flex items-start gap-2 ${ok ? 'bg-green-50 text-green-800 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+      <span className="flex-shrink-0 font-bold">{ok ? '✓' : '✗'}</span>
+      <span>{message}</span>
+    </div>
+  )
+}
+
+const INPUT = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400'
+const BTN = 'inline-flex items-center px-4 py-2 text-sm font-semibold rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+
+// ─── Step card ────────────────────────────────────────────────────────────────
+
+function StepCard({
+  number, title, description, children, result,
+}: {
   number: number
   title: string
   description: string
-  stat?: React.ReactNode
-  action: React.ReactNode
-  result: ResultBanner | null
-}
-
-function StepCard({ number, title, description, stat, action, result }: StepCardProps) {
+  children: React.ReactNode
+  result: { ok: boolean; message: string } | null
+}) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5">
       <div className="flex items-start gap-3">
@@ -49,179 +52,174 @@ function StepCard({ number, title, description, stat, action, result }: StepCard
         </span>
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-bark text-sm">{title}</h3>
-          <p className="text-xs text-gray-500 mt-0.5">{description}</p>
-          {stat && <div className="mt-1">{stat}</div>}
-          <div className="mt-3">{action}</div>
-          {result && <Banner result={result} />}
+          <p className="text-xs text-gray-500 mt-0.5 mb-3">{description}</p>
+          {children}
+          {result && <Banner ok={result.ok} message={result.message} />}
         </div>
       </div>
     </div>
   )
 }
 
-const BATCH_SIZES = [100, 300, 500, 1000] as const
+// ─── Batch size selector ──────────────────────────────────────────────────────
+
+const BATCH_SIZES = [100, 300, 500] as const
 type BatchSize = (typeof BATCH_SIZES)[number]
 
-interface Props {
-  initialStats: PipelineStats
-}
+// ─── Main component ───────────────────────────────────────────────────────────
 
-export function PipelineClient({ initialStats }: Props) {
+export function PipelineClient({ initialStats }: { initialStats: PipelineStats }) {
   const stats = initialStats
 
-  const [syncCatsResult, setSyncCatsResult] = useState<ResultBanner | null>(null)
-  const [importResult, setImportResult] = useState<ResultBanner | null>(null)
-  const [pubCatsResult, setPubCatsResult] = useState<ResultBanner | null>(null)
-  const [pubProdsResult, setPubProdsResult] = useState<ResultBanner | null>(null)
+  const [catSheetUrl, setCatSheetUrl] = useState('')
+  const [prodSheetUrl, setProdSheetUrl] = useState('')
   const [batchSize, setBatchSize] = useState<BatchSize>(300)
 
-  const [syncCatsPending, startSyncCats] = useTransition()
-  const [importPending, startImport] = useTransition()
+  const [catImportResult, setCatImportResult] = useState<SheetImportResult | null>(null)
+  const [prodImportResult, setProdImportResult] = useState<SheetImportResult | null>(null)
+  const [pubCatsResult, setPubCatsResult] = useState<{ ok: boolean; message: string } | null>(null)
+  const [pubProdsResult, setPubProdsResult] = useState<{ ok: boolean; message: string } | null>(null)
+
+  const [catImportPending, startCatImport] = useTransition()
+  const [prodImportPending, startProdImport] = useTransition()
   const [pubCatsPending, startPubCats] = useTransition()
   const [pubProdsPending, startPubProds] = useTransition()
 
-  const anyPending = syncCatsPending || importPending || pubCatsPending || pubProdsPending
+  const anyPending = catImportPending || prodImportPending || pubCatsPending || pubProdsPending
 
   return (
     <div className="space-y-4">
-      {/* Stats overview */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+      {/* Stats strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-2">
         {[
-          { label: 'Категорії постачальника', value: stats.supplierCategories },
-          { label: 'Категорії каталогу', value: stats.catalogCategories },
-          { label: 'Опубліковано категорій', value: stats.catalogCategoriesPublished },
-          { label: 'Товари до імпорту', value: stats.supplierProductsEligible },
-          { label: 'Товари каталогу', value: stats.catalogProducts },
-          { label: 'Опубліковано товарів', value: stats.catalogProductsPublished },
+          { label: 'Категорій (опубл.)', value: `${stats.catalogCategories} (${stats.catalogCategoriesPublished})` },
+          { label: 'Товарів усього', value: stats.catalogProducts.toLocaleString('uk-UA') },
+          { label: 'Draft / Опубліковано', value: `${stats.catalogProductsDraft} / ${stats.catalogProductsPublished}` },
         ].map(({ label, value }) => (
           <div key={label} className="bg-honey-50 rounded-lg p-3 text-center">
-            <div className="text-2xl font-bold text-bark">{value.toLocaleString('uk-UA')}</div>
-            <div className="text-xs text-gray-600 mt-0.5">{label}</div>
+            <div className="text-xl font-bold text-bark">{value}</div>
+            <div className="text-xs text-gray-500 mt-0.5">{label}</div>
           </div>
         ))}
       </div>
 
-      {/* Step 1: Sync categories */}
+      {/* Step 1: Import categories from sheet */}
       <StepCard
         number={1}
-        title="Синхронізація категорій"
-        description="Створює нові catalog_categories з supplier_categories. Наявні не змінюються (SEO-поля збережені)."
-        stat={
-          <span className="text-xs text-gray-500">
-            {stats.supplierCategories} постачальник → {stats.catalogCategories} каталог
-          </span>
-        }
-        result={syncCatsResult}
-        action={
-          <button
+        title="Категорії з таблиці"
+        description="Вставте посилання на таблицю з двома колонками: Category | Description. Нові категорії додаються, існуючі — доповнюються описом."
+        result={catImportResult ? { ok: catImportResult.ok, message: catImportResult.message } : null}
+      >
+        <div className="flex gap-2">
+          <input
+            value={catSheetUrl}
+            onChange={(e) => setCatSheetUrl(e.target.value)}
+            placeholder="https://docs.google.com/spreadsheets/d/…"
+            className={INPUT}
             disabled={anyPending}
-            onClick={() => startSyncCats(async () => {
-              const r = await syncCategoriesAction()
-              setSyncCatsResult({ ok: r.ok, message: r.message })
-            })}
-            className="px-4 py-2 text-sm font-semibold bg-bark text-white rounded-full disabled:opacity-50 hover:bg-bark/90 transition-colors"
+          />
+          <button
+            disabled={anyPending || !catSheetUrl.trim()}
+            onClick={() => startCatImport(async () => setCatImportResult(await importCategoriesFromSheetAction(catSheetUrl)))}
+            className={`${BTN} bg-bark text-white hover:bg-bark/90 whitespace-nowrap`}
           >
-            {syncCatsPending && <Spinner />}
-            {syncCatsPending ? 'Синхронізую…' : 'Синхронізувати категорії'}
+            {catImportPending && <Spinner />}
+            {catImportPending ? 'Імпорт…' : 'Імпортувати'}
           </button>
-        }
-      />
+        </div>
+      </StepCard>
 
-      {/* Step 2: Import products */}
+      {/* Step 2: Import products from sheet */}
       <StepCard
         number={2}
-        title="Імпорт товарів у каталог"
-        description="Переміщує товари постачальника в catalog_products. Існуючі (за SKU) не перезаписуються. Запускайте кілька разів для великих обсягів."
-        stat={
-          <span className="text-xs text-gray-500">
-            Залишилось до імпорту: {stats.supplierProductsEligible.toLocaleString('uk-UA')}
-          </span>
-        }
-        result={importResult}
-        action={
+        title="Товари з таблиці"
+        description="Вставте посилання на прайс (ID · Name · SKU · Price · Categories · Stock · Images · Description · Meta Title · Meta Description · Meta Keywords). Нові — status=draft. Існуючі (за SKU) не перезаписуються."
+        result={prodImportResult ? { ok: prodImportResult.ok, message: prodImportResult.message } : null}
+      >
+        <div className="space-y-2">
+          <input
+            value={prodSheetUrl}
+            onChange={(e) => setProdSheetUrl(e.target.value)}
+            placeholder="https://docs.google.com/spreadsheets/d/…"
+            className={INPUT}
+            disabled={anyPending}
+          />
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-gray-500">Пакет:</span>
-              {BATCH_SIZES.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setBatchSize(s)}
-                  className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
-                    batchSize === s
-                      ? 'bg-bark text-white border-bark'
-                      : 'border-gray-300 text-gray-600 hover:border-bark'
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+            <span className="text-xs text-gray-500">Пакет:</span>
+            {BATCH_SIZES.map((s) => (
+              <button
+                key={s}
+                onClick={() => setBatchSize(s)}
+                disabled={anyPending}
+                className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                  batchSize === s ? 'bg-bark text-white border-bark' : 'border-gray-300 text-gray-600 hover:border-bark'
+                }`}
+              >
+                {s}
+              </button>
+            ))}
             <button
-              disabled={anyPending || stats.supplierProductsEligible === 0}
-              onClick={() => startImport(async () => {
-                const r = await importProductsAction(batchSize)
-                setImportResult({ ok: r.ok, message: r.message })
-              })}
-              className="px-4 py-2 text-sm font-semibold bg-bark text-white rounded-full disabled:opacity-50 hover:bg-bark/90 transition-colors"
+              disabled={anyPending || !prodSheetUrl.trim()}
+              onClick={() => startProdImport(async () => setProdImportResult(await importProductsFromSheetAction(prodSheetUrl, batchSize)))}
+              className={`${BTN} bg-bark text-white hover:bg-bark/90`}
             >
-              {importPending && <Spinner />}
-              {importPending ? 'Імпортую…' : `Імпортувати ${batchSize}`}
+              {prodImportPending && <Spinner />}
+              {prodImportPending ? 'Імпорт…' : `Імпортувати ${batchSize} товарів`}
             </button>
           </div>
-        }
-      />
+          {stats.catalogProductsDraft > 0 && (
+            <p className="text-xs text-amber-600">
+              {stats.catalogProductsDraft} товарів у статусі draft (не видно публічно). Запустіть Крок 4 щоб опублікувати.
+            </p>
+          )}
+        </div>
+      </StepCard>
 
       {/* Step 3: Publish categories */}
       <StepCard
         number={3}
         title="Опублікувати категорії"
-        description="Встановлює is_published=true для всіх категорій каталогу. Категорії стають видимими на сайті."
-        stat={
-          <span className="text-xs text-gray-500">
-            {stats.catalogCategories - stats.catalogCategoriesPublished} неопублікованих
-          </span>
-        }
+        description={`${stats.catalogCategories - stats.catalogCategoriesPublished} категорій ще не видно публічно. Натисніть щоб увімкнути всі.`}
         result={pubCatsResult}
-        action={
-          <button
-            disabled={anyPending || stats.catalogCategories === 0}
-            onClick={() => startPubCats(async () => {
-              const r = await publishCategoriesAction()
-              setPubCatsResult({ ok: r.ok, message: r.message })
-            })}
-            className="px-4 py-2 text-sm font-semibold bg-green-700 text-white rounded-full disabled:opacity-50 hover:bg-green-800 transition-colors"
-          >
-            {pubCatsPending && <Spinner />}
-            {pubCatsPending ? 'Публікую…' : 'Опублікувати всі категорії'}
-          </button>
-        }
-      />
+      >
+        <button
+          disabled={anyPending || stats.catalogCategories === 0}
+          onClick={() => startPubCats(async () => {
+            const r = await publishCategoriesAction()
+            setPubCatsResult({ ok: r.ok, message: r.message })
+          })}
+          className={`${BTN} bg-green-700 text-white hover:bg-green-800`}
+        >
+          {pubCatsPending && <Spinner />}
+          {pubCatsPending ? 'Публікую…' : `Опублікувати всі категорії (${stats.catalogCategories})`}
+        </button>
+      </StepCard>
 
       {/* Step 4: Publish products */}
       <StepCard
         number={4}
         title="Опублікувати товари"
-        description="Встановлює status=published для всіх draft-товарів каталогу. Товари стають видимими на сайті."
-        stat={
-          <span className="text-xs text-gray-500">
-            {stats.catalogProducts - stats.catalogProductsPublished} неопублікованих
-          </span>
-        }
+        description={`${stats.catalogProductsDraft} товарів у статусі draft — не видно на сайті. Натисніть щоб опублікувати всі.`}
         result={pubProdsResult}
-        action={
-          <button
-            disabled={anyPending || stats.catalogProducts === 0}
-            onClick={() => startPubProds(async () => {
-              const r = await publishProductsAction()
-              setPubProdsResult({ ok: r.ok, message: r.message })
-            })}
-            className="px-4 py-2 text-sm font-semibold bg-green-700 text-white rounded-full disabled:opacity-50 hover:bg-green-800 transition-colors"
-          >
-            {pubProdsPending && <Spinner />}
-            {pubProdsPending ? 'Публікую…' : 'Опублікувати всі товари'}
-          </button>
-        }
-      />
+      >
+        <button
+          disabled={anyPending || stats.catalogProductsDraft === 0}
+          onClick={() => startPubProds(async () => {
+            const r = await publishProductsAction()
+            setPubProdsResult({ ok: r.ok, message: r.message })
+          })}
+          className={`${BTN} bg-green-700 text-white hover:bg-green-800`}
+        >
+          {pubProdsPending && <Spinner />}
+          {pubProdsPending ? 'Публікую…' : `Опублікувати ${stats.catalogProductsDraft} товарів`}
+        </button>
+      </StepCard>
+
+      <div className="text-xs text-gray-400 space-y-0.5 pt-2">
+        <p>• Крок 2 можна запускати кілька разів — кожен запуск обробляє наступний пакет.</p>
+        <p>• SEO-поля існуючих товарів не перезаписуються при повторному імпорті.</p>
+        <p>• Таблиці мають бути публічними для читання (Поділитися → «Будь-хто з посиланням»).</p>
+      </div>
     </div>
   )
 }

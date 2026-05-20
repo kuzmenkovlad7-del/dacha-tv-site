@@ -9,11 +9,10 @@ export default async function PipelinePage() {
     stats = await getPipelineStats()
   } catch {
     stats = {
-      supplierCategories: 0,
       catalogCategories: 0,
       catalogCategoriesPublished: 0,
-      supplierProductsEligible: 0,
       catalogProducts: 0,
+      catalogProductsDraft: 0,
       catalogProductsPublished: 0,
     }
   }
@@ -29,11 +28,6 @@ export default async function PipelinePage() {
 
       <PipelineClient initialStats={stats} />
 
-      <div className="mt-8 text-xs text-gray-400 space-y-1">
-        <p>• Крок 2 можна запускати кілька разів — кожен пакет обробляє нові товари.</p>
-        <p>• Імпортовані товари залишаються у статусі &quot;draft&quot; до кроку 4.</p>
-        <p>• SEO-поля існуючих товарів не перезаписуються при повторному імпорті.</p>
-      </div>
     </div>
   )
 }
