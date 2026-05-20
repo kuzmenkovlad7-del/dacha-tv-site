@@ -237,6 +237,21 @@ export interface SupplierProduct {
 
 export type CatalogProductStatus = 'published' | 'draft' | 'archived'
 
+export interface CatalogCategory {
+  id: string
+  supplier_category_id: string | null
+  slug: string
+  name_ua: string
+  description: string | null
+  meta_title: string | null
+  meta_description: string | null
+  image_url: string | null
+  is_published: boolean
+  display_order: number
+  created_at: string
+  updated_at: string
+}
+
 export interface CatalogProduct {
   id: string
   supplier_product_id: string | null
